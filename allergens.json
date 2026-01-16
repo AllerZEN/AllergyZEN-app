@@ -1,0 +1,20 @@
+[
+  {"name": "Cows Milk", "category": "Dairy"},
+  {"name": "Goats Milk", "category": "Dairy"},
+  {"name": "Sheep Milk", "category": "Dairy"},
+  {"name": "Cashew Nuts", "category": "Nuts"},
+  {"name": "Walnuts", "category": "Nuts"},
+  {"name": "Almonds", "category": "Nuts"},
+  {"name": "Prawns", "category": "Shellfish"},
+  {"name": "Crab", "category": "Shellfish"},
+  {"name": "E1202 (Crospovidone)", "category": "Additives"},
+  {"name": "Maltodextrin", "category": "Additives"},
+  {"name": "Acacia Gum", "category": "Additives"},
+  {"name": "Magnesium Stearate", "category": "Additives"},
+  {"name": "Nickel", "category": "Metals"},
+  {"name": "Aluminum", "category": "Metals"},
+  {"name": "Titanium Dioxide", "category": "Metals"},
+  {"name": "Aspirin", "category": "Medications"},
+  {"name": "Ibuprofen", "category": "Medications"},
+  {"name": "Paracetamol", "category": "Medications"}
+]
