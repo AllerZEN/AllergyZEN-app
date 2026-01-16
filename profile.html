@@ -33,37 +33,20 @@
 <div class="search-section">
     <input type="text" id="allergySearch" placeholder="Search 1,750+ items..." onkeyup="smartSearch()">
     <div class="tip-box">
-        <strong>Search for specifics:</strong> Medications, Metals, Botanicals, or Additives (e.g., E1202).
+        <strong>Search for:</strong> Cows milk, Cashews, E1202, etc.
     </div>
 </div>
 
 <div id="list-container">
-    <div class="category-label">Major Food Staples</div>
+    <div class="category-label">Quick Access (The Basics)</div>
     <div class="item-card"><span class="item-name">Dairy & Lactose</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Gluten (Wheat, Barley, Rye)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Eggs</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Soy & Soya</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-
-    <div class="category-label">Nuts, Seeds & Legumes</div>
+    <div class="item-card"><span class="item-name">Gluten</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
     <div class="item-card"><span class="item-name">Peanuts</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Tree Nuts (Cashew, Almond, etc.)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Sesame Seeds</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Shellfish</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
 
-    <div class="category-label">Seafood</div>
-    <div class="item-card"><span class="item-name">Shellfish (Prawns, Crab, etc.)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Fish (Cod, Salmon, etc.)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-
-    <div class="category-label">Medications & Chemicals</div>
-    <div class="item-card"><span class="item-name">NSAIDs (Aspirin/Ibuprofen)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Paracetamol</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-
-    <div class="category-label">Metals</div>
+    <div class="category-label">Medications & Metals</div>
+    <div class="item-card"><span class="item-name">NSAIDs (Aspirin)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
     <div class="item-card"><span class="item-name">Nickel</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Aluminum</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-
-    <div class="category-label">Botanicals</div>
-    <div class="item-card"><span class="item-name">Aloe Vera</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
-    <div class="item-card"><span class="item-name">Chamomile</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
 </div>
 
 <div id="search-results"></div>
@@ -72,7 +55,10 @@
 
 <script>
     let allergenDatabase = [];
-    fetch('allergens.json').then(r => r.json()).then(data => { allergenDatabase = data; });
+    // Important: Cache busting to ensure the phone sees the new JSON file
+    fetch('allergens.json?v=' + Date.now())
+        .then(r => r.json())
+        .then(data => { allergenDatabase = data; });
 
     function setStatus(btn) {
         let group = btn.parentElement.querySelectorAll('.btn-status');
@@ -92,7 +78,12 @@
         }
 
         quickList.style.display = "none";
+        // Search the database for matches
         let matches = allergenDatabase.filter(item => item.name.toLowerCase().includes(input));
+
+        if(matches.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align:center; padding:20px; color:gray;">No items found. Try a different search.</p>';
+        }
 
         matches.forEach(match => {
             resultsContainer.innerHTML += `
