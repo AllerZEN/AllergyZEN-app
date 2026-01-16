@@ -7,38 +7,53 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root { --primary: #8e44ad; --light: #f4f9f4; }
-        body { font-family: sans-serif; margin: 0; background: #000; color: white; text-align: center; }
-        #reader { width: 100%; max-width: 500px; margin: auto; }
-        .controls { padding: 20px; background: var(--primary); }
-        .result-box { padding: 20px; background: white; color: black; margin: 20px; border-radius: 10px; display: none; }
-        .back-btn { color: white; text-decoration: none; display: block; padding: 20px; font-weight: bold; }
+        body { font-family: sans-serif; margin: 0; background: #1a1a1a; color: white; text-align: center; }
+        #reader { width: 100%; max-width: 500px; margin: 20px auto; border-radius: 15px; overflow: hidden; border: 2px solid var(--primary); }
+        .controls { padding: 30px 20px; background: white; color: #333; }
+        h2 { color: var(--primary); margin: 0; }
+        .result-box { padding: 20px; background: white; color: black; margin: 20px; border-radius: 15px; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+        .back-btn { color: #888; text-decoration: none; display: block; padding: 20px; margin-bottom: 20px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="controls">
-    <h2>allergyZEN Scanner</h2>
-    <p>Point your camera at a menu QR code</p>
+    <h2>allergyZEN</h2>
+    <p>Point your camera at a QR code to scan ingredients.</p>
 </div>
 
 <div id="reader"></div>
 
 <div id="scanned-result" class="result-box">
-    <h3>Item Detected</h3>
-    <p id="result-text"></p>
-    <button onclick="location.reload()" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 5px;">Scan Again</button>
+    <h3 id="status-title">Product Identified</h3>
+    <p id="result-text" style="font-size: 1.2rem; font-weight: bold;"></p>
+    <button onclick="location.reload()">Scan Next Item</button>
 </div>
 
-<a href="index.html" class="back-btn">← Back to Home</a>
+<a href="index.html" class="back-btn">← Cancel and Go Back</a>
 
 <script>
     function onScanSuccess(decodedText, decodedResult) {
-        document.getElementById('scanned-result').style.display = 'block';
-        document.getElementById('result-text').innerText = "Result: " + decodedText;
+        // Stop the scanner immediately upon find
         html5QrcodeScanner.clear();
+        
+        // Show result
+        document.getElementById('scanned-result').style.display = 'block';
+        document.getElementById('result-text').innerText = decodedText;
+        
+        // Vibrate phone if supported
+        if (navigator.vibrate) { navigator.vibrate(200); }
     }
-    let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess);
+
+    function onScanFailure(error) {
+        // We don't need to show errors for every failed frame
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", { fps: 15, qrbox: {width: 250, height: 250} });
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 </script>
+
 </body>
 </html>
