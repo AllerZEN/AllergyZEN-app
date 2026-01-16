@@ -7,14 +7,20 @@
     <style>
         :root { --primary: #8e44ad; --secondary: #27ae60; --dark: #2c3e50; --light: #f4f9f4; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; color: var(--dark); background: var(--light); line-height: 1.6; }
-        header { background: white; color: var(--dark); padding: 40px 20px; text-align: center; border-bottom: 3px solid var(--primary); }
-        .logo-img { max-width: 250px; height: auto; margin-bottom: 10px; }
+        header { background: white; color: var(--dark); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--primary); }
+        .logo-img { max-width: 200px; height: auto; margin-bottom: 10px; }
         .container { max-width: 1000px; margin: auto; padding: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
-        .card { padding: 30px; border-radius: 15px; background: white; border-top: 5px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { margin: 10px 0; font-size: 2.2rem; color: var(--primary); }
-        .btn { display: inline-block; background: var(--secondary); color: white; padding: 12px 25px; text-decoration: none; border-radius: 50px; margin-top: 15px; font-weight: bold; transition: 0.3s; text-align: center;}
+        
+        /* Profile Button at Top */
+        .profile-bar { background: #efe5f5; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--primary); }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { padding: 25px; border-radius: 15px; background: white; border-top: 5px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        .btn { display: inline-block; background: var(--secondary); color: white; padding: 12px 20px; text-decoration: none; border-radius: 50px; font-weight: bold; transition: 0.3s; text-align: center; border: none; }
+        .btn-profile { background: var(--primary); font-size: 0.9rem; }
         .btn-dark { background: var(--primary); }
+        
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -22,20 +28,24 @@
 
 <header>
     <img src="Screenshot_20260115_092747_Google.jpg" alt="allergyZEN Logo" class="logo-img">
-    <h1>Wellness Assistant</h1>
-    <p>Intelligent allergen scanning for a safer, healthier lifestyle.</p>
+    <p style="margin:0; font-weight:bold; color:var(--primary);">Wellness Assistant</p>
 </header>
 
 <div class="container">
+    <div class="profile-bar">
+        <span><strong>My Status:</strong> 1,750 items monitored</span>
+        <a href="profile.html" class="btn btn-profile">Edit Profile</a>
+    </div>
+
     <div class="grid">
         <div class="card">
             <h2>Consumer Scanner</h2>
-            <p>Ready to scan. Get instant feedback on ingredients matched specifically to your wellness profile.</p>
+            <p>Scan ingredients to check against your profile.</p>
             <a href="scanner.html" class="btn">Launch Assistant</a>
         </div>
         <div class="card">
             <h2>Business Partners</h2>
-            <p>Integrate allergyZEN into your establishment. Secure your custom Business QR code for your menu.</p>
+            <p>Join the network and secure your QR code.</p>
             <a href="partner.html" class="btn btn-dark">Partner Portal</a>
         </div>
     </div>
