@@ -38,9 +38,20 @@
 </div>
 
 <div id="list-container">
-    <div class="category-label">Quick Access</div>
+    <div class="category-label">Food Staples</div>
     <div class="item-card"><span class="item-name">Dairy & Lactose</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
     <div class="item-card"><span class="item-name">Gluten</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+
+    <div class="category-label">Medications & Chemicals</div>
+    <div class="item-card"><span class="item-name">NSAIDs (Aspirin/Ibuprofen)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Paracetamol</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+
+    <div class="category-label">Metals</div>
+    <div class="item-card"><span class="item-name">Nickel</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Aluminum</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+
+    <div class="category-label">Botanicals</div>
+    <div class="item-card"><span class="item-name">Aloe Vera</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
 </div>
 
 <div id="search-results"></div>
@@ -49,34 +60,30 @@
 
 <script>
     let allergenDatabase = [];
-
-    // 1. Fetch the 1,750+ items from your JSON file
-    fetch('allergens.json')
-        .then(response => response.json())
-        .then(data => {
-            allergenDatabase = data;
-        });
+    fetch('allergens.json').then(r => r.json()).then(data => { allergenDatabase = data; });
 
     function setStatus(btn) {
         let group = btn.parentElement.querySelectorAll('.btn-status');
         group.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        // Future step: Save this setting to phone memory
     }
 
     function smartSearch() {
         let input = document.getElementById('allergySearch').value.toLowerCase();
         let resultsContainer = document.getElementById('search-results');
-        resultsContainer.innerHTML = ""; // Clear old results
+        let quickList = document.getElementById('list-container');
+        
+        resultsContainer.innerHTML = "";
+        if (input.length < 1) {
+            quickList.style.display = "block";
+            return;
+        }
 
-        if (input.length < 2) return; // Wait for 2 letters
-
-        let matches = allergenDatabase.filter(item => 
-            item.name.toLowerCase().includes(input)
-        );
+        quickList.style.display = "none";
+        let matches = allergenDatabase.filter(item => item.name.toLowerCase().includes(input));
 
         matches.forEach(match => {
-            let card = `
+            resultsContainer.innerHTML += `
                 <div class="item-card">
                     <span class="item-name">${match.name} <br><small style="color:gray">${match.category}</small></span>
                     <div class="status-group">
@@ -85,7 +92,6 @@
                         <button class="btn-status btn-green" onclick="setStatus(this)"></button>
                     </div>
                 </div>`;
-            resultsContainer.innerHTML += card;
         });
     }
 </script>
