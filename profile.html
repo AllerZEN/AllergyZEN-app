@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wellness Profile | allergyZEN</title>
+    <style>
+        :root { --primary: #8e44ad; --red: #e74c3c; --orange: #f39c12; --green: #27ae60; --light: #f4f9f4; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); padding: 15px; color: #333; }
+        .header { text-align: center; padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .search-section { margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; font-size: 1rem; box-sizing: border-box; }
+        .item-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .item-name { font-weight: bold; flex-grow: 1; }
+        .status-group { display: flex; gap: 8px; }
+        .btn-status { width: 35px; height: 35px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.2s; opacity: 0.3; }
+        .btn-red { background: var(--red); }
+        .btn-orange { background: var(--orange); }
+        .btn-green { background: var(--green); }
+        .btn-status.active { opacity: 1; border-color: #333; transform: scale(1.1); }
+        .back-link { display: block; text-align: center; margin-top: 30px; color: var(--primary); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2 style="color: var(--primary); margin:0;">Wellness Profile</h2>
+    <p style="font-size: 0.9rem;">Set reaction levels for your items</p>
+</div>
+
+<div class="search-section">
+    <input type="text" id="allergySearch" placeholder="Search 1,750+ items..." onkeyup="filterItems()">
+</div>
+
+<div id="list-container">
+    <div class="item-card">
+        <span class="item-name">Dairy & Lactose</span>
+        <div class="status-group">
+            <button class="btn-status btn-red active" onclick="setStatus(this)"></button>
+            <button class="btn-status btn-orange" onclick="setStatus(this)"></button>
+            <button class="btn-status btn-green" onclick="setStatus(this)"></button>
+        </div>
+    </div>
+    <div class="item-card">
+        <span class="item-name">Gluten</span>
+        <div class="status-group">
+            <button class="btn-status btn-red" onclick="setStatus(this)"></button>
+            <button class="btn-status btn-orange active" onclick="setStatus(this)"></button>
+            <button class="btn-status btn-green" onclick="setStatus(this)"></button>
+        </div>
+    </div>
+</div>
+
+<a href="index.html" class="back-link">← Save & Exit</a>
+
+<script>
+    function setStatus(btn) {
+        let group = btn.parentElement.querySelectorAll('.btn-status');
+        group.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    function filterItems() {
+        let input = document.getElementById('allergySearch').value.toLowerCase();
+        let cards = document.getElementsByClassName('item-card');
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].querySelector('.item-name').innerText.toLowerCase();
+            cards[i].style.display = name.includes(input) ? "flex" : "none";
+        }
+    }
+</script>
+</body>
+</html>
