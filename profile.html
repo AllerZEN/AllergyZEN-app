@@ -8,24 +8,25 @@
         :root { --primary: #8e44ad; --red: #e74c3c; --orange: #f39c12; --green: #27ae60; --light: #f4f9f4; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); padding: 15px; color: #333; }
         .header { text-align: center; padding: 20px; background: white; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .search-section { margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; font-size: 1rem; box-sizing: border-box; }
+        .search-section { margin-bottom: 20px; position: sticky; top: 10px; z-index: 100; }
+        input[type="text"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--primary); font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .item-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .item-name { font-weight: bold; flex-grow: 1; }
+        .item-name { font-weight: bold; flex-grow: 1; font-size: 0.95rem; }
         .status-group { display: flex; gap: 8px; }
-        .btn-status { width: 35px; height: 35px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.2s; opacity: 0.3; }
+        .btn-status { width: 35px; height: 35px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: 0.2s; opacity: 0.2; }
         .btn-red { background: var(--red); }
         .btn-orange { background: var(--orange); }
         .btn-green { background: var(--green); }
         .btn-status.active { opacity: 1; border-color: #333; transform: scale(1.1); }
-        .back-link { display: block; text-align: center; margin-top: 30px; color: var(--primary); text-decoration: none; font-weight: bold; }
+        .back-link { display: block; text-align: center; margin: 30px 0; color: var(--primary); text-decoration: none; font-weight: bold; padding: 15px; background: white; border-radius: 10px; }
+        .category-label { font-size: 0.8rem; color: var(--primary); font-weight: bold; margin: 15px 0 5px 5px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h2 style="color: var(--primary); margin:0;">Wellness Profile</h2>
-    <p style="font-size: 0.9rem;">Set reaction levels for your items</p>
+    <p style="font-size: 0.8rem;">Tap a color to set your reaction level</p>
 </div>
 
 <div class="search-section">
@@ -33,22 +34,24 @@
 </div>
 
 <div id="list-container">
-    <div class="item-card">
-        <span class="item-name">Dairy & Lactose</span>
-        <div class="status-group">
-            <button class="btn-status btn-red active" onclick="setStatus(this)"></button>
-            <button class="btn-status btn-orange" onclick="setStatus(this)"></button>
-            <button class="btn-status btn-green" onclick="setStatus(this)"></button>
-        </div>
-    </div>
-    <div class="item-card">
-        <span class="item-name">Gluten</span>
-        <div class="status-group">
-            <button class="btn-status btn-red" onclick="setStatus(this)"></button>
-            <button class="btn-status btn-orange active" onclick="setStatus(this)"></button>
-            <button class="btn-status btn-green" onclick="setStatus(this)"></button>
-        </div>
-    </div>
+    <div class="category-label">Common Staples</div>
+    <div class="item-card"><span class="item-name">Dairy & Lactose</span><div class="status-group"><button class="btn-status btn-red active" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Gluten</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange active" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Eggs</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Soy</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+
+    <div class="category-label">Nuts & Seeds</div>
+    <div class="item-card"><span class="item-name">Peanuts</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Tree Nuts (Almonds, Walnuts)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">Sesame Seeds</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+
+    <div class="category-label">Seafood</div>
+    <div class="item-card"><span class="item-name">Shellfish</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">White Fish</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+
+    <div class="category-label">Other Common</div>
+    <div class="item-card"><span class="item-name">Nightshades (Tomato, Potato)</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
+    <div class="item-card"><span class="item-name">MSG / Yeast Extract</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this)"></button><button class="btn-status btn-orange" onclick="setStatus(this)"></button><button class="btn-status btn-green" onclick="setStatus(this)"></button></div></div>
 </div>
 
 <a href="index.html" class="back-link">← Save & Exit</a>
