@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner with allergyZEN</title>
+    <style>
+        :root { --primary: #8e44ad; --secondary: #27ae60; --dark: #2c3e50; --light: #f4f9f4; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: var(--dark); padding: 20px; }
+        .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); }
+        h2 { color: var(--primary); margin-top: 0; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .submit-btn { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 25px; font-size: 1.1rem; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: var(--dark); text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Business Registration</h2>
+    <p>Join our wellness network and provide transparent allergen data to your customers.</p>
+    
+    <form>
+        <label>Business Name</label>
+        <input type="text" placeholder="e.g. Zen Pizza Co." required>
+
+        <label>Contact Email</label>
+        <input type="email" placeholder="owner@business.com" required>
+
+        <label>Establishment Type</label>
+        <select>
+            <option>Restaurant</option>
+            <option>Cafe / Bakery</option>
+            <option>Supermarket</option>
+            <option>Catering</option>
+        </select>
+
+        <label>How many menu items do you have?</label>
+        <input type="number" placeholder="10">
+
+        <button type="button" class="submit-btn" onclick="alert('Thank you! Our team will contact you shortly.')">Register Interest</button>
+    </form>
+
+    <a href="index.html" class="back-link">← Back to Home</a>
+</div>
+
+</body>
+</html>
