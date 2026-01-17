@@ -37,6 +37,57 @@
         <a href="profile.html" class="btn btn-profile">Edit Profile</a>
     </div>
 
+    <div class="card" style="margin-bottom: 20px; border-top: 5px solid #27ae60;">
+    <h2>Quick Allergen Search</h2>
+    <p class="text-sm" style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
+        Instantly check 1,750+ triggers including medicinal fillers and exotic woods.
+    </p>
+    <input type="text" id="searchInput" placeholder="Type to search (e.g. Milk, Ale, Metol)..." 
+           style="width: 100%; padding: 12px; border: 2px solid #efe5f5; rounded: 10px; margin-bottom: 10px; outline: none;">
+    
+    <div id="results" style="max-height: 250px; overflow-y: auto; background: #fafafa; border-radius: 10px;">
+        </div>
+</div>
+
+<script>
+    let allAllergens = [];
+    // Fetch your updated 1,750 item list
+    fetch('./allergens.json')
+        .then(res => res.json())
+        .then(data => {
+            allAllergens = [
+                ...data.high_reactivity.map(i => ({...i, severity: 'High'})),
+                ...data.moderate_reactivity.map(i => ({...i, severity: 'Moderate'})),
+                ...data.no_reactivity.map(i => ({...i, severity: 'Safe'}))
+            ];
+        });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim().replace(/['"`]/g, '');
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+        if (query.length < 2) return;
+
+        const filtered = allAllergens.filter(item => 
+            item.name.toLowerCase().replace(/['"`]/g, '').includes(query)
+        );
+
+        filtered.slice(0, 15).forEach(item => {
+            const div = document.createElement('div');
+            div.style = "padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;";
+            const color = item.severity === 'High' ? '#e74c3c' : item.severity === 'Moderate' ? '#f39c12' : '#27ae60';
+            div.innerHTML = `
+                <div>
+                    <div style="font-weight: bold;">${item.name}</div>
+                    <div style="font-size: 0.75rem; color: #888;">${item.category}</div>
+                </div>
+                <span style="font-size: 0.7rem; font-weight: bold; color: white; background: ${color}; padding: 2px 8px; border-radius: 10px;">${item.severity}</span>
+            `;
+            resultsDiv.appendChild(div);
+        });
+    });
+</script>
+
     <div class="grid">
         <div class="card">
             <h2>Consumer Scanner</h2>
