@@ -69,52 +69,73 @@
 <script>
     let allergenDatabase = [];
 
-    // Fetch the data from your allergens.json file in GitHub
+      // 1. This variable will hold your 1,750 items from the JSON file
+    let masterAllergenList = [];
+
+    // 2. Fetch the master list from your allergens.json
     fetch('./allergens.json')
         .then(response => response.json())
         .then(data => {
-            // Combine high, moderate, and no reactivity lists into one array
-            allergenDatabase = [
-                ...data.high_reactivity.map(item => ({...item, level: 'High (Red)', color: '#e74c3c'})),
-                ...data.moderate_reactivity.map(item => ({...item, level: 'Moderate (Orange)', color: '#f39c12'})),
-                ...data.no_reactivity.map(item => ({...item, level: 'Safe (Green)', color: '#27ae60'}))
-            ];
-            console.log("allergyZEN Engine Live: " + allergenDatabase.length + " items loaded.");
+            // This handles the 1,750 items regardless of how they are listed in the JSON
+            masterAllergenList = data; 
+            console.log("allergyZEN Engine Live: " + masterAllergenList.length + " items loaded.");
         })
-        .catch(err => console.error("Could not load allergens.json. Ensure the file is in the same folder as index.html", err));
+        .catch(err => console.error("Database failed to load. Check your JSON file path."));
 
+    // 3. Search Logic for the Master Database
     document.getElementById('mainSearch').addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim().replace(/['"`]/g, '');
+        const query = e.target.value.toLowerCase().trim();
         const display = document.getElementById('searchResults');
         display.innerHTML = '';
-        
+
         if (query.length < 2) return;
 
-        // Searches the list and normalizes for apostrophes
-        const matches = allergenDatabase.filter(item => 
-            item.name.toLowerCase().replace(/['"`]/g, '').includes(query)
-        );
+        // Filter the 1,750 items (Terpenes, Woods, Lab chemicals, etc.)
+        const matches = masterAllergenList.filter(item => {
+            const name = typeof item === 'string' ? item : item.name;
+            return name.toLowerCase().includes(query);
+        });
 
         if (matches.length === 0) {
-            display.innerHTML = '<div style="padding:15px; color:#888; text-align:center;">No items found. Check spelling or try a different term.</div>';
+            display.innerHTML = '<div style="padding:15px; color:#888; text-align:center;">Not found in database</div>';
             return;
         }
 
-        // Display top 15 matches
+        // Display results with buttons for the user to choose their reactivity
         matches.slice(0, 15).forEach(item => {
+            const name = typeof item === 'string' ? item : item.name;
             const row = document.createElement('div');
             row.className = 'result-item';
+            row.style = "display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee;";
+            
             row.innerHTML = `
                 <div>
-                    <div style="font-weight: bold; color: #2c3e50;">${item.name}</div>
-                    <div style="font-size: 0.75rem; color: #7f8c8d;">${item.category}</div>
+                    <div style="font-weight: bold; color: #2c3e50;">${name}</div>
+                    <div style="font-size: 0.75rem; color: #7f8c8d;">Select your reaction level:</div>
                 </div>
-                <span class="severity-badge" style="background:${item.color}">${item.level}</span>
+                <div class="actions">
+                    <button onclick="saveToProfile('${name}', 'High')" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;">High</button>
+                    <button onclick="saveToProfile('${name}', 'Moderate')" style="background:#f39c12; color:white; border:none; border-radius:4px; padding:6px 10px; margin-left:5px; cursor:pointer;">Mod</button>
+                </div>
             `;
             display.appendChild(row);
         });
     });
-</script>
 
+    // 4. Function to save choices to the user's personal profile (LocalStorage)
+    function saveToProfile(name, level) {
+        let userProfile = JSON.parse(localStorage.getItem('myAllergies')) || [];
+        
+        // Check if already added to avoid duplicates
+        if (!userProfile.some(item => item.name === name)) {
+            userProfile.push({ name: name, level: level, date: new Date().toLocaleDateString() });
+            localStorage.setItem('myAllergies', JSON.stringify(userProfile));
+            alert(name + " has been added to your profile as: " + level);
+        } else {
+            alert(name + " is already in your profile.");
+        }
+    }
+</script>
 </body>
 </html>
+  
