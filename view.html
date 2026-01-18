@@ -9,31 +9,103 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 15px; margin: 0; }
         .header { background: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); margin-bottom: 20px; }
         .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        
+        /* Security Status Boxes */
+        .status-badge { padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; }
+        .active { background: #d4efdf; color: #1e8449; border: 1px solid var(--green); }
+        .expired { background: #fdeaea; color: #c0392b; border: 1px solid var(--red); }
+        
         .risk-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
         .badge { padding: 5px 12px; border-radius: 50px; color: white; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        
+        /* Trust Action Section */
+        .action-area { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #eee; text-align: center; }
+        .btn-trust { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        .footer-note { font-size: 0.7rem; color: #777; margin-top: 15px; line-height: 1.4; }
     </style>
 </head>
 <body>
-    <div class="header"><h2 style="margin:0; color: var(--primary);">allergyZEN <span style="color: var(--secondary);">Secure Scan</span></h2></div>
-    <div class="card">
-        <h3 style="margin-top: 0; font-size: 1rem; color: #444;">Customer Safety Risks:</h3>
-        <div id="riskList"><p style="text-align:center; color:#999;">Waiting for scan data...</p></div>
+
+<div class="header">
+    <h2 style="margin:0; color: var(--primary);">allergyZEN <span style="color: var(--secondary);">Secure Scan</span></h2>
+</div>
+
+<div class="card">
+    <div id="securityStatus"></div>
+
+    <h3 id="riskTitle" style="margin-top: 0; font-size: 1rem; color: #444; display:none;">Customer Safety Risks:</h3>
+    <div id="riskList">
+        <p style="text-align:center; color:#999;">Waiting for secure handshake...</p>
     </div>
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const encodedData = params.get('data');
-        if (encodedData) {
-            try {
-                const profile = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
-                const list = document.getElementById('riskList');
-                list.innerHTML = ''; 
-                profile.sort((a, b) => (a.level === 'High' ? -1 : 1));
-                profile.forEach(item => {
-                    let color = item.level === 'High' ? 'var(--red)' : (item.level === 'Moderate' ? 'var(--orange)' : 'var(--green)');
-                    list.innerHTML += `<div class="risk-row"><strong>${item.name}</strong><span class="badge" style="background:${color}">${item.level}</span></div>`;
+
+    <div id="trustSection" style="display:none;" class="action-area">
+        <button class="btn-trust" onclick="requestTrust()">Request to Save Profile</button>
+        <p class="footer-note">
+            <strong>3-Hour Rule:</strong> Data is wiped automatically after 3 hours.<br>
+            If the customer taps "Trust" on their device, you can save this profile for future visits.
+        </p>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    // Support both 'token' (V2) and 'data' (V1) for backwards compatibility during testing
+    const encodedData = params.get('token') || params.get('data');
+    const statusDiv = document.getElementById('securityStatus');
+    const riskList = document.getElementById('riskList');
+    const riskTitle = document.getElementById('riskTitle');
+    const trustSection = document.getElementById('trustSection');
+
+    if (encodedData) {
+        try {
+            const handshake = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+            const now = Date.now();
+
+            // 1. THE 3-HOUR SECURITY CHECK
+            if (handshake.expires && now > handshake.expires) {
+                statusDiv.className = "status-badge expired";
+                statusDiv.innerHTML = "⚠️ SESSION EXPIRED<br><small>3-hour window closed. For safety, the customer must rescan.</small>";
+                riskList.innerHTML = "";
+            } else {
+                // 2. SESSION IS VALID
+                statusDiv.className = "status-badge active";
+                statusDiv.innerHTML = "✅ ACTIVE PROTECTION<br><small>Verified Allergy Profile</small>";
+                
+                // Decode profile (handle V2 payload or V1 raw array)
+                const profile = handshake.payload || handshake;
+                
+                riskList.innerHTML = "";
+                riskTitle.style.display = "block";
+                trustSection.style.display = "block";
+
+                // Sort High risks to the top
+                profile.sort((a, b) => {
+                    let levelA = a.l || a.level;
+                    return (levelA === 'High' ? -1 : 1);
                 });
-            } catch (e) { document.getElementById('riskList').innerHTML = 'Scan Error.'; }
+
+                profile.forEach(item => {
+                    let name = item.n || item.name;
+                    let level = item.l || item.level;
+                    let color = level === 'High' ? 'var(--red)' : (level === 'Moderate' ? 'var(--orange)' : 'var(--green)');
+                    
+                    riskList.innerHTML += `
+                        <div class="risk-row">
+                            <strong>${name}</strong>
+                            <span class="badge" style="background:${color}">${level}</span>
+                        </div>`;
+                });
+            }
+        } catch (e) {
+            statusDiv.className = "status-badge expired";
+            statusDiv.innerHTML = "❌ DECRYPTION ERROR<br><small>Invalid or corrupted safety QR code.</small>";
+            console.error(e);
         }
-    </script>
+    }
+
+    function requestTrust() {
+        alert("Trust Request Sent! The customer must now tap 'Trust' in their allergyZEN profile to allow permanent saving.");
+    }
+</script>
 </body>
 </html>
