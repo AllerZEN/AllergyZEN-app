@@ -20,6 +20,12 @@
         .btn-green { background: var(--green); }
         .btn-status.active { opacity: 1; border-color: #333; transform: scale(1.1); }
         .category-label { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin: 20px 0 8px 5px; text-transform: uppercase; }
+        
+        /* Trusted Business Section */
+        .trust-card { background: white; padding: 15px; border-radius: 15px; margin-top: 25px; border: 1px solid #ddd; }
+        .trust-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .btn-revoke { background: none; border: 1px solid var(--red); color: var(--red); padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
+
         .back-link { display: block; text-align: center; margin-top: 20px; color: var(--primary); text-decoration: none; font-weight: bold; padding: 15px; background: white; border-radius: 12px; border: 1px solid var(--primary); }
         .qr-btn { background: var(--primary); color: white; width: 100%; border: none; border-radius: 12px; padding: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 1rem; }
     </style>
@@ -28,13 +34,13 @@
 
 <div class="header">
     <h2 style="color: var(--primary); margin:0;">Wellness Profile</h2>
-    <p style="font-size: 0.8rem;">Tap a color to set your reaction level</p>
+    <p style="font-size: 0.8rem;">Set your reactions. QR resets every 3 hours.</p>
 </div>
 
 <div class="search-section">
     <input type="text" id="allergySearch" placeholder="Search 1,750+ items..." onkeyup="smartSearch()">
     <div class="tip-box">
-        <strong>Try searching:</strong> Terpenes, Wenge, or Croscarmellose.
+        <strong>Try:</strong> Terpenes, Wenge Wood, or Croscarmellose.
     </div>
 </div>
 
@@ -45,18 +51,24 @@
     </div>
 
 <div id="qrcode-container" style="display: none; text-align: center; background: white; padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid var(--primary);">
-    <p style="font-size:0.85rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">Security: This QR is active for 3 hours.</p>
+    <p style="font-size:0.85rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">Security: This QR expires in 3 hours.</p>
     <div id="qrcode"></div>
 </div>
 
 <button onclick="generateQR()" class="qr-btn">Generate Safety QR (3-Hour Window)</button>
+
+<div class="trust-card">
+    <h4 style="margin:0; color: var(--primary); font-size: 0.9rem;">Trusted Businesses</h4>
+    <p style="font-size: 0.7rem; color: #666;">Businesses you've allowed to save your profile.</p>
+    <div id="trustedList"></div>
+</div>
 
 <a href="index.html" class="back-link">← Save & Exit</a>
 
 <script>
     let allergenDatabase = [];
     
-    // 1. Security: Encryption Wrapper for Local Storage
+    // 1. Encryption Helper
     const secureStorage = {
         save: (data) => {
             const encrypted = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -64,22 +76,20 @@
         },
         load: () => {
             const data = localStorage.getItem('allergyZEN_vault');
-            try { 
-                return data ? JSON.parse(decodeURIComponent(escape(atob(data)))) : []; 
-            } catch(e) { 
-                return []; 
-            }
+            try { return data ? JSON.parse(decodeURIComponent(escape(atob(data)))) : []; }
+            catch(e) { return []; }
         }
     };
 
     let userProfile = secureStorage.load();
 
-    // 2. Load Database & Render
+    // 2. Load DB
     fetch('allergens.json?v=' + Date.now())
         .then(r => r.json())
         .then(data => { 
             allergenDatabase = data; 
             renderQuickList();
+            renderTrustedBusinesses();
         })
         .catch(err => console.error("Error loading allergens:", err));
 
@@ -93,11 +103,7 @@
         if (btn.classList.contains('btn-orange')) level = "Moderate";
 
         userProfile = userProfile.filter(i => i.name !== itemName);
-        userProfile.push({ 
-            name: itemName, 
-            level: level, 
-            date: new Date().toISOString() 
-        });
+        userProfile.push({ name: itemName, level: level, date: new Date().toISOString() });
         secureStorage.save(userProfile);
     }
 
@@ -122,10 +128,7 @@
             const saved = userProfile.find(p => p.name === match.name);
             return `
             <div class="item-card">
-                <span class="item-name">
-                    ${match.name}<br>
-                    <small style="color:var(--primary);">${match.category}</small>
-                </span>
+                <span class="item-name">${match.name}<br><small style="color:var(--primary);">${match.category}</small></span>
                 <div class="status-group">
                     <button class="btn-status btn-red ${saved?.level === 'High' ? 'active' : ''}" onclick="setStatus(this, '${match.name.replace(/'/g, "\\'")}')"></button>
                     <button class="btn-status btn-orange ${saved?.level === 'Moderate' ? 'active' : ''}" onclick="setStatus(this, '${match.name.replace(/'/g, "\\'")}')"></button>
@@ -141,7 +144,7 @@
         container.innerHTML = '<div class="category-label">Quick Access Essentials</div>' + essentials.map(name => {
             const saved = userProfile.find(p => p.name === name);
             return `
-            <div class="item-card" data-name="${name}">
+            <div class="item-card">
                 <span class="item-name">${name}</span>
                 <div class="status-group">
                     <button class="btn-status btn-red ${saved?.level === 'High' ? 'active' : ''}" onclick="setStatus(this, '${name}')"></button>
@@ -152,24 +155,42 @@
         }).join('');
     }
 
-    // 3. Secure 3-Hour Masked QR Generation
+    // 3. Trusted Businesses Management
+    function renderTrustedBusinesses() {
+        const trusted = JSON.parse(localStorage.getItem('az_trusted_partners') || '[]');
+        const container = document.getElementById('trustedList');
+        if(trusted.length === 0) {
+            container.innerHTML = '<p style="font-size:0.75rem; color:gray; text-align:center;">No trusted businesses yet.</p>';
+            return;
+        }
+        container.innerHTML = trusted.map(biz => `
+            <div class="trust-item">
+                <span style="font-size:0.8rem;">${biz.name}</span>
+                <button class="btn-revoke" onclick="revokeTrust('${biz.id}')">Revoke</button>
+            </div>
+        `).join('');
+    }
+
+    function revokeTrust(id) {
+        let trusted = JSON.parse(localStorage.getItem('az_trusted_partners') || '[]');
+        trusted = trusted.filter(b => b.id !== id);
+        localStorage.setItem('az_trusted_partners', JSON.stringify(trusted));
+        renderTrustedBusinesses();
+    }
+
+    // 4. Secure QR Generation
     function generateQR() {
         const profileData = secureStorage.load();
-        if (profileData.length === 0) { 
-            alert("Please add some items to your profile first!"); 
-            return; 
-        }
+        if (profileData.length === 0) { alert("Please set your reactions first!"); return; }
 
-        // Masking the data and setting expiration
         const handshake = {
             id: "AZ-" + Math.random().toString(36).substr(2, 9),
-            expires: Date.now() + (3 * 60 * 60 * 1000), // 3 Hour protection
-            payload: profileData.map(i => ({n: i.name, l: i.level})) // Masked for scan speed
+            expires: Date.now() + (3 * 60 * 60 * 1000), // 3 Hours
+            payload: profileData.map(i => ({n: i.name, l: i.level}))
         };
 
         const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(handshake))));
         const shareUrl = `https://allergyzen.app/view.html?token=${encodedData}`;
-        
         const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`;
         
         document.getElementById('qrcode').innerHTML = `<img src="${qrImgUrl}" style="width:200px; border:5px solid white;">`;
