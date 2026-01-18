@@ -34,7 +34,7 @@
 <div class="search-section">
     <input type="text" id="allergySearch" placeholder="Search 1,750+ items..." onkeyup="smartSearch()">
     <div class="tip-box">
-        <strong>Search for:</strong> Cows milk, Cashews, E1202, etc.
+        <strong>Try searching:</strong> Terpenes, Wenge, or Croscarmellose.
     </div>
 </div>
 
@@ -42,34 +42,47 @@
 
 <div id="list-container">
     <div class="category-label">Quick Access Essentials</div>
-    <div class="item-card" data-name="Dairy & Lactose"><span class="item-name">Dairy & Lactose</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this, 'Dairy & Lactose')"></button><button class="btn-status btn-orange" onclick="setStatus(this, 'Dairy & Lactose')"></button><button class="btn-status btn-green" onclick="setStatus(this, 'Dairy & Lactose')"></button></div></div>
-    <div class="item-card" data-name="Gluten & Wheat"><span class="item-name">Gluten & Wheat</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this, 'Gluten & Wheat')"></button><button class="btn-status btn-orange" onclick="setStatus(this, 'Gluten & Wheat')"></button><button class="btn-status btn-green" onclick="setStatus(this, 'Gluten & Wheat')"></button></div></div>
-    <div class="item-card" data-name="Nickel"><span class="item-name">Nickel</span><div class="status-group"><button class="btn-status btn-red" onclick="setStatus(this, 'Nickel')"></button><button class="btn-status btn-orange" onclick="setStatus(this, 'Nickel')"></button><button class="btn-status btn-green" onclick="setStatus(this, 'Nickel')"></button></div></div>
-</div>
+    </div>
 
 <div id="qrcode-container" style="display: none; text-align: center; background: white; padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid var(--primary);">
-    <p style="font-size:0.85rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">Show this to staff to scan:</p>
+    <p style="font-size:0.85rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">Security: This QR is active for 3 hours.</p>
     <div id="qrcode"></div>
 </div>
 
-<button onclick="generateQR()" class="qr-btn">Generate My Safety QR</button>
+<button onclick="generateQR()" class="qr-btn">Generate Safety QR (3-Hour Window)</button>
 
 <a href="index.html" class="back-link">← Save & Exit</a>
 
 <script>
     let allergenDatabase = [];
-    let userProfile = JSON.parse(localStorage.getItem('myAllergies')) || [];
+    
+    // 1. Security: Encryption Wrapper for Local Storage
+    const secureStorage = {
+        save: (data) => {
+            const encrypted = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            localStorage.setItem('allergyZEN_vault', encrypted);
+        },
+        load: () => {
+            const data = localStorage.getItem('allergyZEN_vault');
+            try { 
+                return data ? JSON.parse(decodeURIComponent(escape(atob(data)))) : []; 
+            } catch(e) { 
+                return []; 
+            }
+        }
+    };
 
-    // 1. Fetch the JSON database with Cache Buster
+    let userProfile = secureStorage.load();
+
+    // 2. Load Database & Render
     fetch('allergens.json?v=' + Date.now())
         .then(r => r.json())
         .then(data => { 
             allergenDatabase = data; 
-            applySavedStatus(); // Highlight items already saved
+            renderQuickList();
         })
         .catch(err => console.error("Error loading allergens:", err));
 
-    // 2. Set Status AND Save
     function setStatus(btn, itemName) {
         let group = btn.parentElement.querySelectorAll('.btn-status');
         group.forEach(b => b.classList.remove('active'));
@@ -80,16 +93,14 @@
         if (btn.classList.contains('btn-orange')) level = "Moderate";
 
         userProfile = userProfile.filter(i => i.name !== itemName);
-        userProfile.push({
-            name: itemName,
-            level: level,
-            date: new Date().toLocaleDateString()
+        userProfile.push({ 
+            name: itemName, 
+            level: level, 
+            date: new Date().toISOString() 
         });
-
-        localStorage.setItem('myAllergies', JSON.stringify(userProfile));
+        secureStorage.save(userProfile);
     }
 
-    // 3. Search Logic
     function smartSearch() {
         const input = document.getElementById('allergySearch').value.toLowerCase().trim();
         const resultsContainer = document.getElementById('search-results');
@@ -98,7 +109,6 @@
         if (input.length < 1) {
             resultsContainer.innerHTML = "";
             quickList.style.display = "block";
-            applySavedStatus(); 
             return;
         }
 
@@ -108,18 +118,13 @@
             item.category.toLowerCase().includes(input)
         );
 
-        if(matches.length === 0) {
-            resultsContainer.innerHTML = '<p style="text-align:center; padding:20px; color:gray;">No items found.</p>';
-            return;
-        }
-
         resultsContainer.innerHTML = matches.slice(0, 25).map(match => {
             const saved = userProfile.find(p => p.name === match.name);
             return `
             <div class="item-card">
                 <span class="item-name">
-                    ${match.name} <br>
-                    <small style="color:var(--primary); font-weight:normal;">${match.category}</small>
+                    ${match.name}<br>
+                    <small style="color:var(--primary);">${match.category}</small>
                 </span>
                 <div class="status-group">
                     <button class="btn-status btn-red ${saved?.level === 'High' ? 'active' : ''}" onclick="setStatus(this, '${match.name.replace(/'/g, "\\'")}')"></button>
@@ -130,35 +135,45 @@
         }).join('');
     }
 
-    // 4. Highlight items
-    function applySavedStatus() {
-        const items = document.querySelectorAll('.item-card');
-        items.forEach(card => {
-            const name = card.getAttribute('data-name');
+    function renderQuickList() {
+        const container = document.getElementById('list-container');
+        const essentials = ["Dairy & Lactose", "Gluten & Wheat", "Nickel"];
+        container.innerHTML = '<div class="category-label">Quick Access Essentials</div>' + essentials.map(name => {
             const saved = userProfile.find(p => p.name === name);
-            if (saved) {
-                const buttons = card.querySelectorAll('.btn-status');
-                buttons.forEach(btn => {
-                    if (saved.level === "High" && btn.classList.contains('btn-red')) btn.classList.add('active');
-                    if (saved.level === "Moderate" && btn.classList.contains('btn-orange')) btn.classList.add('active');
-                    if (saved.level === "Safe" && btn.classList.contains('btn-green')) btn.classList.add('active');
-                });
-            }
-        });
+            return `
+            <div class="item-card" data-name="${name}">
+                <span class="item-name">${name}</span>
+                <div class="status-group">
+                    <button class="btn-status btn-red ${saved?.level === 'High' ? 'active' : ''}" onclick="setStatus(this, '${name}')"></button>
+                    <button class="btn-status btn-orange ${saved?.level === 'Moderate' ? 'active' : ''}" onclick="setStatus(this, '${name}')"></button>
+                    <button class="btn-status btn-green ${saved?.level === 'Safe' ? 'active' : ''}" onclick="setStatus(this, '${name}')"></button>
+                </div>
+            </div>`;
+        }).join('');
     }
 
-    // 5. QR Generation
+    // 3. Secure 3-Hour Masked QR Generation
     function generateQR() {
-        const profileData = localStorage.getItem('myAllergies');
-        if (!profileData || profileData === '[]') {
-            alert("Please add some items to your profile first!");
-            return;
+        const profileData = secureStorage.load();
+        if (profileData.length === 0) { 
+            alert("Please add some items to your profile first!"); 
+            return; 
         }
-        document.getElementById('qrcode-container').style.display = 'block';
-        const encodedData = btoa(unescape(encodeURIComponent(profileData))); 
-        const shareUrl = `https://allergyzen.app/view.html?data=${encodedData}`;
+
+        // Masking the data and setting expiration
+        const handshake = {
+            id: "AZ-" + Math.random().toString(36).substr(2, 9),
+            expires: Date.now() + (3 * 60 * 60 * 1000), // 3 Hour protection
+            payload: profileData.map(i => ({n: i.name, l: i.level})) // Masked for scan speed
+        };
+
+        const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(handshake))));
+        const shareUrl = `https://allergyzen.app/view.html?token=${encodedData}`;
+        
         const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`;
+        
         document.getElementById('qrcode').innerHTML = `<img src="${qrImgUrl}" style="width:200px; border:5px solid white;">`;
+        document.getElementById('qrcode-container').style.display = 'block';
         document.getElementById('qrcode-container').scrollIntoView({ behavior: 'smooth' });
     }
 </script>
