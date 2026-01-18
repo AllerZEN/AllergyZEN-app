@@ -148,6 +148,134 @@
             }
         });
     }
+<div id="qrcode-container" style="display: none; text-align: center; background: white; padding: 20px; border-radius: 15px; margin: 20px 0;">
+    <p style="font-size:0.85rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">Show this to staff to scan:</p>
+    <div id="qrcode"></div>
+</div>
+
+<button onclick="generateQR()" style="background: var(--primary); color: white; width: 100%; border: none; border-radius: 12px; padding: 15px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">Generate My Safety QR</button>
+    
+<script>
+    let allergenDatabase = [];
+    let userProfile = JSON.parse(localStorage.getItem('myAllergies')) || [];
+
+    // 1. Fetch the JSON database
+    fetch('allergens.json?v=' + Date.now())
+        .then(r => r.json())
+        .then(data => { 
+            allergenDatabase = data; 
+            console.log("Database loaded: " + allergenDatabase.length + " items");
+            applySavedStatus(); // Highlight items already saved
+        })
+        .catch(err => console.error("Error loading allergens:", err));
+
+    // 2. Set Status AND Save to Memory
+    function setStatus(btn, itemName) {
+        let group = btn.parentElement.querySelectorAll('.btn-status');
+        group.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        let level = "Safe";
+        if (btn.classList.contains('btn-red')) level = "High";
+        if (btn.classList.contains('btn-orange')) level = "Moderate";
+
+        // Update logic
+        userProfile = userProfile.filter(i => i.name !== itemName);
+        userProfile.push({
+            name: itemName,
+            level: level,
+            date: new Date().toLocaleDateString()
+        });
+
+        localStorage.setItem('myAllergies', JSON.stringify(userProfile));
+    }
+
+    // 3. Search Logic
+    function smartSearch() {
+        const input = document.getElementById('allergySearch').value.toLowerCase().trim();
+        const resultsContainer = document.getElementById('search-results');
+        const quickList = document.getElementById('list-container');
+        
+        if (input.length < 1) {
+            resultsContainer.innerHTML = "";
+            quickList.style.display = "block";
+            applySavedStatus(); 
+            return;
+        }
+
+        quickList.style.display = "none";
+        const matches = allergenDatabase.filter(item => 
+            item.name.toLowerCase().includes(input) || 
+            item.category.toLowerCase().includes(input)
+        );
+
+        if(matches.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align:center; padding:20px; color:gray;">No items found.</p>';
+            return;
+        }
+
+        resultsContainer.innerHTML = matches.slice(0, 20).map(match => {
+            const saved = userProfile.find(p => p.name === match.name);
+            return `
+            <div class="item-card">
+                <span class="item-name">
+                    ${match.name} <br>
+                    <small style="color:var(--primary); font-weight:normal;">${match.category}</small>
+                </span>
+                <div class="status-group">
+                    <button class="btn-status btn-red ${saved?.level === 'High' ? 'active' : ''}" onclick="setStatus(this, '${match.name.replace(/'/g, "\\'")}')"></button>
+                    <button class="btn-status btn-orange ${saved?.level === 'Moderate' ? 'active' : ''}" onclick="setStatus(this, '${match.name.replace(/'/g, "\\'")}')"></button>
+                    <button class="btn-status btn-green ${saved?.level === 'Safe' ? 'active' : ''}" onclick="setStatus(this, '${match.name.replace(/'/g, "\\'")}')"></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // 4. Highlight circles for existing saves
+    function applySavedStatus() {
+        const items = document.querySelectorAll('.item-card');
+        items.forEach(card => {
+            const name = card.getAttribute('data-name');
+            if(!name) return;
+            const saved = userProfile.find(p => p.name === name);
+            if (saved) {
+                const buttons = card.querySelectorAll('.btn-status');
+                buttons.forEach(btn => {
+                    if (saved.level === "High" && btn.classList.contains('btn-red')) btn.classList.add('active');
+                    if (saved.level === "Moderate" && btn.classList.contains('btn-orange')) btn.classList.add('active');
+                    if (saved.level === "Safe" && btn.classList.contains('btn-green')) btn.classList.add('active');
+                });
+            }
+        });
+    }
+
+    // 5. NEW: QR GENERATION LOGIC
+    function generateQR() {
+        const profileData = localStorage.getItem('myAllergies');
+        if (!profileData || profileData === '[]') {
+            alert("Please add some items to your profile first!");
+            return;
+        }
+
+        // Show the QR container (ensure you added the HTML div I mentioned previously)
+        const container = document.getElementById('qrcode-container');
+        if(container) container.style.display = 'block';
+
+        // Encode the library
+        const encodedData = btoa(unescape(encodeURIComponent(profileData))); 
+        
+        // Point to your live domain view page
+        const shareUrl = `https://allergyzen.app/view.html?data=${encodedData}`;
+        
+        // Generate QR Image
+        const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`;
+        
+        const qrDiv = document.getElementById('qrcode');
+        if(qrDiv) {
+            qrDiv.innerHTML = `<img src="${qrImgUrl}" alt="Safety QR" style="border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 200px;">`;
+            qrDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
 </script>
 </body>
 </html>
