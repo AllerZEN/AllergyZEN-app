@@ -3,89 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safety Scan | allergyZEN</title>
+    <title>Business Access | allergyZEN</title>
     <style>
         :root { --primary: #8e44ad; --secondary: #27ae60; --red: #e74c3c; --orange: #f39c12; --green: #27ae60; --light: #f4f9f4; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 15px; margin: 0; }
         .header { background: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); margin-bottom: 20px; }
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        
+        /* PIN Gate Styling */
+        #pinGate { text-align: center; }
+        input[type="password"] { width: 80%; padding: 15px; font-size: 1.5rem; text-align: center; border-radius: 12px; border: 2px solid var(--primary); margin-bottom: 15px; letter-spacing: 10px; }
+        .btn-unlock { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        /* Data Display */
+        #secureContent { display: none; }
         .status-badge { padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; }
         .active { background: #d4efdf; color: #1e8449; border: 1px solid var(--green); }
         .expired { background: #fdeaea; color: #c0392b; border: 1px solid var(--red); }
         .risk-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        .badge { padding: 5px 12px; border-radius: 50px; color: white; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-        .action-area { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #eee; text-align: center; }
-        .btn-trust { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        .badge { padding: 5px 12px; border-radius: 50px; color: white; font-size: 0.75rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h2 style="margin:0; color: var(--primary);">allergyZEN <span style="color: var(--secondary);">Secure Scan</span></h2>
+    <h2 style="margin:0; color: var(--primary);">allergyZEN <span style="color: var(--secondary);">Partner Portal</span></h2>
 </div>
 
 <div class="card">
-    <div id="securityStatus"></div>
-    <div id="riskList"></div>
+    <div id="pinGate">
+        <h3 style="margin-top:0;">Business Access Required</h3>
+        <p style="font-size: 0.85rem; color: #666;">Enter your 4-digit Partner PIN to view this safety profile.</p>
+        <input type="password" id="pinInput" maxlength="4" placeholder="••••">
+        <button class="btn-unlock" onclick="verifyPin()">Verify & Unlock</button>
+        <p id="pinError" style="color: var(--red); font-size: 0.8rem; margin-top: 10px; display: none;">Invalid Partner PIN</p>
+    </div>
 
-    <div id="trustSection" style="display:none;" class="action-area">
-        <button class="btn-trust" onclick="requestTrust()">Request to Save Profile</button>
-        <p style="font-size: 0.7rem; color: #777; margin-top: 10px;">
-            Saves this profile for future visits.
-        </p>
+    <div id="secureContent">
+        <div id="securityStatus"></div>
+        <div id="riskList"></div>
+        <div class="action-area" style="margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px;">
+            <button class="btn-unlock" style="background: var(--secondary);" onclick="requestTrust()">Request to Save Profile</button>
+        </div>
     </div>
 </div>
 
 <script>
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token') || params.get('data');
-    const statusDiv = document.getElementById('securityStatus');
-    const riskList = document.getElementById('riskList');
-    const trustSection = document.getElementById('trustSection');
+    // Set your master PIN here (for testing, let's use 2026)
+    const MASTER_PIN = "2026"; 
 
-    if (token) {
+    function verifyPin() {
+        const input = document.getElementById('pinInput').value;
+        const gate = document.getElementById('pinGate');
+        const content = document.getElementById('secureContent');
+        const error = document.getElementById('pinError');
+
+        if (input === MASTER_PIN) {
+            gate.style.display = 'none';
+            content.style.display = 'block';
+            processQRData();
+        } else {
+            error.style.display = 'block';
+            document.getElementById('pinInput').value = '';
+        }
+    }
+
+    function processQRData() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        const statusDiv = document.getElementById('securityStatus');
+        const riskList = document.getElementById('riskList');
+
+        if (!token) return;
+
         try {
             const handshake = JSON.parse(decodeURIComponent(escape(atob(token))));
             const now = Date.now();
 
+            // 3-HOUR SECURITY CHECK
             if (handshake.expires && now > handshake.expires) {
                 statusDiv.className = "status-badge expired";
-                statusDiv.innerHTML = "⚠️ SESSION EXPIRED";
+                statusDiv.innerHTML = "⚠️ SESSION EXPIRED<br><small>Safety window closed.</small>";
             } else {
                 statusDiv.className = "status-badge active";
                 statusDiv.innerHTML = "✅ ACTIVE PROTECTION";
                 
-                const profile = handshake.payload || handshake;
+                const profile = handshake.payload || [];
                 riskList.innerHTML = "";
                 profile.forEach(item => {
-                    let level = item.l || item.level;
-                    let color = level === 'High' ? 'var(--red)' : (level === 'Moderate' ? 'var(--orange)' : 'var(--green)');
-                    riskList.innerHTML += `<div class="risk-row"><strong>${item.n || item.name}</strong><span class="badge" style="background:${color}">${level}</span></div>`;
+                    let color = item.l === 'High' ? 'var(--red)' : (item.l === 'Moderate' ? 'var(--orange)' : 'var(--green)');
+                    riskList.innerHTML += `
+                        <div class="risk-row">
+                            <strong>${item.n}</strong>
+                            <span class="badge" style="background:${color}">${item.l}</span>
+                        </div>`;
                 });
-
-                trustSection.style.display = "block";
             }
         } catch (e) {
-            statusDiv.innerHTML = "❌ ERROR";
+            statusDiv.innerHTML = "❌ DECRYPTION ERROR";
         }
     }
 
-    // THE TEST FUNCTION
     function requestTrust() {
-        // We simulate the business ID (In real life this is unique to the cafe)
-        const testBusiness = { id: "BIZ-101", name: "The Local Cafe" };
-        
-        // Save to the customer's trusted list in local storage
+        const testBusiness = { id: "BIZ-101", name: "Verified Partner #101" };
         let trusted = JSON.parse(localStorage.getItem('az_trusted_partners') || '[]');
-        
-        // Only add if not already there
         if (!trusted.find(b => b.id === testBusiness.id)) {
             trusted.push(testBusiness);
             localStorage.setItem('az_trusted_partners', JSON.stringify(trusted));
-            alert("SUCCESS: 'The Local Cafe' added to your Trusted Businesses!");
-            window.location.reload(); // Refresh to show state
+            alert("Partner Verified! Profile added to customer's Trusted list.");
         } else {
-            alert("Business is already trusted.");
+            alert("Partner is already trusted.");
         }
     }
 </script>
