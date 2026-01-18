@@ -6,43 +6,81 @@
     <title>Partner with allergyZEN</title>
     <style>
         :root { --primary: #8e44ad; --secondary: #27ae60; --dark: #2c3e50; --light: #f4f9f4; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: var(--dark); padding: 20px; }
-        .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); }
-        h2 { color: var(--primary); margin-top: 0; }
-        label { display: block; margin: 15px 0 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .submit-btn { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 25px; font-size: 1.1rem; }
-        .back-link { display: block; text-align: center; margin-top: 20px; color: var(--dark); text-decoration: none; font-size: 0.9rem; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: var(--dark); padding: 20px; line-height: 1.6; }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        /* Header/Value Prop Section */
+        .value-prop { text-align: center; padding: 40px 20px; }
+        .value-prop h1 { color: var(--primary); margin-bottom: 10px; }
+        .features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px; text-align: center; }
+        .feat-card { background: #efe5f5; padding: 15px; border-radius: 12px; font-size: 0.85rem; border: 1px solid #dcd0e5; }
+        .feat-card strong { color: var(--primary); display: block; margin-bottom: 5px; }
+
+        /* Form Styling */
+        .form-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); }
+        h2 { color: var(--primary); margin-top: 0; text-align: center; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; font-size: 0.9rem; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        
+        .submit-btn { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 25px; font-size: 1.1rem; transition: 0.3s; }
+        .submit-btn:hover { background: #732d91; transform: scale(1.02); }
+        
+        .back-link { display: block; text-align: center; margin-top: 20px; color: var(--dark); text-decoration: none; font-size: 0.9rem; font-weight: bold; }
+
+        @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <h2>Business Registration</h2>
-    <p>Join our wellness network and provide transparent allergen data to your customers.</p>
-    
-    <form>
-        <label>Business Name</label>
-        <input type="text" placeholder="e.g. Zen Pizza Co." required>
+<div class="container">
+    <div class="value-prop">
+        <h1>allergyZEN <span style="color:var(--secondary)">Secure</span></h1>
+        <p>The world's most comprehensive allergen safety network.</p>
+    </div>
 
-        <label>Contact Email</label>
-        <input type="email" placeholder="owner@business.com" required>
+    <div class="features">
+        <div class="feat-card">
+            <strong>Reduce Liability</strong>
+            Digital accuracy for 1,750+ rare triggers.
+        </div>
+        <div class="feat-card">
+            <strong>Build Loyalty</strong>
+            Become a safe haven for the allergy community.
+        </div>
+        <div class="feat-card">
+            <strong>Smart Scanning</strong>
+            Eliminate human error with instant QR profiles.
+        </div>
+    </div>
 
-        <label>Establishment Type</label>
-        <select>
-            <option>Restaurant</option>
-            <option>Cafe / Bakery</option>
-            <option>Supermarket</option>
-            <option>Catering</option>
-        </select>
+    <div class="form-container">
+        <h2>Business Registration</h2>
+        <p style="text-align: center; color: #666; font-size: 0.9rem;">Join the waitlist for our 2026 Partner Launch.</p>
+        
+        <form action="mailto:your-email@example.com" method="post" enctype="text/plain">
+            <label>Business Name</label>
+            <input type="text" name="Business_Name" placeholder="e.g. Zen Pizza Co." required>
 
-        <label>How many menu items do you have?</label>
-        <input type="number" placeholder="10">
+            <label>Contact Email</label>
+            <input type="email" name="Email" placeholder="owner@business.com" required>
 
-        <button type="button" class="submit-btn" onclick="alert('Thank you! Our team will contact you shortly.')">Register Interest</button>
-    </form>
+            <label>Establishment Type</label>
+            <select name="Type">
+                <option>Restaurant</option>
+                <option>Cafe / Bakery</option>
+                <option>Supermarket</option>
+                <option>Catering / Events</option>
+            </select>
 
-    <a href="index.html" class="back-link">← Back to Home</a>
+            <label>Estimated Monthly Customers</label>
+            <input type="number" name="Volume" placeholder="e.g. 500">
+
+            <button type="submit" class="submit-btn">Apply for Partnership</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Return to Home</a>
+    </div>
 </div>
 
 </body>
