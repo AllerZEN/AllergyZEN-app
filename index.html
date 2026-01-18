@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>allergyZEN | Wellness Assistant</title>
     <style>
-        :root { --primary: #8e44ad; --secondary: #27ae60; --dark: #2c3e50; --light: #f4f9f4; }
+        :root { --primary: #8e44ad; --secondary: #27ae60; --dark: #2c3e50; --light: #f4f9f4; --danger: #e74c3c; --warning: #f39c12; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; color: var(--dark); background: var(--light); line-height: 1.6; }
         header { background: white; color: var(--dark); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--primary); }
         .logo-img { max-width: 200px; height: auto; margin-bottom: 10px; }
@@ -17,7 +17,7 @@
         /* Search Section Style */
         .search-card { padding: 25px; border-radius: 15px; background: white; border-top: 5px solid var(--secondary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .search-input { width: 100%; padding: 15px; border: 2px solid #efe5f5; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box; }
-        #searchResults { max-height: 300px; overflow-y: auto; margin-top: 10px; border-radius: 10px; background: #fafafa; }
+        #searchResults { max-height: 400px; overflow-y: auto; margin-top: 10px; border-radius: 10px; background: #fafafa; }
         
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { padding: 25px; border-radius: 15px; background: white; border-top: 5px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -26,10 +26,12 @@
         .btn-profile { background: var(--primary); font-size: 0.9rem; }
         .btn-dark { background: var(--primary); }
         
-        .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .severity-badge { color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .action-buttons { display: flex; gap: 5px; }
+        .action-buttons button { border: none; border-radius: 6px; padding: 8px 12px; color: white; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: opacity 0.2s; }
+        .action-buttons button:hover { opacity: 0.8; }
+        
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .result-item { flex-direction: column; align-items: flex-start; } .action-buttons { width: 100%; justify-content: space-between; } }
     </style>
 </head>
 <body>
@@ -41,8 +43,8 @@
 
 <div class="container">
     <div class="profile-bar">
-        <span><strong>My Status:</strong> 1,750 items monitored</span>
-        <a href="profile.html" class="btn btn-profile">Edit Profile</a>
+        <span id="profileStatus"><strong>My Status:</strong> 0 items saved</span>
+        <a href="profile.html" class="btn btn-profile">View My Profile</a>
     </div>
 
     <div class="search-card">
@@ -67,24 +69,24 @@
 </div>
 
 <script>
-    let allergenDatabase = [];
+    let masterAllergenList = [];
 
-        let masterAllergenList = [];
+    // Initialize UI on load
+    updateStatusCount();
 
-    // 1. Fetch the data
+    // 1. Fetch the data from your 1,750 item JSON
     fetch('./allergens.json')
         .then(response => response.json())
         .then(data => {
-            masterAllergenList = data; // Now contains your objects with names and categories
+            masterAllergenList = data;
             console.log("allergyZEN Engine Live: " + masterAllergenList.length + " items loaded.");
         })
         .catch(err => {
             console.error("Database error:", err);
-            // Fallback alert to help us troubleshoot
-            document.getElementById('searchResults').innerHTML = 'Error loading database. Check file formatting.';
+            document.getElementById('searchResults').innerHTML = '<div style="padding:20px; color:red;">Error loading database. Please refresh.</div>';
         });
 
-    // 2. Updated Search Logic for Objects
+    // 2. Search Logic
     document.getElementById('mainSearch').addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         const display = document.getElementById('searchResults');
@@ -92,7 +94,6 @@
 
         if (query.length < 2) return;
 
-        // Search through the .name property of each object
         const matches = masterAllergenList.filter(item => 
             item.name.toLowerCase().includes(query)
         );
@@ -105,35 +106,46 @@
         matches.slice(0, 15).forEach(item => {
             const row = document.createElement('div');
             row.className = 'result-item';
-            row.style = "display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee;";
             
             row.innerHTML = `
                 <div>
                     <div style="font-weight: bold; color: #2c3e50;">${item.name}</div>
                     <div style="font-size: 0.75rem; color: #7f8c8d;">Category: ${item.category}</div>
                 </div>
-                <div class="actions">
-                    <button onclick="saveToProfile('${item.name.replace(/'/g, "\\'")}', 'High')" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;">High</button>
-                    <button onclick="saveToProfile('${item.name.replace(/'/g, "\\'")}', 'Moderate')" style="background:#f39c12; color:white; border:none; border-radius:4px; padding:6px 10px; margin-left:5px; cursor:pointer;">Mod</button>
+                <div class="action-buttons">
+                    <button onclick="saveToProfile('${item.name.replace(/'/g, "\\'")}', 'High')" style="background:var(--danger);">High</button>
+                    <button onclick="saveToProfile('${item.name.replace(/'/g, "\\'")}', 'Moderate')" style="background:var(--warning);">Mod</button>
+                    <button onclick="saveToProfile('${item.name.replace(/'/g, "\\'")}', 'Safe')" style="background:var(--secondary);">Safe</button>
                 </div>
             `;
             display.appendChild(row);
         });
     });
 
-    // 3. Save to Profile
+    // 3. Save to Profile Logic
     function saveToProfile(name, level) {
         let userProfile = JSON.parse(localStorage.getItem('myAllergies')) || [];
-        if (!userProfile.some(item => item.name === name)) {
-            userProfile.push({ name: name, level: level, date: new Date().toLocaleDateString() });
-            localStorage.setItem('myAllergies', JSON.stringify(userProfile));
-            alert(name + " saved as " + level);
-        } else {
-            alert(name + " is already in your profile.");
-        }
+        
+        // Remove existing entry if they are changing the reactivity level
+        userProfile = userProfile.filter(item => item.name !== name);
+        
+        userProfile.push({ 
+            name: name, 
+            level: level, 
+            date: new Date().toLocaleDateString() 
+        });
+        
+        localStorage.setItem('myAllergies', JSON.stringify(userProfile));
+        updateStatusCount();
+        alert(`${name} saved to your profile as ${level}!`);
+    }
+
+    // 4. Update the "My Status" counter at the top
+    function updateStatusCount() {
+        const userProfile = JSON.parse(localStorage.getItem('myAllergies')) || [];
+        const count = userProfile.length;
+        document.getElementById('profileStatus').innerHTML = `<strong>My Status:</strong> ${count} personal risks tracked`;
     }
 </script>
 </body>
 </html>
-  
-   
