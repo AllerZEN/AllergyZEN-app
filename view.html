@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Scan | allergyZEN</title>
+    <style>
+        :root { --primary: #8e44ad; --secondary: #27ae60; --red: #e74c3c; --orange: #f39c12; --green: #27ae60; --light: #f4f9f4; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 15px; margin: 0; }
+        .header { background: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); margin-bottom: 20px; }
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        .risk-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .badge { padding: 5px 12px; border-radius: 50px; color: white; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="header"><h2 style="margin:0; color: var(--primary);">allergyZEN <span style="color: var(--secondary);">Secure Scan</span></h2></div>
+    <div class="card">
+        <h3 style="margin-top: 0; font-size: 1rem; color: #444;">Customer Safety Risks:</h3>
+        <div id="riskList"><p style="text-align:center; color:#999;">Waiting for scan data...</p></div>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const encodedData = params.get('data');
+        if (encodedData) {
+            try {
+                const profile = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+                const list = document.getElementById('riskList');
+                list.innerHTML = ''; 
+                profile.sort((a, b) => (a.level === 'High' ? -1 : 1));
+                profile.forEach(item => {
+                    let color = item.level === 'High' ? 'var(--red)' : (item.level === 'Moderate' ? 'var(--orange)' : 'var(--green)');
+                    list.innerHTML += `<div class="risk-row"><strong>${item.name}</strong><span class="badge" style="background:${color}">${item.level}</span></div>`;
+                });
+            } catch (e) { document.getElementById('riskList').innerHTML = 'Scan Error.'; }
+        }
+    </script>
+</body>
+</html>
