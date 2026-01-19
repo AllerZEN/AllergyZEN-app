@@ -4,169 +4,43 @@
     <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>allergyZEN | Wellness Assistant</title>
-
+    <title>allerZEN | App Setup</title>
     <style>
-        :root { --primary: #8e44ad; --secondary: #27ae60; --dark: #2c3e50; --light: #f4f9f4; --danger: #e74c3c; --warning: #f39c12; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; color: var(--dark); background: var(--light); line-height: 1.6; }
-        
-        /* New Hero & Install Section [cite: 2026-01-17] */
-        header { background: white; padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--primary); }
-        .logo-img { max-width: 180px; height: auto; margin-bottom: 10px; }
-        
-        .install-guide { background: #efe5f5; padding: 15px; border-radius: 12px; font-size: 0.9rem; margin: 15px auto; max-width: 350px; color: var(--primary); border: 1px dashed var(--primary); }
-        
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-        
-        /* 3-Hour Shield Status Bar [cite: 2026-01-18] */
-        #safety-container { background: white; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .protected { border-left: 10px solid var(--secondary) !important; color: var(--secondary); }
-        
-        .profile-bar { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; }
-        
-        .search-card { padding: 25px; border-radius: 15px; background: white; border-top: 5px solid var(--secondary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .search-input { width: 100%; padding: 15px; border: 2px solid #efe5f5; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box; }
-        
-        #searchResults { max-height: 400px; overflow-y: auto; margin-top: 10px; border-radius: 10px; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { padding: 25px; border-radius: 15px; background: white; border-top: 5px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        
-        .btn { display: block; background: var(--secondary); color: white; padding: 12px 20px; text-decoration: none; border-radius: 50px; font-weight: bold; text-align: center; border: none; cursor: pointer; margin-top: 10px; }
-        .btn-profile { background: var(--primary); font-size: 0.9rem; }
-        .btn-main { background: var(--primary); padding: 15px 30px; font-size: 1.1rem; margin-bottom: 20px; }
-
-        .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .action-buttons { display: flex; gap: 5px; }
-        .action-buttons button { border: none; border-radius: 6px; padding: 8px 12px; color: white; cursor: pointer; font-size: 0.75rem; }
-
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        :root { --primary: #8e44ad; --dark: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdfbff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        .logo { width: 120px; margin-bottom: 20px; }
+        .container { width: 85%; max-width: 400px; padding: 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .btn { display: block; width: 100%; padding: 18px; margin: 10px 0; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-decoration: none; border: none; cursor: pointer; box-sizing: border-box; }
+        .btn-install { background: var(--primary); color: white; }
+        .btn-setup { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        #guide { display: none; font-size: 0.9rem; color: #555; background: #f3e5f5; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px dashed var(--primary); }
     </style>
 </head>
 <body>
 
-<header>
-    <img src="https://allergyzen.app/logo.png" alt="allergyZEN Logo" class="logo-img">
-    <p style="margin:0; font-weight:bold; color:var(--primary);">Wellness Assistant</p>
-    
-    <a href="profile.html" class="btn btn-main" style="display:inline-block;">Start My Safety Profile</a>
-
-    <div class="install-guide">
-        <strong>To Download:</strong> Tap <strong>Share</strong> (or ⋮) and select <strong>'Add to Home Screen'</strong>
-    </div>
-</header>
-
 <div class="container">
-    <div id="safety-container">
-        <span id="status-text">SHIELD INACTIVE: Scan to Protect</span>
-        <div id="timer-countdown" style="font-size: 0.8em; margin-top: 5px; color: #666;"></div>
+    <img src="https://allergyzen.app/logo.png" alt="allergyZEN" class="logo">
+    
+    <h2>Welcome to allerZEN</h2>
+    <p>Setup your safety shield in two steps:</p>
+
+    <button class="btn btn-install" onclick="showGuide()">1. ADD TO HOME SCREEN</button>
+    <div id="guide">
+        Tap the <strong>Share</strong> icon (iPhone) or <strong>⋮</strong> (Android) and select <strong>'Add to Home Screen'</strong> to install the full app.
     </div>
 
-    <div class="profile-bar">
-        <span id="profileStatus"><strong>My Status:</strong> 0 risks tracked</span>
-        <a href="profile.html" class="btn btn-profile">Edit My Profile</a>
-    </div>
+    <a href="profile.html" class="btn btn-setup">2. SETUP MY PROFILE</a>
 
-    <div class="search-card">
-        <h2 style="margin-top:0;">Quick Allergen Search</h2>
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Search 1,750+ triggers instantly</p>
-        <input type="text" id="mainSearch" class="search-input" placeholder="Search foods, medicines, or woods...">
-        <div id="searchResults"></div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>Safety Scanner</h2>
-            <p>Check ingredients against your 3-hour shield.</p>
-            <a href="scanner.html" class="btn">Launch Scanner</a>
-        </div>
-        <div class="card">
-            <h2>Business Portal</h2>
-            <p>For restaurants & venues to secure their premises.</p>
-            <a href="partner.html" class="btn" style="background:var(--dark);">Partner Sign-up</a>
-        </div>
-    </div>
+    <p style="margin-top: 30px; font-size: 0.8rem; color: #999;">
+        Business? <a href="partner.html" style="color:var(--primary);">Partner Portal</a>
+    </p>
 </div>
 
 <script>
-    let masterAllergenList = [];
-
-    // Initialize UI and Timer
-    window.onload = () => {
-        updateStatusCount();
-        checkSafetyTimer(); // Step 3 logic
-    };
-
-    // Load Database
-    fetch('./allergens.json')
-        .then(res => res.json())
-        .then(data => { masterAllergenList = data; })
-        .catch(err => console.error("Database error", err));
-
-    // Search Logic
-    document.getElementById('mainSearch').addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        const display = document.getElementById('searchResults');
-        display.innerHTML = '';
-        if (query.length < 2) return;
-
-        const matches = masterAllergenList.filter(item => item.name.toLowerCase().includes(query));
-        matches.slice(0, 10).forEach(item => {
-            const row = document.createElement('div');
-            row.className = 'result-item';
-            row.innerHTML = `
-                <div><strong>${item.name}</strong><br><small>${item.category}</small></div>
-                <div class="action-buttons">
-                    <button onclick="saveToProfile('${item.name}', 'High')" style="background:var(--danger);">Block</button>
-                    <button onclick="saveToProfile('${item.name}', 'Safe')" style="background:var(--secondary);">Safe</button>
-                </div>`;
-            display.appendChild(row);
-        });
-    });
-
-    function saveToProfile(name, level) {
-        let profile = JSON.parse(localStorage.getItem('myAllergies')) || [];
-        profile = profile.filter(i => i.name !== name);
-        profile.push({ name, level, date: new Date().toLocaleDateString() });
-        localStorage.setItem('myAllergies', JSON.stringify(profile));
-        updateStatusCount();
-    }
-
-    function updateStatusCount() {
-        const count = (JSON.parse(localStorage.getItem('myAllergies')) || []).length;
-        document.getElementById('profileStatus').innerHTML = `<strong>My Status:</strong> ${count} risks tracked`;
-    }
-
-    // STEP 3: Variable Timer Logic [cite: 2026-01-18]
-    function checkSafetyTimer() {
-        const shieldExpiry = localStorage.getItem('shieldExpiry');
-        const statusBox = document.getElementById('safety-container');
-        const statusText = document.getElementById('status-text');
-
-        if (shieldExpiry && new Date().getTime() < shieldExpiry) {
-            statusBox.classList.add('protected');
-            statusText.innerText = "FAMILY SHIELD: PROTECTED";
-            startCountdown(shieldExpiry);
-        } else {
-            statusBox.classList.remove('protected');
-            statusText.innerText = "SHIELD INACTIVE: Scan to Protect";
-        }
-    }
-
-    function startCountdown(expiry) {
-        const timerDisplay = document.getElementById('timer-countdown');
-        const interval = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = expiry - now;
-            const hours = Math.floor(distance / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            timerDisplay.innerText = `Protection expires in: ${hours}h ${minutes}m`;
-            if (distance < 0) {
-                clearInterval(interval);
-                checkSafetyTimer();
-            }
-        }, 1000);
+    function showGuide() {
+        document.getElementById('guide').style.display = 'block';
     }
 </script>
+
 </body>
 </html>
