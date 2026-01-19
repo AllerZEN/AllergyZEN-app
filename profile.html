@@ -5,66 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My allerZEN Profile</title>
     <style>
-        :root { --primary: #8e44ad; --bg: #fdfbff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo-small { width: 80px; }
+        :root { --primary: #8e44ad; --bg: #fdfbff; --pro: #ffd700; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; padding-bottom: 100px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo-small { width: 60px; margin-bottom: 10px; }
+        
+        /* Search Bar */
+        #searchBox { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 20px; box-sizing: border-box; font-size: 1rem; }
+
         .category { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .category-title { font-weight: bold; color: var(--primary); display: flex; justify-content: space-between; cursor: pointer; }
-        .allergen-list { display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        .allergen-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.9rem; }
-        input[type="checkbox"] { margin-right: 15px; accent-color: var(--primary); width: 20px; height: 20px; }
-        .save-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; position: sticky; bottom: 20px; }
-        .pro-badge { background: #ffd700; color: #000; font-size: 0.7rem; padding: 2px 6px; border-radius: 5px; margin-left: 10px; }
+        .category-title { font-weight: bold; color: var(--primary); display: flex; justify-content: space-between; cursor: pointer; align-items: center; }
+        .allergen-list { display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; max-height: 300px; overflow-y: auto; }
+        .allergen-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.95rem; color: #444; }
+        
+        input[type="checkbox"] { margin-right: 15px; accent-color: var(--primary); width: 22px; height: 22px; cursor: pointer; }
+        .pro-badge { background: var(--pro); color: #000; font-size: 0.65rem; padding: 3px 8px; border-radius: 5px; font-weight: bold; margin-left: 10px; text-transform: uppercase; }
+        
+        .footer-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; }
+        .save-btn { background: var(--primary); color: white; border: none; width: 90%; max-width: 400px; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <img src="logo.png" alt="allerZEN" class="logo-small">
-    <h2>My Safety Profile</h2>
-    <p>Select your triggers to activate your shield.</p>
+    <h2>Safety Profile</h2>
+    <p style="font-size: 0.9rem; color: #666;">Select your triggers to activate your shield.</p>
 </div>
 
-<div class="category">
-    <div class="category-title" onclick="toggleCat('meds')">💊 Medicinal Excipients <span class="pro-badge">ProZEN</span> <span>▼</span></div>
-    <div id="meds" class="allergen-list">
-        <div class="allergen-item"><input type="checkbox"> Croscarmellose Sodium</div>
-        <div class="allergen-item"><input type="checkbox"> Magnesium Stearate</div>
-        <div class="allergen-item"><input type="checkbox"> Lactose Monohydrate</div>
+<input type="text" id="searchBox" placeholder="🔍 Search 1,750+ triggers..." onkeyup="filterAllergens()">
+
+<div id="categoryContainer">
     </div>
-</div>
 
-<div class="category">
-    <div class="category-title" onclick="toggleCat('fibers')">🧤 Luxury Fibers <span class="pro-badge">ProZEN</span> <span>▼</span></div>
-    <div id="fibers" class="allergen-list">
-        <div class="allergen-item"><input type="checkbox"> Vicuna</div>
-        <div class="allergen-item"><input type="checkbox"> Qiviut</div>
-        <div class="allergen-item"><input type="checkbox"> Cashmere</div>
-    </div>
+<div class="footer-nav">
+    <button class="save-btn" onclick="saveProfile()">ACTIVATE 3-HOUR SHIELD</button>
 </div>
-
-<div class="category">
-    <div class="category-title" onclick="toggleCat('ferment')">🥗 Fermented Basics <span>▼</span></div>
-    <div id="ferment" class="allergen-list">
-        <div class="allergen-item"><input type="checkbox"> Kimchi (Bacteria Triggers)</div>
-        <div class="allergen-item"><input type="checkbox"> Natto</div>
-        <div class="allergen-item"><input type="checkbox"> Kombucha</div>
-    </div>
-</div>
-
-<button class="save-btn" onclick="saveProfile()">SAVE MY SHIELD</button>
 
 <script>
+    // THE BULK DATABASE (Sample of the 1,750+ Triggers)
+    const triggerDatabase = {
+        "💊 Medicinal Excipients (Pro)": ["Croscarmellose Sodium", "Magnesium Stearate", "Lactose Monohydrate", "Microcrystalline Cellulose", "Povidone", "Silicon Dioxide"],
+        "🧪 Lab Chemicals (Pro)": ["SDS (Sodium Dodecyl Sulfate)", "EDTA", "DMSO", "Formaldehyde", "Hydroquinone", "Metol"],
+        "🌲 Terpene Profile (Pro)": ["Pinene", "Myrcene", "Limonene", "Linalool", "Beta-Caryophyllene", "Humulene", "Terpinolene"],
+        "🥗 Fermented Basics": ["Kimchi", "Natto", "Kombucha", "Sauerkraut", "Miso", "Tempeh", "Kefir"],
+        "🧤 Luxury Fibers (Pro)": ["Vicuna", "Qiviut", "Cashmere", "Angora", "Shahtoosh"],
+        "🍄 Modern Materials": ["Mushroom Leather", "PLA (Sustainable Textile)", "Recycled Ocean Plastic", "Apple Skin Leather"]
+    };
+
+    const container = document.getElementById('categoryContainer');
+
+    function initProfile() {
+        for (const [catName, items] of Object.entries(triggerDatabase)) {
+            const isPro = catName.includes("(Pro)");
+            const catId = catName.replace(/\s+/g, '-').toLowerCase();
+            
+            let html = `
+                <div class="category" data-category="${catName.toLowerCase()}">
+                    <div class="category-title" onclick="toggleCat('${catId}')">
+                        <span>${catName.replace("(Pro)", "")} ${isPro ? '<span class="pro-badge">ProZEN</span>' : ''}</span>
+                        <span id="icon-${catId}">▼</span>
+                    </div>
+                    <div id="${catId}" class="allergen-list">
+            `;
+
+            items.forEach(item => {
+                html += `
+                    <div class="allergen-item" data-name="${item.toLowerCase()}">
+                        <input type="checkbox" id="${item}">
+                        <label for="${item}">${item}</label>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            container.innerHTML += html;
+        }
+    }
+
     function toggleCat(id) {
         const list = document.getElementById(id);
-        list.style.display = list.style.display === 'block' ? 'none' : 'block';
+        const icon = document.getElementById('icon-' + id);
+        const isOpen = list.style.display === 'block';
+        list.style.display = isOpen ? 'none' : 'block';
+        icon.innerText = isOpen ? '▼' : '▲';
+    }
+
+    function filterAllergens() {
+        const input = document.getElementById('searchBox').value.toLowerCase();
+        const items = document.querySelectorAll('.allergen-item');
+        
+        items.forEach(item => {
+            const text = item.getAttribute('data-name');
+            item.style.display = text.includes(input) ? 'flex' : 'none';
+        });
+
+        // Auto-open lists if searching
+        const lists = document.querySelectorAll('.allergen-list');
+        lists.forEach(list => {
+            if (input.length > 1) {
+                list.style.display = 'block';
+            }
+        });
     }
 
     function saveProfile() {
-        alert("Profile Saved! Your 3-hour Safety Shield is now active.");
+        alert("Success! Your profile is updated. Your details will be held for 3 hours once you scan a partner QR code.");
         window.location.href = "index.html";
     }
+
+    window.onload = initProfile;
 </script>
 
 </body>
