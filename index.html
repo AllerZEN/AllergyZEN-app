@@ -4,41 +4,53 @@
     <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>allerZEN | App Setup</title>
+    <title>allerZEN | Safety Shield</title>
     <style>
-        :root { --primary: #8e44ad; --dark: #2c3e50; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fdfbff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-        .logo { width: 120px; margin-bottom: 20px; }
-        .container { width: 85%; max-width: 400px; padding: 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .btn { display: block; width: 100%; padding: 18px; margin: 10px 0; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-decoration: none; border: none; cursor: pointer; box-sizing: border-box; }
-        .btn-install { background: var(--primary); color: white; }
-        .btn-setup { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
-        #guide { display: none; font-size: 0.9rem; color: #555; background: #f3e5f5; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px dashed var(--primary); }
+        :root { --primary: #8e44ad; --light: #fdfbff; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 400px; background: white; padding: 40px 20px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; }
+        .logo { width: 140px; height: auto; margin-bottom: 20px; }
+        .web-app-tag { font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; font-weight: bold; }
+        h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
+        .sub-text { color: #666; margin-bottom: 30px; font-size: 0.95rem; }
+        
+        .btn { display: block; width: 100%; padding: 20px; margin: 12px 0; border-radius: 15px; font-size: 1.1rem; font-weight: bold; text-decoration: none; cursor: pointer; border: none; box-sizing: border-box; transition: 0.3s; }
+        .btn-purple { background: var(--primary); color: white; }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+
+        #guide { display: none; background: #f3e5f5; border: 2px dashed var(--primary); padding: 20px; border-radius: 15px; font-size: 0.95rem; color: #4a148c; margin: 15px 0; text-align: left; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="https://allergyzen.app/logo.png" alt="allergyZEN" class="logo">
+    <span class="web-app-tag">Official Web App</span>
     
-    <h2>Welcome to allerZEN</h2>
-    <p>Setup your safety shield in two steps:</p>
+    <img src="./logo.png" alt="allergyZEN" class="logo">
+    
+    <h1>Welcome to allerZEN</h1>
+    <p class="sub-text">Setup your safety shield in two steps:</p>
 
-    <button class="btn btn-install" onclick="showGuide()">1. ADD TO HOME SCREEN</button>
+    <button class="btn btn-purple" onclick="showInstructions()">1. ADD TO HOME SCREEN</button>
+    
     <div id="guide">
-        Tap the <strong>Share</strong> icon (iPhone) or <strong>⋮</strong> (Android) and select <strong>'Add to Home Screen'</strong> to install the full app.
+        <strong>Install Instructions:</strong><br><br>
+        1. Tap the <strong>three dots (⋮)</strong> in your browser bar at the <strong>top right</strong>.<br><br>
+        2. <strong>Scroll down</strong> the menu and select <strong>'Add to home screen'</strong>.<br><br>
+        <em>This installs the allerZEN shield directly to your phone.</em>
     </div>
 
-    <a href="profile.html" class="btn btn-setup">2. SETUP MY PROFILE</a>
+    <a href="profile.html" class="btn btn-outline">2. SETUP MY PROFILE</a>
 
-    <p style="margin-top: 30px; font-size: 0.8rem; color: #999;">
-        Business? <a href="partner.html" style="color:var(--primary);">Partner Portal</a>
-    </p>
+    <div style="margin-top: 30px; font-size: 0.85rem;">
+        Business? <a href="partner.html" style="color:var(--primary); font-weight:bold; text-decoration:none;">Partner Portal</a>
+    </div>
 </div>
 
 <script>
-    function showGuide() {
-        document.getElementById('guide').style.display = 'block';
+    function showInstructions() {
+        const box = document.getElementById('guide');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
     }
 </script>
 
