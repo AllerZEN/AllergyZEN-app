@@ -18,7 +18,8 @@
         .btn-purple { background: var(--primary); color: white; }
         .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
 
-        #guide { display: none; background: #f3e5f5; border: 2px dashed var(--primary); padding: 20px; border-radius: 15px; font-size: 0.95rem; color: #4a148c; margin: 15px 0; text-align: left; line-height: 1.5; }
+        #guide { display: none; background: #fdfbff; border: 2px solid var(--primary); padding: 20px; border-radius: 20px; text-align: left; margin: 15px 0; }
+        .help-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--primary); background: #f3e5f5; font-size: 0.8rem; cursor: pointer; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -31,13 +32,32 @@
     <h1>Welcome to allerZEN</h1>
     <p class="sub-text">Setup your safety shield in two steps:</p>
 
-    <button class="btn btn-purple" onclick="showInstructions()">1. ADD TO HOME SCREEN</button>
+    <button class="btn btn-purple" onclick="toggleMainGuide()">1. ADD TO HOME SCREEN</button>
     
     <div id="guide">
-        <strong>Install Instructions:</strong><br><br>
-        1. Tap the <strong>three dots (⋮)</strong> in your browser bar at the <strong>top right</strong>.<br><br>
-        2. <strong>Scroll down</strong> the menu and select <strong>'Add to home screen'</strong>.<br><br>
-        <em>This installs the allerZEN shield directly to your phone.</em>
+        <strong style="color: var(--primary);">How to Install:</strong>
+        <ol style="padding-left: 20px; color: #444; font-size: 0.9rem; line-height: 1.6;">
+            <li>Tap the <strong>three dots (⋮)</strong> at the top right.</li>
+            <li>Select <strong>'Add to home screen'</strong>.</li>
+        </ol>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="help-btn" onclick="showHelp('gif')">🎬 Watch GIF</button>
+            <button class="help-btn" onclick="showHelp('graphic')">🖼️ Show Steps</button>
+        </div>
+
+        <div id="help-gif" style="display:none; margin-top: 15px; text-align: center;">
+            <img src="install-guide.gif" alt="Installation GIF" style="width: 100%; border-radius: 10px;">
+            <p style="font-size: 0.7rem; color: #666;">(10-second visual walkthrough)</p>
+        </div>
+
+        <div id="help-graphic" style="display:none; margin-top: 15px;">
+            <div style="background: #fff; padding: 12px; border: 1px dashed var(--primary); border-radius: 10px; font-size: 0.85rem; color: #444;">
+                <strong>1. Menu:</strong> Tap ⋮ in browser<br>
+                <strong>2. Add:</strong> Select 'Add to home screen'<br>
+                <strong>3. Fix:</strong> Enable 'Add new apps' in phone settings if icon is hidden
+            </div>
+        </div>
     </div>
 
     <a href="profile.html" class="btn btn-outline">2. SETUP MY PROFILE</a>
@@ -48,9 +68,14 @@
 </div>
 
 <script>
-    function showInstructions() {
+    function toggleMainGuide() {
         const box = document.getElementById('guide');
         box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function showHelp(type) {
+        document.getElementById('help-gif').style.display = type === 'gif' ? 'block' : 'none';
+        document.getElementById('help-graphic').style.display = type === 'graphic' ? 'block' : 'none';
     }
 </script>
 
