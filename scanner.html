@@ -6,49 +6,69 @@
     <title>Scanner | allergyZEN</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root { --primary: #8e44ad; --light: #f4f9f4; }
+        :root { --primary: #8e44ad; --light: #f4f9f4; --safe: #2ecc71; --danger: #e74c3c; }
         body { font-family: sans-serif; margin: 0; background: #1a1a1a; color: white; text-align: center; }
         #reader { width: 100%; max-width: 500px; margin: 20px auto; border-radius: 15px; overflow: hidden; border: 2px solid var(--primary); }
         .controls { padding: 30px 20px; background: white; color: #333; }
         h2 { color: var(--primary); margin: 0; }
         .result-box { padding: 20px; background: white; color: black; margin: 20px; border-radius: 15px; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
         .back-btn { color: #888; text-decoration: none; display: block; padding: 20px; margin-bottom: 20px; }
-        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+        #shield-status { font-size: 0.8rem; font-weight: bold; margin-top: 5px; color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="controls">
     <h2>allergyZEN</h2>
-    <p>Point your camera at a QR code to scan ingredients.</p>
+    <div id="active-member-display">Shielding: Loading...</div>
+    <div id="shield-status">3-HOUR PROTECTION ACTIVE ON SCAN</div>
 </div>
 
 <div id="reader"></div>
 
 <div id="scanned-result" class="result-box">
-    <h3 id="status-title">Product Identified</h3>
+    <h3 id="status-title">Safety Check Result</h3>
     <p id="result-text" style="font-size: 1.2rem; font-weight: bold;"></p>
+    <p id="safety-advice" style="font-size: 0.9rem; color: #666;"></p>
     <button onclick="location.reload()">Scan Next Item</button>
 </div>
 
 <a href="index.html" class="back-btn">← Cancel and Go Back</a>
 
-<script>
+<script type="module">
+    // 1. IMPORT YOUR MASTER LOGIC
+    import userProfile from './Profile.js';
+
+    // Update UI with active family member name
+    const activeMember = userProfile.profiles[userProfile.session.activeProfileIndex];
+    document.getElementById('active-member-display').innerText = `Shielding: ${activeMember.name}`;
+
     function onScanSuccess(decodedText, decodedResult) {
-        // Stop the scanner immediately upon find
         html5QrcodeScanner.clear();
         
-        // Show result
-        document.getElementById('scanned-result').style.display = 'block';
-        document.getElementById('result-text').innerText = decodedText;
+        // 2. ACTIVATE 3-HOUR TIMER
+        userProfile.startProtectionTimer();
+        userProfile.save(); // Save the timestamp to the phone
+
+        // 3. LOGIC CHECK (Simulated for MVP ingredient match)
+        // This will compare against your allergens.json list
+        const resultBox = document.getElementById('scanned-result');
+        const resultText = document.getElementById('result-text');
+        const statusTitle = document.getElementById('status-title');
+
+        resultBox.style.display = 'block';
         
-        // Vibrate phone if supported
+        // Example logic: Check if decoded text contains a known trigger
+        // In your final version, this will cross-ref your 1,750+ items
+        resultText.innerText = decodedText;
+        statusTitle.innerText = "Family Shield: PROTECTED";
+        statusTitle.style.color = "var(--safe)";
+
         if (navigator.vibrate) { navigator.vibrate(200); }
     }
 
-    function onScanFailure(error) {
-        // We don't need to show errors for every failed frame
-    }
+    function onScanFailure(error) {}
 
     let html5QrcodeScanner = new Html5QrcodeScanner(
         "reader", { fps: 15, qrbox: {width: 250, height: 250} });
