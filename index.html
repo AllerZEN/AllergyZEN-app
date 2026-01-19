@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
+    
+    <link rel="icon" type="image/jpeg" href="Icon.jpg">
+    <link rel="apple-touch-icon" href="Icon.jpg">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>allerZEN | Safety Shield</title>
@@ -19,7 +23,7 @@
         .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
 
         #guide { display: none; background: #fdfbff; border: 2px solid var(--primary); padding: 20px; border-radius: 20px; text-align: left; margin: 15px 0; }
-        .help-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--primary); background: #f3e5f5; font-size: 0.8rem; cursor: pointer; font-weight: bold; color: var(--primary); }
+        .help-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--primary); background: #f3e5f5; font-size: 0.8rem; cursor: pointer; font-weight: bold; color: var(--primary); text-align: center; }
     </style>
 </head>
 <body>
@@ -27,7 +31,7 @@
 <div class="container">
     <span class="web-app-tag">Official Web App</span>
     
-    <img src="./logo.png" alt="allergyZEN" class="logo">
+    <img src="logo.png" alt="allergyZEN" class="logo">
     
     <h1>Welcome to allerZEN</h1>
     <p class="sub-text">Setup your safety shield in two steps:</p>
@@ -47,7 +51,7 @@
         </div>
 
         <div id="help-gif" style="display:none; margin-top: 15px; text-align: center;">
-            <img src="install-guide.gif" alt="Installation GIF" style="width: 100%; border-radius: 10px;">
+            <img src="install.gif" alt="Installation GIF" style="width: 100%; border-radius: 10px;">
             <p style="font-size: 0.7rem; color: #666;">(10-second visual walkthrough)</p>
         </div>
 
@@ -74,8 +78,17 @@
     }
 
     function showHelp(type) {
-        document.getElementById('help-gif').style.display = type === 'gif' ? 'block' : 'none';
-        document.getElementById('help-graphic').style.display = type === 'graphic' ? 'block' : 'none';
+        // Toggle logic: if you click the same button again, it hides
+        const gif = document.getElementById('help-gif');
+        const graphic = document.getElementById('help-graphic');
+        
+        if (type === 'gif') {
+            gif.style.display = gif.style.display === 'block' ? 'none' : 'block';
+            graphic.style.display = 'none';
+        } else {
+            graphic.style.display = graphic.style.display === 'block' ? 'none' : 'block';
+            gif.style.display = 'none';
+        }
     }
 </script>
 
