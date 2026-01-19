@@ -1,20 +1,22 @@
 {
-  "short_name": "allerZEN",
   "name": "allerZEN Wellness Assistant",
+  "short_name": "allerZEN",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8e44ad",
   "icons": [
     {
-      "src": "https://allergyzen.app/logo.png",
+      "src": "./logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://allergyzen.app/logo.png",
+      "src": "./logo.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#8e44ad",
-  "background_color": "#ffffff"
+  ]
 }
