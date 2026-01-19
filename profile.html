@@ -44,13 +44,39 @@
 
 <script>
     // THE BULK DATABASE (Sample of the 1,750+ Triggers)
-    const triggerDatabase = {
-        "💊 Medicinal Excipients (Pro)": ["Croscarmellose Sodium", "Magnesium Stearate", "Lactose Monohydrate", "Microcrystalline Cellulose", "Povidone", "Silicon Dioxide"],
-        "🧪 Lab Chemicals (Pro)": ["SDS (Sodium Dodecyl Sulfate)", "EDTA", "DMSO", "Formaldehyde", "Hydroquinone", "Metol"],
-        "🌲 Terpene Profile (Pro)": ["Pinene", "Myrcene", "Limonene", "Linalool", "Beta-Caryophyllene", "Humulene", "Terpinolene"],
-        "🥗 Fermented Basics": ["Kimchi", "Natto", "Kombucha", "Sauerkraut", "Miso", "Tempeh", "Kefir"],
-        "🧤 Luxury Fibers (Pro)": ["Vicuna", "Qiviut", "Cashmere", "Angora", "Shahtoosh"],
-        "🍄 Modern Materials": ["Mushroom Leather", "PLA (Sustainable Textile)", "Recycled Ocean Plastic", "Apple Skin Leather"]
+       const triggerDatabase = {
+        "💊 Medicinal Excipients (Pro)": [
+            "Croscarmellose Sodium", "Magnesium Stearate", "Lactose Monohydrate", 
+            "Microcrystalline Cellulose", "Povidone", "Silicon Dioxide", 
+            "Polyethylene Glycol (PEG)", "Titanium Dioxide", "Hypromellose"
+        ],
+        "🧪 Lab & Photographic Chemicals (Pro)": [
+            "SDS (Sodium Dodecyl Sulfate)", "EDTA", "DMSO", "Formaldehyde", 
+            "Hydroquinone", "Metol", "Silver Nitrate", "Potassium Dichromate",
+            "Glutaraldehyde", "Toluene", "Xylene"
+        ],
+        "🌲 Terpene Profile (Pro)": [
+            "Pinene", "Myrcene", "Limonene", "Linalool", "Beta-Caryophyllene", 
+            "Humulene", "Terpinolene", "Geraniol", "Alpha-Bisabolol"
+        ],
+        "🪵 Exotic Wood Dusts (Pro)": [
+            "Wenge", "Padauk", "Cocobolo", "Rosewood", "Ebony", 
+            "Teak", "Zebrawood", "Mahogany (African)"
+        ],
+        "🧤 Luxury Fibers & Modern Materials (Pro)": [
+            "Vicuna", "Qiviut", "Cashmere", "Angora", "Shahtoosh",
+            "Mushroom Leather", "PLA (Sustainable Textile)", "Apple Skin Leather",
+            "Recycled Ocean Plastic (Specific Polymer Triggers)"
+        ],
+        "🥗 Fermented Basics": [
+            "Kimchi (Lactic Acid Bacteria Triggers)", "Natto (Bacillus subtilis)", 
+            "Kombucha (Yeast/Bacteria colony)", "Sauerkraut", "Miso", "Tempeh", 
+            "Kefir", "Sourdough Starter"
+        ],
+        "🍎 Common Food Triggers": [
+            "Peanuts", "Tree Nuts", "Dairy", "Egg", "Soy", "Wheat", "Shellfish", 
+            "Fish", "Sesame", "Mustard", "Celery", "Sulphites"
+        ]
     };
 
     const container = document.getElementById('categoryContainer');
