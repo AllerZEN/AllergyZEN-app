@@ -3,52 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Partnership | allerZEN</title>
+    <title>Business Partner Portal | allerZEN</title>
     <style>
-        :root { --primary: #8e44ad; --dark: #2c3e50; --secondary: #27ae60; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fafafa; color: var(--dark); text-align: center; }
-        .hero { background: white; padding: 40px 20px; border-bottom: 3px solid var(--primary); }
-        .form-container { max-width: 500px; margin: 30px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: left; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: var(--primary); }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .timer-info { font-size: 0.85rem; color: #666; margin-top: 5px; font-style: italic; }
-        .btn-submit { width: 100%; background: var(--secondary); color: white; padding: 15px; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: bold; margin-top: 25px; cursor: pointer; }
+        :root { --primary: #8e44ad; --safe: #2ecc71; --alert: #e74c3c; --bg: #fdfbff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2c3e50; }
+        
+        /* Fast-Glance Dashboard */
+        .card { background: white; border-radius: 25px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 15px; border: 2px solid #eee; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .logo { width: 80px; }
+        
+        .status-badge { background: var(--safe); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        
+        /* The "No-Stall" Timer */
+        .timer-container { text-align: center; background: #2c3e50; color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+        #timer { font-size: 2rem; font-family: monospace; color: #f1c40f; }
+
+        /* High-Visibility Alerts */
+        .trigger-list { margin-top: 10px; }
+        .trigger-item { display: flex; align-items: center; background: #fffafa; border: 1px solid #ffeded; padding: 15px; border-radius: 15px; margin-bottom: 10px; }
+        .trigger-icon { font-size: 1.5rem; margin-right: 15px; }
+        .trigger-info b { font-size: 1.1rem; color: var(--alert); display: block; }
+        .trigger-info span { font-size: 0.75rem; color: #7f8c8d; text-transform: uppercase; }
+
+        .action-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        .btn-clear { background: #ecf0f1; color: #95a5a6; }
+        .btn-clear:hover { background: var(--alert); color: white; }
     </style>
 </head>
 <body>
 
-<div class="hero">
-    <img src="https://allergyzen.app/logo.png" style="width: 100px;">
-    <h1>Join the allerZEN Network</h1>
-    <p>Secure your premises and protect your customers.</p>
-</div>
+    <div class="card">
+        <div class="header">
+            <img src="logo.png" alt="allerZEN" class="logo">
+            <div class="status-badge">SHIELD ACTIVE</div>
+        </div>
+        
+        <div class="timer-container">
+            <span style="font-size: 0.7rem; letter-spacing: 1px;">AUTO-WIPE IN:</span>
+            <div id="timer">03:00:00</div>
+        </div>
 
-<div class="form-container">
-    <form action="/partner-dashboard.html">
-        <label>Business Name</label>
-        <input type="text" placeholder="e.g. The Lotus Cafe" required>
+        <h3 style="margin-bottom: 10px;">Customer Safety Profile:</h3>
+        <div class="trigger-list">
+            <div class="trigger-item">
+                <div class="trigger-icon">💊</div>
+                <div class="trigger-info">
+                    <span>Medicinal Excipient (ProZEN)</span>
+                    <b>Croscarmellose Sodium</b>
+                </div>
+            </div>
 
-        <label>Venue Type</label>
-        <select id="venueType" onchange="updateTimerText()">
-            <option value="1">Express (Cafe / Takeaway)</option>
-            <option value="3" selected>Standard (Restaurant)</option>
-            <option value="5">Event (Weddings / Conferences)</option>
-        </select>
-        <p id="timer-desc" class="timer-info">Customer scans will expire in 3 hours.</p>
+            <div class="trigger-item">
+                <div class="trigger-icon">🌲</div>
+                <div class="trigger-info">
+                    <span>Terpene Profile (ProZEN)</span>
+                    <b>Linalool</b>
+                </div>
+            </div>
+        </div>
 
-        <label>Email Address</label>
-        <input type="email" placeholder="owner@business.com" required>
+        <p style="font-size: 0.8rem; color: #7f8c8d; text-align: center; margin-top: 20px;">
+            Verify ingredients for Table #4. Data clears automatically.
+        </p>
+    </div>
 
-        <button type="submit" class="btn-submit">Activate My Business QR</button>
-    </form>
-</div>
+    <button class="action-btn btn-clear" onclick="clearData()">MANUAL WIPE & RESET</button>
 
-<script>
-    function updateTimerText() {
-        const hours = document.getElementById('venueType').value;
-        document.getElementById('timer-desc').innerText = `Customer scans will expire in ${hours} hour(s).`;
-    }
-</script>
+    <script>
+        // Simple 3-Hour Countdown
+        let seconds = 3 * 60 * 60;
+        const timerDisplay = document.getElementById('timer');
 
+        function countdown() {
+            let h = Math.floor(seconds / 3600);
+            let m = Math.floor((seconds % 3600) / 60);
+            let s = seconds % 60;
+            timerDisplay.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            if (seconds > 0) seconds--;
+            else location.reload(); // Wipes data on expire
+        }
+        setInterval(countdown, 1000);
+
+        function clearData() {
+            if(confirm("Confirm Customer Departure? All safety data will be permanently wiped.")) {
+                location.reload();
+            }
+        }
+    </script>
 </body>
 </html>
