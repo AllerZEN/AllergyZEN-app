@@ -5,56 +5,54 @@
 
 const userProfile = {
     session: {
-        lastScanTimestamp: null,
-        validityDuration: 3 * 60 * 60 * 1000, // Default 3 hours
+        lastScanTimestamp: localStorage.getItem('az_last_scan_time') || null,
+        validityDuration: 3 * 60 * 60 * 1000, // Fixed 3 hours per your requirement [cite: 2026-01-18]
         isExpired: false,
-        activeProfileIndex: 0,
-        currentBusiness: null // Track which business set the timer
+        activeProfileIndex: 0
     },
 
-    // 2. Updated Family Profiles to match your new "Shield" UI
-    profiles: [
+    profiles: JSON.parse(localStorage.getItem('allerzen_family_profiles')) || [
         {
             name: "Main User",
             type: "Adult",
-            redList: [],    // Critical/Anaphylaxis
-            amberList: [],  // Sensitivities (Terpenes, etc.)
-            blueList: [],   // Boundaries (ED Support/Sensory)
-            greenList: []   // Power Choices (Safe Alternatives)
+            redList: [],    // Critical
+            amberList: [],  // Sensitivities
+            blueList: [],   // Boundaries (ED Support)
+            greenList: []   // Power Choices
         }
     ],
 
     init: function() {
-        const savedData = localStorage.getItem('allerzen_family_profiles');
-        const setupStatus = localStorage.getItem('az_onboarding_complete');
-        
-        if (savedData) {
-            this.profiles = JSON.parse(savedData);
-        }
-        
-        // Gatekeeper: If setup is complete and we are on the LP, redirect to App
-        if (setupStatus === 'true' && window.location.pathname.includes('index.html')) {
-            window.location.href = 'view.html';
-        }
-        
         console.log("allerZEN: Shield Logic Initialized.");
         this.updateBlueDotUI();
+        this.loadSelectedChips(); // Syncs the UI with saved data
     },
 
-    // 3. Variable Expiration Support
-    // Call this when a QR is scanned: e.g., userProfile.activateShield(1) for a 1-hour cafe window
-    activateShield: function(customHours = 3) {
-        this.session.validityDuration = customHours * 60 * 60 * 1000;
-        this.session.lastScanTimestamp = Date.now();
-        this.session.isExpired = false;
+    // 1. Logic to handle the Chip selections in the UI [cite: 2026-01-18]
+    toggleChipData: function(category, value) {
+        const list = this.profiles[this.activeProfileIndex][category + 'List'];
+        const index = list.indexOf(value);
         
-        // Save the installation/onboarding flag
-        localStorage.setItem('az_onboarding_complete', 'true');
+        if (index > -1) {
+            list.splice(index, 1); // Remove if already there
+        } else {
+            list.push(value); // Add if new
+        }
         this.save();
-        this.updateBlueDotUI();
     },
 
-    // 4. Update the Blue Dot UI across the app
+    // 2. Activate Shield & Pair with Business [cite: 2026-01-18]
+    activateShield: function() {
+        this.session.lastScanTimestamp = Date.now();
+        localStorage.setItem('az_last_scan_time', this.session.lastScanTimestamp);
+        localStorage.setItem('az_onboarding_complete', 'true');
+        
+        this.save();
+        alert("Shield Activated! Your 3-hour safety window has started.");
+        window.location.href = 'view.html'; // Redirect to user dashboard
+    },
+
+    // 3. Update the Blue Dot UI [cite: 2026-01-18]
     updateBlueDotUI: function() {
         const blueDot = document.querySelector('.blue-dot');
         const status = this.checkStatus();
@@ -62,34 +60,52 @@ const userProfile = {
         if (blueDot) {
             if (status === "PROTECTED") {
                 blueDot.classList.add('pulse');
-                blueDot.style.backgroundColor = '#007bff'; // Active Blue
+                blueDot.style.backgroundColor = '#007bff';
             } else {
                 blueDot.classList.remove('pulse');
-                blueDot.style.backgroundColor = '#808080'; // Expired Gray
+                blueDot.style.backgroundColor = '#808080'; // Gray if expired [cite: 2026-01-18]
             }
         }
     },
 
     checkStatus: function() {
         if (!this.session.lastScanTimestamp) return "No Scan";
-        
         const now = Date.now();
         const elapsed = now - this.session.lastScanTimestamp;
 
-        if (elapsed >= this.session.validityDuration) {
-            this.session.isExpired = true;
-            return "EXPIRED";
-        }
-        return "PROTECTED";
+        return (elapsed < this.session.validityDuration) ? "PROTECTED" : "EXPIRED";
     },
 
     save: function() {
         localStorage.setItem('allerzen_family_profiles', JSON.stringify(this.profiles));
+    },
+
+    loadSelectedChips: function() {
+        // This visualizes saved selections when the page reloads
+        const current = this.profiles[this.activeProfileIndex];
+        const categories = ['red', 'amber', 'blue', 'green'];
+        
+        categories.forEach(cat => {
+            const list = current[cat + 'List'];
+            const buttons = document.querySelectorAll(`#${cat}-group button`);
+            buttons.forEach(btn => {
+                if (list.includes(btn.innerText)) {
+                    btn.classList.add('active');
+                }
+            });
+        });
     }
 };
 
-// Auto-initialize
-userProfile.init();
+// Bridging HTML to JS [cite: 2026-01-18]
+function toggleChip(btn) {
+    const category = btn.parentElement.id.split('-')[0]; // gets 'red', 'blue' etc.
+    btn.classList.toggle('active');
+    userProfile.toggleChipData(category, btn.innerText);
+}
 
-// Export for use in other files
-if (typeof module !== 'undefined') { module.exports = userProfile; }
+function activateMyShield() {
+    userProfile.activateShield();
+}
+
+userProfile.init();
