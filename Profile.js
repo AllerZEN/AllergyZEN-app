@@ -1,78 +1,95 @@
 /**
  * allerZEN Master Profile System
- * Features: Multi-user Family Support, Persistent Storage, 3-Hour Protection Timer
+ * Merged Features: Family Support, 3-Hour Variable Timer, Blue Dot Status, & ED Support
  */
 
 const userProfile = {
-    // 1. Session & Safety Data
     session: {
         lastScanTimestamp: null,
-        validityDuration: 3 * 60 * 60 * 1000, // 3 hours
+        validityDuration: 3 * 60 * 60 * 1000, // Default 3 hours
         isExpired: false,
-        activeProfileIndex: 0 // Default to the main account holder
+        activeProfileIndex: 0,
+        currentBusiness: null // Track which business set the timer
     },
 
-    // 2. Family Profiles Array
-    // This allows parents to add kids/family members
+    // 2. Updated Family Profiles to match your new "Shield" UI
     profiles: [
         {
             name: "Main User",
             type: "Adult",
-            redList: [],    // High Danger
-            orangeList: [], // Moderate/Caution
-            greenList: []   // Safe/Verified
+            redList: [],    // Critical/Anaphylaxis
+            amberList: [],  // Sensitivities (Terpenes, etc.)
+            blueList: [],   // Boundaries (ED Support/Sensory)
+            greenList: []   // Power Choices (Safe Alternatives)
         }
     ],
 
-    // 3. Initialize & Load Data
-    // Pulls saved family data from the phone's memory
     init: function() {
         const savedData = localStorage.getItem('allerzen_family_profiles');
+        const setupStatus = localStorage.getItem('az_onboarding_complete');
+        
         if (savedData) {
             this.profiles = JSON.parse(savedData);
         }
-        console.log("allerZEN: Family Profiles Loaded.");
+        
+        // Gatekeeper: If setup is complete and we are on the LP, redirect to App
+        if (setupStatus === 'true' && window.location.pathname.includes('index.html')) {
+            window.location.href = 'view.html';
+        }
+        
+        console.log("allerZEN: Shield Logic Initialized.");
+        this.updateBlueDotUI();
     },
 
-    // 4. Add Family Member
-    addFamilyMember: function(name, type = "Child") {
-        this.profiles.push({
-            name: name,
-            type: type,
-            redList: [],
-            orangeList: [],
-            greenList: []
-        });
-        this.save();
-    },
-
-    // 5. Save Data
-    save: function() {
-        localStorage.setItem('allerzen_family_profiles', JSON.stringify(this.profiles));
-    },
-
-    // 6. The Protection Logic
-    startProtectionTimer: function() {
+    // 3. Variable Expiration Support
+    // Call this when a QR is scanned: e.g., userProfile.activateShield(1) for a 1-hour cafe window
+    activateShield: function(customHours = 3) {
+        this.session.validityDuration = customHours * 60 * 60 * 1000;
         this.session.lastScanTimestamp = Date.now();
         this.session.isExpired = false;
-        console.log("allerZEN: 3-Hour Family Shield Activated.");
+        
+        // Save the installation/onboarding flag
+        localStorage.setItem('az_onboarding_complete', 'true');
+        this.save();
+        this.updateBlueDotUI();
+    },
+
+    // 4. Update the Blue Dot UI across the app
+    updateBlueDotUI: function() {
+        const blueDot = document.querySelector('.blue-dot');
+        const status = this.checkStatus();
+
+        if (blueDot) {
+            if (status === "PROTECTED") {
+                blueDot.classList.add('pulse');
+                blueDot.style.backgroundColor = '#007bff'; // Active Blue
+            } else {
+                blueDot.classList.remove('pulse');
+                blueDot.style.backgroundColor = '#808080'; // Expired Gray
+            }
+        }
     },
 
     checkStatus: function() {
-        if (!this.session.lastScanTimestamp) return "No Scan Detected";
+        if (!this.session.lastScanTimestamp) return "No Scan";
         
         const now = Date.now();
         const elapsed = now - this.session.lastScanTimestamp;
 
         if (elapsed >= this.session.validityDuration) {
             this.session.isExpired = true;
-            return "EXPIRED: Please Rescan";
+            return "EXPIRED";
         }
         return "PROTECTED";
+    },
+
+    save: function() {
+        localStorage.setItem('allerzen_family_profiles', JSON.stringify(this.profiles));
     }
 };
 
-// Auto-initialize when the app loads
+// Auto-initialize
 userProfile.init();
 
-export default userProfile;
+// Export for use in other files
+if (typeof module !== 'undefined') { module.exports = userProfile; }
