@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Safety & Power Shield | allerZEN</title>
-    <link rel="stylesheet" href="style.css"> <style>
+    <link rel="stylesheet" href="style.css"> 
+    <style>
         /* Pulse Animation for the Blue Dot Safety System */
         .blue-dot {
             width: 12px;
@@ -22,23 +23,30 @@
             70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
         }
-        .shield-card { border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 8px solid; }
+        .shield-card { border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 8px solid; background: white; }
         .red { border-left-color: #ff4d4d; }
         .amber { border-left-color: #ffaa00; }
         .blue { border-left-color: #007bff; }
         .green { border-left-color: #28a745; }
-        .chip-group button { margin: 5px; padding: 10px; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer; }
-        .chip-group button.active { background: #6f42c1; color: white; }
+        .chip-group button { margin: 5px; padding: 10px; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer; transition: 0.3s; }
+        .chip-group button.active { background: #6f42c1; color: white; border-color: #6f42c1; }
+        
+        /* Pairing Note Styling */
+        .pairing-note { background: #fdfbff; border: 1px solid #8e44ad; padding: 15px; border-radius: 15px; margin: 20px 0; font-size: 0.9rem; color: #333; line-height: 1.4; text-align: left; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" style="max-width: 500px; margin: auto; padding: 15px;">
         <header style="text-align: center; padding: 20px;">
             <img src="logo.png" alt="allerZEN" width="80">
             <h1>My Safety & Power Shield</h1>
             <p>Define your risks, set your boundaries, and reclaim your favorites.</p>
         </header>
+
+        <div class="pairing-note">
+            <strong>Pairing Note:</strong> You can edit and update your profile anytime after you have activated your shield. You must <b>Activate My Shield</b> to pair the app with your needs and generate your live AZWAA v0 protection window.
+        </div>
 
         <div class="shield-card red">
             <h3>🔴 Red: Critical Allergies</h3>
@@ -68,21 +76,4 @@
             </div>
         </div>
 
-        <div class="shield-card green">
-            <h3>🟢 Green: My Power Choices</h3>
-            <p>Safe & Healthy Alternatives: Take back control.</p>
-            <div class="chip-group" id="green-group">
-                <button onclick="toggleChip(this)">High Protein Safe</button>
-                <button onclick="toggleChip(this)">Plant-Based Power</button>
-                <button onclick="toggleChip(this)">Fiber Rich</button>
-            </div>
-        </div>
-
-        <button id="activateBtn" onclick="activateMyShield()" style="width: 100%; padding: 20px; background: #6f42c1; color: white; border: none; border-radius: 25px; font-weight: bold; font-size: 18px;">
-            ACTIVATE MY SHIELD
-        </button>
-    </div>
-
-    <script src="Profile.js"></script>
-</body>
-</html>
+        <div class="shield-card green
