@@ -3,144 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My allerZEN Profile</title>
+    <title>allerZEN | My Safety & Power Profile</title>
     <style>
-        :root { --primary: #8e44ad; --bg: #fdfbff; --pro: #ffd700; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; padding-bottom: 100px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .logo-small { width: 60px; margin-bottom: 10px; }
+        :root { --red: #e74c3c; --amber: #f39c12; --blue: #3498db; --green: #2ecc71; --primary: #8e44ad; }
+        body { font-family: 'Segoe UI', sans-serif; background: #fdfbff; margin: 0; padding: 20px; padding-bottom: 100px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { width: 80px; margin-bottom: 10px; }
         
-        /* Search Bar */
-        #searchBox { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 20px; box-sizing: border-box; font-size: 1rem; }
+        .zone-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 8px solid; }
+        .red-zone { border-left-color: var(--red); }
+        .amber-zone { border-left-color: var(--amber); }
+        .blue-zone { border-left-color: var(--blue); }
+        .green-zone { border-left-color: var(--green); }
 
-        .category { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .category-title { font-weight: bold; color: var(--primary); display: flex; justify-content: space-between; cursor: pointer; align-items: center; }
-        .allergen-list { display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; max-height: 300px; overflow-y: auto; }
-        .allergen-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.95rem; color: #444; }
+        h2 { margin: 0 0 10px 0; font-size: 1.2rem; display: flex; align-items: center; }
+        .zone-desc { font-size: 0.85rem; color: #666; margin-bottom: 15px; }
         
-        input[type="checkbox"] { margin-right: 15px; accent-color: var(--primary); width: 22px; height: 22px; cursor: pointer; }
-        .pro-badge { background: var(--pro); color: #000; font-size: 0.65rem; padding: 3px 8px; border-radius: 5px; font-weight: bold; margin-left: 10px; text-transform: uppercase; }
+        .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .chip { padding: 12px; border: 1px solid #ddd; border-radius: 12px; font-size: 0.85rem; text-align: center; cursor: pointer; transition: 0.2s; background: #fff; font-weight: 500; }
         
-        .footer-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; }
-        .save-btn { background: var(--primary); color: white; border: none; width: 90%; max-width: 400px; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        /* Selection Colors */
+        .red-zone .chip.selected { background: var(--red); color: white; border-color: transparent; }
+        .amber-zone .chip.selected { background: var(--amber); color: white; border-color: transparent; }
+        .blue-zone .chip.selected { background: var(--blue); color: white; border-color: transparent; }
+        .green-zone .chip.selected { background: var(--green); color: white; border-color: transparent; }
+
+        .save-bar { position: fixed; bottom: 20px; left: 5%; width: 90%; background: var(--primary); color: white; border: none; padding: 20px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(142, 68, 173, 0.4); z-index: 100; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="logo.png" alt="allerZEN" class="logo-small">
-    <h2>Safety Profile</h2>
-    <p style="font-size: 0.9rem; color: #666;">Select your triggers to activate your shield.</p>
+    <img src="icon.jpg" alt="allerZEN" class="logo">
+    <h1>My Safety & Power Shield</h1>
+    <p>Define your risks, set your boundaries, and reclaim your favorites.</p>
 </div>
 
-<input type="text" id="searchBox" placeholder="🔍 Search 1,750+ triggers..." onkeyup="filterAllergens()">
-
-<div id="categoryContainer">
+<div class="zone-card red-zone">
+    <h2>🔴 Red: Critical Allergies</h2>
+    <p class="zone-desc">Immediate life-threat / Anaphylaxis risk.</p>
+    <div class="option-grid">
+        <div class="chip" onclick="toggle(this, 'Peanuts', 'red')">Peanuts</div>
+        <div class="chip" onclick="toggle(this, 'Shellfish', 'red')">Shellfish</div>
     </div>
-
-<div class="footer-nav">
-    <button class="save-btn" onclick="saveProfile()">ACTIVATE 3-HOUR SHIELD</button>
 </div>
+
+<div class="zone-card amber-zone">
+    <h2>🟠 Amber: Sensitivities</h2>
+    <p class="zone-desc">Hidden triggers: Terpenes, Lab Chemicals, Intolerances.</p>
+    <div class="option-grid">
+        <div class="chip" onclick="toggle(this, 'Lactose', 'amber')">Lactose</div>
+        <div class="chip" onclick="toggle(this, 'Terpenes', 'amber')">Terpenes</div>
+    </div>
+</div>
+
+<div class="zone-card blue-zone">
+    <h2>🔵 Blue: Boundaries (ED Support)</h2>
+    <p class="zone-desc">Safe-experience triggers: Texture or Sensory needs.</p>
+    <div class="option-grid">
+        <div class="chip" onclick="toggle(this, 'Soft Textures', 'blue')">Soft Textures</div>
+        <div class="chip" onclick="toggle(this, 'No Strong Smells', 'blue')">No Strong Smells</div>
+    </div>
+</div>
+
+<div class="zone-card green-zone">
+    <h2>🟢 Green: My Power Choices</h2>
+    <p class="zone-desc">Safe & Healthy Alternatives: Take back control.</p>
+    <div class="option-grid">
+        <div class="chip" onclick="toggle(this, 'High Protein Safe', 'green')">High Protein Safe</div>
+        <div class="chip" onclick="toggle(this, 'Plant-Based Power', 'green')">Plant-Based Power</div>
+        <div class="chip" onclick="toggle(this, 'Fiber Rich', 'green')">Fiber Rich</div>
+        <div class="chip" onclick="toggle(this, 'Low Acid Safe', 'green')">Low Acid Safe</div>
+    </div>
+</div>
+
+<button class="save-bar" onclick="saveProfile()">ACTIVATE MY SHIELD</button>
 
 <script>
-    // THE BULK DATABASE (Sample of the 1,750+ Triggers)
-       const triggerDatabase = {
-        "💊 Medicinal Excipients (Pro)": [
-            "Croscarmellose Sodium", "Magnesium Stearate", "Lactose Monohydrate", 
-            "Microcrystalline Cellulose", "Povidone", "Silicon Dioxide", 
-            "Polyethylene Glycol (PEG)", "Titanium Dioxide", "Hypromellose"
-        ],
-        "🧪 Lab & Photographic Chemicals (Pro)": [
-            "SDS (Sodium Dodecyl Sulfate)", "EDTA", "DMSO", "Formaldehyde", 
-            "Hydroquinone", "Metol", "Silver Nitrate", "Potassium Dichromate",
-            "Glutaraldehyde", "Toluene", "Xylene"
-        ],
-        "🌲 Terpene Profile (Pro)": [
-            "Pinene", "Myrcene", "Limonene", "Linalool", "Beta-Caryophyllene", 
-            "Humulene", "Terpinolene", "Geraniol", "Alpha-Bisabolol"
-        ],
-        "🪵 Exotic Wood Dusts (Pro)": [
-            "Wenge", "Padauk", "Cocobolo", "Rosewood", "Ebony", 
-            "Teak", "Zebrawood", "Mahogany (African)"
-        ],
-        "🧤 Luxury Fibers & Modern Materials (Pro)": [
-            "Vicuna", "Qiviut", "Cashmere", "Angora", "Shahtoosh",
-            "Mushroom Leather", "PLA (Sustainable Textile)", "Apple Skin Leather",
-            "Recycled Ocean Plastic (Specific Polymer Triggers)"
-        ],
-        "🥗 Fermented Basics": [
-            "Kimchi (Lactic Acid Bacteria Triggers)", "Natto (Bacillus subtilis)", 
-            "Kombucha (Yeast/Bacteria colony)", "Sauerkraut", "Miso", "Tempeh", 
-            "Kefir", "Sourdough Starter"
-        ],
-        "🍎 Common Food Triggers": [
-            "Peanuts", "Tree Nuts", "Dairy", "Egg", "Soy", "Wheat", "Shellfish", 
-            "Fish", "Sesame", "Mustard", "Celery", "Sulphites"
-        ]
-    };
+    let userProfile = { red: [], amber: [], blue: [], green: [] };
 
-    const container = document.getElementById('categoryContainer');
-
-    function initProfile() {
-        for (const [catName, items] of Object.entries(triggerDatabase)) {
-            const isPro = catName.includes("(Pro)");
-            const catId = catName.replace(/\s+/g, '-').toLowerCase();
-            
-            let html = `
-                <div class="category" data-category="${catName.toLowerCase()}">
-                    <div class="category-title" onclick="toggleCat('${catId}')">
-                        <span>${catName.replace("(Pro)", "")} ${isPro ? '<span class="pro-badge">ProZEN</span>' : ''}</span>
-                        <span id="icon-${catId}">▼</span>
-                    </div>
-                    <div id="${catId}" class="allergen-list">
-            `;
-
-            items.forEach(item => {
-                html += `
-                    <div class="allergen-item" data-name="${item.toLowerCase()}">
-                        <input type="checkbox" id="${item}">
-                        <label for="${item}">${item}</label>
-                    </div>
-                `;
-            });
-
-            html += `</div></div>`;
-            container.innerHTML += html;
+    function toggle(element, item, zone) {
+        element.classList.toggle('selected');
+        if (userProfile[zone].includes(item)) {
+            userProfile[zone] = userProfile[zone].filter(i => i !== item);
+        } else {
+            userProfile[zone].push(item);
         }
     }
 
-    function toggleCat(id) {
-        const list = document.getElementById(id);
-        const icon = document.getElementById('icon-' + id);
-        const isOpen = list.style.display === 'block';
-        list.style.display = isOpen ? 'none' : 'block';
-        icon.innerText = isOpen ? '▼' : '▲';
-    }
-
-    function filterAllergens() {
-        const input = document.getElementById('searchBox').value.toLowerCase();
-        const items = document.querySelectorAll('.allergen-item');
-        
-        items.forEach(item => {
-            const text = item.getAttribute('data-name');
-            item.style.display = text.includes(input) ? 'flex' : 'none';
-        });
-
-        // Auto-open lists if searching
-        const lists = document.querySelectorAll('.allergen-list');
-        lists.forEach(list => {
-            if (input.length > 1) {
-                list.style.display = 'block';
-            }
-        });
-    }
-
     function saveProfile() {
-        alert("Success! Your profile is updated. Your details will be held for 3 hours once you scan a partner QR code.");
-        window.location.href = "index.html";
+        localStorage.setItem('allerzen_profile', JSON.stringify(userProfile));
+        alert('Shield Activated! Your safety and power choices are saved for the next 3 hours.');
+        window.location.href = 'index.html';
     }
-
-    window.onload = initProfile;
 </script>
 
 </body>
