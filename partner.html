@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Partner Portal | allerZEN</title>
     <style>
-        :root { --primary: #8e44ad; --safe: #2ecc71; --alert: #e74c3c; --bg: #fdfbff; }
+        :root { --primary: #8e44ad; --safe: #2ecc71; --alert: #e74c3c; --blue: #007bff; --bg: #fdfbff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2c3e50; }
         
-        /* Fast-Glance Dashboard */
         .card { background: white; border-radius: 25px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 15px; border: 2px solid #eee; }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .logo { width: 80px; }
         
-        .status-badge { background: var(--safe); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-badge { background: var(--safe); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; }
         
-        /* The "No-Stall" Timer */
+        .blue-dot { width: 10px; height: 10px; background: white; border-radius: 50%; margin-right: 8px; }
+        .pulse { animation: pulse-white 2s infinite; }
+        @keyframes pulse-white { 
+            0% { transform: scale(0.9); opacity: 1; }
+            70% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(0.9); opacity: 1; }
+        }
+
         .timer-container { text-align: center; background: #2c3e50; color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
         #timer { font-size: 2rem; font-family: monospace; color: #f1c40f; }
 
-        /* High-Visibility Alerts */
         .trigger-list { margin-top: 10px; }
         .trigger-item { display: flex; align-items: center; background: #fffafa; border: 1px solid #ffeded; padding: 15px; border-radius: 15px; margin-bottom: 10px; }
         .trigger-icon { font-size: 1.5rem; margin-right: 15px; }
@@ -36,7 +41,7 @@
     <div class="card">
         <div class="header">
             <img src="logo.png" alt="allerZEN" class="logo">
-            <div class="status-badge">SHIELD ACTIVE</div>
+            <div id="statusBadge" class="status-badge">SHIELD ACTIVE</div>
         </div>
         
         <div class="timer-container">
@@ -45,33 +50,18 @@
         </div>
 
         <h3 style="margin-bottom: 10px;">Customer Safety Profile:</h3>
-        <div class="trigger-list">
-            <div class="trigger-item">
-                <div class="trigger-icon">💊</div>
-                <div class="trigger-info">
-                    <span>Medicinal Excipient (ProZEN)</span>
-                    <b>Croscarmellose Sodium</b>
-                </div>
+        <div id="customerProfile" class="trigger-list">
             </div>
-
-            <div class="trigger-item">
-                <div class="trigger-icon">🌲</div>
-                <div class="trigger-info">
-                    <span>Terpene Profile (ProZEN)</span>
-                    <b>Linalool</b>
-                </div>
-            </div>
-        </div>
 
         <p style="font-size: 0.8rem; color: #7f8c8d; text-align: center; margin-top: 20px;">
-            Verify ingredients for Table #4. Data clears automatically.
+            Verify ingredients for Table. Data clears automatically after 3 hours. [cite: 2026-01-18]
         </p>
     </div>
 
     <button class="action-btn btn-clear" onclick="clearData()">MANUAL WIPE & RESET</button>
 
     <script>
-        // Simple 3-Hour Countdown
+        // 1. Simple 3-Hour Countdown Logic [cite: 2026-01-18]
         let seconds = 3 * 60 * 60;
         const timerDisplay = document.getElementById('timer');
 
@@ -80,14 +70,27 @@
             let m = Math.floor((seconds % 3600) / 60);
             let s = seconds % 60;
             timerDisplay.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            if (seconds > 0) seconds--;
-            else location.reload(); // Wipes data on expire
+            if (seconds > 0) {
+                seconds--;
+            } else {
+                location.reload(); // Auto-wipe data on expire [cite: 2026-01-18]
+            }
         }
         setInterval(countdown, 1000);
 
+        // 2. Manual Wipe Function
         function clearData() {
             if(confirm("Confirm Customer Departure? All safety data will be permanently wiped.")) {
                 location.reload();
+            }
+        }
+
+        // 3. Blue Boundary/ED Support Check
+        function checkBlueBoundaries(profileData) {
+            if (profileData && profileData.blueList && profileData.blueList.length > 0) {
+                const badge = document.getElementById('statusBadge');
+                badge.style.background = 'var(--blue)';
+                badge.innerHTML = '<span class="blue-dot pulse"></span> ED SUPPORT ACTIVE';
             }
         }
     </script>
