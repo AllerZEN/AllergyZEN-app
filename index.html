@@ -7,6 +7,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>allerZEN | Safety Shield</title>
+    
+    <script>
+        (function() {
+            const setupComplete = localStorage.getItem('az_onboarding_complete');
+            // If they have already set up their profile, send them straight to the app
+            if (setupComplete === 'true') {
+                window.location.href = 'view.html'; 
+            }
+        })();
+    </script>
+
     <style>
         :root { --primary: #8e44ad; --light: #fdfbff; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -16,7 +27,7 @@
         h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
         .sub-text { color: #666; margin-bottom: 30px; font-size: 0.95rem; }
         
-        .btn { display: block; width: 100%; padding: 20px; margin: 12px 0; border-radius: 15px; font-size: 1.1rem; font-weight: bold; text-decoration: none; cursor: pointer; border: none; box-sizing: border-box; transition: 0.3s; }
+        .btn { display: block; width: 100%; padding: 20px; margin: 12px 0; border-radius: 15px; font-size: 1.1rem; font-weight: bold; text-decoration: none; cursor: pointer; border: none; box-sizing: border-box; transition: 0.3s; text-align: center; }
         .btn-purple { background: var(--primary); color: white; }
         .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
 
@@ -42,6 +53,7 @@
         <ol style="padding-left: 20px; color: #444; font-size: 0.9rem; line-height: 1.6;">
             <li>Tap the <strong>three dots (⋮)</strong> at the top right.</li>
             <li>Select <strong>'Add to home screen'</strong>.</li>
+            <li>Open allerZEN from your home screen for the full protected experience.</li>
         </ol>
 
         <div style="display: flex; gap: 10px; margin-top: 15px;">
@@ -85,13 +97,8 @@
         const gif = document.getElementById('help-gif');
         const graphic = document.getElementById('help-graphic');
         
-        if (type === 'gif') {
-            gif.style.display = gif.style.display === 'block' ? 'none' : 'block';
-            graphic.style.display = 'none';
-        } else {
-            graphic.style.display = graphic.style.display === 'block' ? 'none' : 'block';
-            gif.style.display = 'none';
-        }
+        if (type === 'gif') { gif.style.display = gif.style.display === 'block' ? 'none' : 'block'; graphic.style.display = 'none'; } 
+        else { graphic.style.display = graphic.style.display === 'block' ? 'none' : 'block'; gif.style.display = 'none'; }
     }
 
     function toggleFix() {
