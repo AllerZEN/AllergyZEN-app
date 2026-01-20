@@ -3,118 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Access | allergyZEN</title>
+    <title>allerZEN | v0 My Shield</title>
     <style>
-        :root { --primary: #8e44ad; --secondary: #27ae60; --red: #e74c3c; --orange: #f39c12; --green: #27ae60; --light: #f4f9f4; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 15px; margin: 0; }
-        .header { background: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); margin-bottom: 20px; }
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        :root { --primary: #8e44ad; --blue: #007bff; --neutral: #666; --bg: #fdfbff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         
-        /* PIN Gate Styling */
-        #pinGate { text-align: center; }
-        input[type="password"] { width: 80%; padding: 15px; font-size: 1.5rem; text-align: center; border-radius: 12px; border: 2px solid var(--primary); margin-bottom: 15px; letter-spacing: 10px; }
-        .btn-unlock { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .blue-dot { width: 14px; height: 14px; background: #808080; border-radius: 50%; display: inline-block; transition: 0.5s; }
+        .pulse { animation: pulse-blue 2s infinite; background: var(--blue); }
+        @keyframes pulse-blue { 
+            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
+            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+        }
+
+        .card { background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #eee; }
+        .card-title { font-weight: bold; color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
-        /* Data Display */
-        #secureContent { display: none; }
-        .status-badge { padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: bold; }
-        .active { background: #d4efdf; color: #1e8449; border: 1px solid var(--green); }
-        .expired { background: #fdeaea; color: #c0392b; border: 1px solid var(--red); }
-        .risk-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        .badge { padding: 5px 12px; border-radius: 50px; color: white; font-size: 0.75rem; font-weight: bold; }
+        .timer-text { font-size: 1.2rem; font-weight: bold; color: #444; }
+        textarea { width: 100%; border: 1px solid #ddd; border-radius: 12px; padding: 12px; font-size: 0.9rem; resize: none; box-sizing: border-box; }
+        
+        .btn-action { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-purple { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h2 style="margin:0; color: var(--primary);">allergyZEN <span style="color: var(--secondary);">Partner Portal</span></h2>
-</div>
-
-<div class="card">
-    <div id="pinGate">
-        <h3 style="margin-top:0;">Business Access Required</h3>
-        <p style="font-size: 0.85rem; color: #666;">Enter your 4-digit Partner PIN to view this safety profile.</p>
-        <input type="password" id="pinInput" maxlength="4" placeholder="••••">
-        <button class="btn-unlock" onclick="verifyPin()">Verify & Unlock</button>
-        <p id="pinError" style="color: var(--red); font-size: 0.8rem; margin-top: 10px; display: none;">Invalid Partner PIN</p>
-    </div>
-
-    <div id="secureContent">
-        <div id="securityStatus"></div>
-        <div id="riskList"></div>
-        <div class="action-area" style="margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px;">
-            <button class="btn-unlock" style="background: var(--secondary);" onclick="requestTrust()">Request to Save Profile</button>
+    <div class="status-bar">
+        <img src="logo.png" alt="allerZEN" height="35">
+        <div style="text-align: right;">
+            <span id="statusLabel" style="font-size: 0.7rem; font-weight: bold; color: var(--neutral); display: block;">SHIELD INACTIVE</span>
+            <div id="statusDot" class="blue-dot"></div>
         </div>
     </div>
-</div>
 
-<script>
-    // Set your master PIN here (for testing, let's use 2026)
-    const MASTER_PIN = "2026"; 
+    <div class="card" id="timerCard">
+        <span class="card-title">🕒 Protection Window</span>
+        <div class="timer-text" id="timerDisplay">00:00:00</div>
+        <p id="pairInfo" style="font-size: 0.85rem; color: #777; margin-top: 8px;">
+            Scan a business QR code to activate your 3-hour safety shield.
+        </p>
+    </div>
 
-    function verifyPin() {
-        const input = document.getElementById('pinInput').value;
-        const gate = document.getElementById('pinGate');
-        const content = document.getElementById('secureContent');
-        const error = document.getElementById('pinError');
+    <div class="card">
+        <span class="card-title">📚 Knowledge Hub</span>
+        <div id="hubContent" style="font-size: 0.85rem; line-height: 1.5;">
+            Select categories in your profile to unlock safety insights here.
+        </div>
+    </div>
 
-        if (input === MASTER_PIN) {
-            gate.style.display = 'none';
-            content.style.display = 'block';
-            processQRData();
-        } else {
-            error.style.display = 'block';
-            document.getElementById('pinInput').value = '';
-        }
-    }
+    <div class="card">
+        <span class="card-title">📝 My Notes</span>
+        <textarea id="notePad" rows="4" placeholder="How did you feel after your meal? Record textures, thoughts, or reactions..."></textarea>
+        <button class="btn-action btn-purple" onclick="saveNote()">SAVE TO PROFILE</button>
+    </div>
 
-    function processQRData() {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-        const statusDiv = document.getElementById('securityStatus');
-        const riskList = document.getElementById('riskList');
+    <div style="padding: 10px;">
+        <button class="btn-action btn-outline" onclick="location.href='profile.html'">EDIT MY SHIELD</button>
+        <p style="text-align: center; font-size: 0.75rem; color: #999; margin-top: 15px;">
+            allerZEN v0 | Power is Knowledge
+        </p>
+    </div>
 
-        if (!token) return;
+    <script src="Profile.js"></script>
+    <script>
+        function updateDashboard() {
+            const profileData = JSON.parse(localStorage.getItem('allerzen_family_profiles'));
+            const mainUser = profileData ? profileData[0] : null;
+            
+            const dot = document.getElementById('statusDot');
+            const label = document.getElementById('statusLabel');
+            const pairInfo = document.getElementById('pairInfo');
 
-        try {
-            const handshake = JSON.parse(decodeURIComponent(escape(atob(token))));
-            const now = Date.now();
-
-            // 3-HOUR SECURITY CHECK
-            if (handshake.expires && now > handshake.expires) {
-                statusDiv.className = "status-badge expired";
-                statusDiv.innerHTML = "⚠️ SESSION EXPIRED<br><small>Safety window closed.</small>";
-            } else {
-                statusDiv.className = "status-badge active";
-                statusDiv.innerHTML = "✅ ACTIVE PROTECTION";
-                
-                const profile = handshake.payload || [];
-                riskList.innerHTML = "";
-                profile.forEach(item => {
-                    let color = item.l === 'High' ? 'var(--red)' : (item.l === 'Moderate' ? 'var(--orange)' : 'var(--green)');
-                    riskList.innerHTML += `
-                        <div class="risk-row">
-                            <strong>${item.n}</strong>
-                            <span class="badge" style="background:${color}">${item.l}</span>
-                        </div>`;
-                });
+            // 1. Check for Blue (ED Support) List
+            if (mainUser && mainUser.blueList && mainUser.blueList.length > 0) {
+                label.innerText = "SAFE-EXPERIENCE ACTIVE";
+                pairInfo.innerText = "Your sensory and experience boundaries are being monitored.";
             }
-        } catch (e) {
-            statusDiv.innerHTML = "❌ DECRYPTION ERROR";
-        }
-    }
 
-    function requestTrust() {
-        const testBusiness = { id: "BIZ-101", name: "Verified Partner #101" };
-        let trusted = JSON.parse(localStorage.getItem('az_trusted_partners') || '[]');
-        if (!trusted.find(b => b.id === testBusiness.id)) {
-            trusted.push(testBusiness);
-            localStorage.setItem('az_trusted_partners', JSON.stringify(trusted));
-            alert("Partner Verified! Profile added to customer's Trusted list.");
-        } else {
-            alert("Partner is already trusted.");
+            // 2. 3-Hour Timer Logic
+            const lastScan = localStorage.getItem('az_last_scan_time'); 
+            const now = Date.now();
+            if (lastScan && (now - lastScan < (3 * 60 * 60 * 1000))) {
+                dot.classList.add('pulse');
+                label.innerText = (mainUser && mainUser.blueList && mainUser.blueList.length > 0) ? "SAFE-EXPERIENCE PULSE" : "SHIELD PULSING";
+            }
         }
-    }
-</script>
+
+        function saveNote() {
+            const note = document.getElementById('notePad').value;
+            localStorage.setItem('az_user_notes', note);
+            alert("Note saved. Knowledge is power.");
+        }
+
+        window.onload = () => {
+            updateDashboard();
+            document.getElementById('notePad').value = localStorage.getItem('az_user_notes') || "";
+        };
+    </script>
 </body>
 </html>
