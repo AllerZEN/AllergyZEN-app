@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
     <link rel="manifest" href="manifest.json">
-    
     <link rel="icon" type="image/jpeg" href="icon.jpg">
     <link rel="apple-touch-icon" href="icon.jpg">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>allerZEN | Safety Shield</title>
@@ -24,6 +22,7 @@
 
         #guide { display: none; background: #fdfbff; border: 2px solid var(--primary); padding: 20px; border-radius: 20px; text-align: left; margin: 15px 0; }
         .help-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--primary); background: #f3e5f5; font-size: 0.8rem; cursor: pointer; font-weight: bold; color: var(--primary); text-align: center; }
+        .fix-box { display: none; margin-top: 10px; font-size: 0.8rem; background: #fff; padding: 12px; border: 1px dashed var(--primary); border-radius: 10px; color: #444; }
     </style>
 </head>
 <body>
@@ -31,7 +30,7 @@
 <div class="container">
     <span class="web-app-tag">Official Web App</span>
     
-    <img src="logo.png" alt="allergyZEN" class="logo">
+    <img src="icon.jpg" alt="allergyZEN" class="logo">
     
     <h1>Welcome to allerZEN</h1>
     <p class="sub-text">Setup your safety shield in two steps:</p>
@@ -52,14 +51,19 @@
 
         <div id="help-gif" style="display:none; margin-top: 15px; text-align: center;">
             <img src="install.gif" alt="Installation GIF" style="width: 100%; border-radius: 10px;">
-            <p style="font-size: 0.7rem; color: #666;">(10-second visual walkthrough)</p>
         </div>
 
         <div id="help-graphic" style="display:none; margin-top: 15px;">
-            <div style="background: #fff; padding: 12px; border: 1px dashed var(--primary); border-radius: 10px; font-size: 0.85rem; color: #444;">
+            <div style="font-size: 0.85rem; color: #444; line-height: 1.6;">
                 <strong>1. Menu:</strong> Tap ⋮ in browser<br>
-                <strong>2. Add:</strong> Select 'Add to home screen'<br>
-                <strong>3. Fix:</strong> Enable 'Add new apps' in phone settings if icon is hidden
+                <strong>2. Add:</strong> Select 'Add to home screen'<br><br>
+                
+                <button onclick="toggleFix()" class="help-btn" style="width:100%; background: var(--primary); color: white;">3. FIX: Icon is hidden?</button>
+                
+                <div id="fix-details" class="fix-box">
+                    <strong>Android:</strong> Settings > Home Screen > Turn OFF 'Hide apps on Home screen'.<br><br>
+                    <strong>iPhone:</strong> Settings > Home Screen > Ensure 'Add to Home Screen' is checked.
+                </div>
             </div>
         </div>
     </div>
@@ -78,7 +82,6 @@
     }
 
     function showHelp(type) {
-        // Toggle logic: if you click the same button again, it hides
         const gif = document.getElementById('help-gif');
         const graphic = document.getElementById('help-graphic');
         
@@ -89,6 +92,11 @@
             graphic.style.display = graphic.style.display === 'block' ? 'none' : 'block';
             gif.style.display = 'none';
         }
+    }
+
+    function toggleFix() {
+        const fix = document.getElementById('fix-details');
+        fix.style.display = fix.style.display === 'block' ? 'none' : 'block';
     }
 </script>
 
