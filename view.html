@@ -26,6 +26,10 @@
         .btn-action { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn-purple { background: var(--primary); color: white; }
         .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        
+        /* KIP Styling [cite: 2026-01-18] */
+        .kip-text { font-size: 0.9rem; line-height: 1.6; color: #444; }
+        .kip-highlight { color: var(--primary); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -42,14 +46,17 @@
         <span class="card-title">🕒 Protection Window</span>
         <div class="timer-text" id="timerDisplay">00:00:00</div>
         <p id="pairInfo" style="font-size: 0.85rem; color: #777; margin-top: 8px;">
-            Scan a business QR code to activate your 3-hour safety shield.
+            Scan a business QR code to activate your 3-hour safety shield. [cite: 2026-01-18]
         </p>
     </div>
 
     <div class="card">
-        <span class="card-title">📚 Knowledge Hub</span>
-        <div id="hubContent" style="font-size: 0.85rem; line-height: 1.5;">
-            Select categories in your profile to unlock safety insights here.
+        <span class="card-title">📚 Knowledge Hub: Power is Knowledge</span>
+        <div id="hubContent" class="kip-text">
+            <div id="kip-welcome">
+                <i>"The shield is active. You are not defined by your triggers; you are protected by your awareness." [cite: 2026-01-18]</i>
+            </div>
+            <div id="kip-details" style="margin-top: 10px;"></div>
         </div>
     </div>
 
@@ -62,7 +69,7 @@
     <div style="padding: 10px;">
         <button class="btn-action btn-outline" onclick="location.href='profile.html'">EDIT MY SHIELD</button>
         <p style="text-align: center; font-size: 0.75rem; color: #999; margin-top: 15px;">
-            allerZEN v0 | Power is Knowledge
+            allerZEN v0 | Power is Knowledge [cite: 2026-01-18]
         </p>
     </div>
 
@@ -76,19 +83,48 @@
             const label = document.getElementById('statusLabel');
             const pairInfo = document.getElementById('pairInfo');
 
-            // 1. Check for Blue (ED Support) List
+            // 1. Check for Blue (ED Support) List [cite: 2026-01-18]
             if (mainUser && mainUser.blueList && mainUser.blueList.length > 0) {
                 label.innerText = "SAFE-EXPERIENCE ACTIVE";
                 pairInfo.innerText = "Your sensory and experience boundaries are being monitored.";
             }
 
-            // 2. 3-Hour Timer Logic
+            // 2. 3-Hour Timer Logic [cite: 2026-01-18]
             const lastScan = localStorage.getItem('az_last_scan_time'); 
             const now = Date.now();
             if (lastScan && (now - lastScan < (3 * 60 * 60 * 1000))) {
                 dot.classList.add('pulse');
                 label.innerText = (mainUser && mainUser.blueList && mainUser.blueList.length > 0) ? "SAFE-EXPERIENCE PULSE" : "SHIELD PULSING";
             }
+        }
+
+        function populateKIP() {
+            const profileData = JSON.parse(localStorage.getItem('allerzen_family_profiles'));
+            const mainUser = profileData ? profileData[0] : null;
+            const kipDetails = document.getElementById('kip-details');
+            
+            if (!mainUser) return;
+
+            let tips = [];
+
+            // Contextual tips based on user choices [cite: 2026-01-16, 2026-01-18]
+            if (mainUser.redList.length > 0) {
+                tips.push("🛡️ <span class='kip-highlight'>Pro-Tip:</span> Your high-risk alerts are now live in the Partner Portal. You don't have to explain—the tech does it for you.");
+            }
+
+            if (mainUser.amberList.includes('Terpenes')) {
+                tips.push("🌲 <span class='kip-highlight'>Did you know?</span> Terpenes like Linalool are in many 'natural' cleaners. Your shield flags these hidden triggers.");
+            }
+
+            if (mainUser.blueList.length > 0) {
+                tips.push("💙 <span class='kip-highlight'>Safe-Experience:</span> We've signaled staff to use neutral language. Focus on the texture and joy of the meal, not the pressure.");
+            }
+
+            if (mainUser.greenList.length > 0) {
+                tips.push("🟢 <span class='kip-highlight'>Power Choice:</span> You've prioritized fuel that works for you. You are reclaiming control today.");
+            }
+
+            kipDetails.innerHTML = tips.length > 0 ? tips.join('<br><br>') : "Select categories in your profile to unlock safety insights here.";
         }
 
         function saveNote() {
@@ -99,6 +135,7 @@
 
         window.onload = () => {
             updateDashboard();
+            populateKIP(); // [cite: 2026-01-18]
             document.getElementById('notePad').value = localStorage.getItem('az_user_notes') || "";
         };
     </script>
