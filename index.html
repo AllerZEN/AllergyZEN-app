@@ -4,56 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#8E55A2">
-  <title>allergyZEN | Bulletproof Shield</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>allergyZEN | v0 Dashboard</title>
   
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
-  
+
+  <script>
+    const APP_VERSION = '1.0.4'; 
+    async function forceAppUpdate() {
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map(name => caches.delete(name)));
+      }
+      localStorage.setItem('az_version', APP_VERSION);
+      window.location.href = window.location.pathname + '?refresh=' + Date.now();
+    }
+    if (localStorage.getItem('az_version') !== APP_VERSION) { forceAppUpdate(); }
+  </script>
+
   <style>
     :root {
       --primary: #8E55A2;
+      --primary-light: #A77BB8;
+      --safe: #22C55E;
       --danger: #EF4444;
       --caution: #F97316;
-      --safe: #22C55E;
       --boundary: #3B82F6;
       --bg: #FAFAFA;
       --card: #FFFFFF;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, sans-serif; background: var(--bg); color: #1F2937; padding-bottom: 90px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+    body { background: var(--bg); color: #1F2937; padding-bottom: 90px; }
 
-    /* Decluttered Header & Profile Scroll */
-    .profile-scroll {
-      background: linear-gradient(135deg, #A77BB8 0%, var(--primary) 100%);
-      color: white;
-      padding: 25px 20px;
-      overflow-y: auto;
-      max-height: 180px;
+    /* v0 Header Style */
+    .header-banner {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      color: white; padding: 40px 20px; border-radius: 0 0 30px 30px;
     }
+    .header-banner h1 { font-size: 1.8rem; margin-bottom: 5px; }
+    .header-banner p { opacity: 0.9; font-size: 0.9rem; }
+
+    /* The Main Shield Card */
+    .shield-container {
+      margin: -30px 15px 15px 15px; background: var(--card);
+      border-radius: 20px; padding: 25px; border: 1px solid #eee;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .shield-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     
-    .profile-avatar {
-      width: 50px; height: 50px; border-radius: 50%; border: 2px solid white;
-      background: #eee; object-fit: cover; margin-bottom: 10px;
-    }
-
-    /* The Shield Card (Centerpiece) */
-    .shield-card {
-      background: var(--card);
-      margin: -20px 15px 15px 15px;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      border: 1px solid #eee;
-    }
-
-    .shield-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    
-    /* Pulsing Blue Dot */
     .blue-dot {
       width: 12px; height: 12px; background: var(--boundary); border-radius: 50%;
-      display: inline-block; animation: pulse 2s infinite;
+      display: inline-block; margin-right: 8px; animation: pulse 2s infinite;
     }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
@@ -61,217 +66,164 @@
       100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
 
-    /* Quick-Add Search Bar */
-    .search-shield {
-      width: 100%; padding: 14px; border-radius: 30px; border: 2px solid #eee;
-      font-size: 1rem; transition: border-color 0.3s;
+    /* Quick-Add Search (Replaces score in v0) */
+    .search-box {
+      width: 100%; padding: 15px; border-radius: 30px; border: 2px solid #F3F4F6;
+      background: #F9FAFB; font-size: 1rem; margin-bottom: 10px;
     }
-    .search-shield:focus { outline: none; border-color: var(--primary); }
 
-    /* Result Sorting Styles */
-    .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-    .status-red { color: var(--danger); font-weight: bold; }
-    .status-amber { color: var(--caution); }
-    .status-green { color: var(--safe); }
+    /* Tabs & Navigation */
+    .tab-content { display: none; padding: 20px; }
+    .tab-content.active { display: block; }
     
-    /* Bottom Navigation */
     .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
-      background: white; border-top: 1px solid #eee;
-      display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+      position: fixed; bottom: 0; width: 100%; background: white;
+      height: 80px; display: flex; justify-content: space-around;
+      align-items: center; border-top: 1px solid #eee; z-index: 1000;
     }
-    .nav-btn { background: none; border: none; font-size: 0.75rem; color: #6B7280; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .nav-btn.active { color: var(--primary); font-weight: bold; }
-    .nav-scan { background: var(--primary) !important; color: white !important; width: 60px; height: 60px; border-radius: 50%; margin-top: -30px; box-shadow: 0 4px 12px rgba(142,85,162,0.4); }
+    .nav-item { border: none; background: none; color: #9CA3AF; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; }
+    .nav-item.active { color: var(--primary); font-weight: bold; }
+    .nav-center {
+      background: var(--primary); color: white; width: 60px; height: 60px;
+      border-radius: 50%; margin-top: -40px; box-shadow: 0 5px 15px rgba(142,85,162,0.3);
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
 
-    /* Insight Modal */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
-    .modal-content { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; text-align: center; }
+    /* Result Sorting UI */
+    .result-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
+    .tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; }
+    .tag-red { background: #fee2e2; color: var(--danger); }
+    .tag-amber { background: #ffedd5; color: var(--caution); }
+    .tag-green { background: #dcfce7; color: var(--safe); }
   </style>
 </head>
 <body>
 
-  <div class="profile-scroll">
-    <img id="active-photo" src="logo.png" class="profile-avatar">
-    <h1 id="greeting">Hey son,</h1>
-    <p>Your safety window is ready.</p>
-  </div>
+  <div id="tab-home" class="tab-content active">
+    <div class="header-banner">
+      <h1 id="user-greeting">Hey me,</h1>
+      <p id="quote-display">Your health matters. You matter.</p>
+    </div>
 
-  <div class="shield-card" id="main-shield">
-    <div class="shield-header">
-      <div>
-        <span class="blue-dot"></span>
-        <select id="profile-select" onchange="changeProfile(this.value)" style="border:none; font-weight:bold; font-size:1rem;">
-          </select>
+    <div class="shield-container">
+      <div class="shield-header">
+        <div>
+          <span class="blue-dot"></span>
+          <strong id="active-profile-label">Me's Shield</strong>
+        </div>
+        <span id="timer-display" style="color: var(--boundary); font-weight: bold;">03:00:00</span>
       </div>
-      <span id="timer-text" style="color: var(--boundary); font-family: monospace; font-weight: bold;">03:00:00</span>
-    </div>
 
-    <input type="text" class="search-shield" id="main-search" placeholder="Quick-add to Zen Spectrum..." onkeyup="handleSearch(this.value)">
-    
-    <div id="search-results" style="max-height: 300px; overflow-y: auto;"></div>
-  </div>
-
-  <div id="tab-health" class="tab-content hidden" style="padding: 20px;">
-    <div class="shield-card" style="text-align: center;">
-      <h2 style="color: var(--safe); font-size: 3rem;" id="zen-score">85</h2>
-      <p>Zen Score</p>
-      <button class="btn-primary" onclick="syncHealthData()" style="margin-top:10px; padding:10px; background:var(--primary); color:white; border:none; border-radius:10px;">Sync Activity</button>
+      <input type="text" class="search-box" id="shield-search" 
+             placeholder="Quick-add to Zen Spectrum..." onkeyup="processSearch(this.value)">
+      
+      <div id="results-area"></div>
+      
+      <div id="emergency-box" style="margin-top:20px; background:#FEF3C7; padding:15px; border-radius:15px; font-size:0.8rem; color:#92400E;">
+        <strong>Emergency Relief Guide:</strong> Stay calm. Use antihistamines or EpiPen if prescribed. Contact emergency services if severe.
+      </div>
     </div>
   </div>
 
-  <div id="tab-scan" class="tab-content hidden" style="padding: 20px;">
-      <video id="camera-preview" style="width:100%; border-radius:20px; background:black;"></video>
-      <div id="scan-feedback" style="margin-top:10px;"></div>
+  <div id="tab-scan" class="tab-content">
+    <video id="scanner-view" style="width:100%; border-radius:20px; background:black;"></video>
   </div>
-
-  <div id="insight-modal" class="modal">
-    <div class="modal-content" id="modal-body"></div>
+  <div id="tab-safe" class="tab-content"><h2>Your Safe List</h2><div id="safe-list-container"></div></div>
+  <div id="tab-health" class="tab-content">
+      <div class="shield-container" style="text-align:center;">
+          <h1 style="font-size:3rem; color:var(--primary);" id="zen-score-val">85</h1>
+          <p>Zen Score</p>
+          <button onclick="syncSteps()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:20px; margin-top:15px;">Sync Activity</button>
+      </div>
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-btn" onclick="switchTab('home')"><span>🏠</span>Home</button>
-    <button class="nav-btn" onclick="switchTab('safe')"><span>✅</span>Safe</button>
-    <button class="nav-btn nav-scan" onclick="startCamera()"><span>📷</span></button>
-    <button class="nav-btn" onclick="switchTab('health')"><span>📈</span>Health</button>
-    <button class="nav-btn" onclick="openEmergency()"><span>•••</span>More</button>
+    <button class="nav-item active" onclick="switchTab('home')"><span>🏠</span>Home</button>
+    <button class="nav-item" onclick="switchTab('safe')"><span>✅</span>Safe</button>
+    <button class="nav-item nav-center" onclick="startScan()"><span>📷</span></button>
+    <button class="nav-item" onclick="switchTab('health')"><span>📈</span>Health</button>
+    <button class="nav-item" onclick="window.location.href='profile.html'"><span>⚙️</span>Profile</button>
   </nav>
 
   <script>
-    // --- MASTER LOGIC ---
-    let appData = {
-      activeProfile: localStorage.getItem('az_profile') || 'Son',
-      profiles: {
-        'Son': { color: '#3B82F6', dislikes: [], red: ['Peanuts'], amber: ['Dairy'], green: ['Apple'] },
-        'Me': { color: '#8E55A2', dislikes: [], red: ['Shellfish'], amber: ['Soy'], green: ['Banana'] }
+    // --- MASTER DATA ENGINE ---
+    const allergyZEN = {
+      profile: JSON.parse(localStorage.getItem('az_user')) || { name: 'Me', dislikes: [], allergens: [] },
+      expiry: localStorage.getItem('az_expiry') || null,
+      
+      init() {
+        document.getElementById('user-greeting').innerText = `Hey ${this.profile.name.toLowerCase()},`;
+        document.getElementById('active-profile-label').innerText = `${this.profile.name}'s Shield`;
+        this.runTimer();
+        setInterval(() => this.runTimer(), 1000);
       },
-      expiry: localStorage.getItem('az_expiry') || null
+
+      runTimer() {
+        if (!this.expiry) return;
+        const remaining = this.expiry - Date.now();
+        if (remaining <= 0) {
+          document.getElementById('timer-display').innerText = "EXPIRED";
+          return;
+        }
+        const h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
+        const m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
+        const s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+        document.getElementById('timer-display').innerText = `${h}:${m}:${s}`;
+      }
     };
 
-    function init() {
-      // Setup profile dropdown
-      const sel = document.getElementById('profile-select');
-      Object.keys(appData.profiles).forEach(p => {
-        sel.innerHTML += `<option value="${p}" ${p === appData.activeProfile ? 'selected' : ''}>${p}'s Shield</option>`;
-      });
-      updateUI();
-      startTimerLoop();
-    }
+    // --- SEARCH & RED-FIRST SORTING ---
+    function processSearch(query) {
+      const area = document.getElementById('results-area');
+      if (query.length < 2) { area.innerHTML = ''; return; }
 
-    function updateUI() {
-      const p = appData.profiles[appData.activeProfile];
-      document.getElementById('greeting').innerText = `Hey ${appData.activeProfile.toLowerCase()},`;
-      document.documentElement.style.setProperty('--primary', p.color);
-    }
-
-    function changeProfile(val) {
-      appData.activeProfile = val;
-      localStorage.setItem('az_profile', val);
-      updateUI();
-    }
-
-    // --- SEARCH & SORTING (RED-FIRST) ---
-    function handleSearch(query) {
-      if(query.length < 2) { document.getElementById('search-results').innerHTML = ''; return; }
-      
-      // Mock Database for example
-      const mockDB = [
-        { name: 'Walnuts', cat: 'red' },
-        { name: 'Milk', cat: 'amber' },
-        { name: 'Unknown Preservative', cat: 'unknown' },
-        { name: 'Carrot', cat: 'green' }
+      // Dummy DB for search logic
+      const db = [
+        { name: 'Peanut Oil', type: 'red' },
+        { name: 'Wenge Wood Dust', type: 'amber' },
+        { name: 'Lactose', type: 'amber' },
+        { name: 'Pure Water', type: 'green' }
       ];
 
-      // SORTING LOGIC: Red > Amber > Unknown > Green
-      const sorted = mockDB.sort((a,b) => {
-        const order = { 'red': 1, 'amber': 2, 'unknown': 3, 'green': 4 };
-        return order[a.cat] - order[b.cat];
-      });
+      const filtered = db.filter(i => i.name.toLowerCase().includes(query.toLowerCase()))
+                         .sort((a, b) => {
+                           const p = { 'red': 1, 'amber': 2, 'green': 3 };
+                           return p[a.type] - p[b.type];
+                         });
 
-      let html = '';
-      sorted.forEach(item => {
-        html += `
-          <div class="result-item" onclick="openInsight('${item.name}', '${item.cat}')">
-            <span>${item.name}</span>
-            <span class="status-${item.cat}">${item.cat.toUpperCase()}</span>
-          </div>`;
-      });
-      document.getElementById('search-results').innerHTML = html;
+      area.innerHTML = filtered.map(item => `
+        <div class="result-row">
+          <span>${item.name}</span>
+          <span class="tag tag-${item.type}">${item.type}</span>
+        </div>
+      `).join('');
     }
 
-    // --- ZEN INSIGHT MODAL ---
-    function openInsight(name, cat) {
-      const modal = document.getElementById('insight-modal');
-      const body = document.getElementById('modal-body');
-      
-      let content = `<h2>${name}</h2>`;
-      if(cat === 'red' || cat === 'amber') {
-        content += `<p style="color:red">🔴 Hidden Trigger Risk</p><p>Symptom: Inflammation/Rash</p>`;
-      } else {
-        content += `<p style="color:green">🟢 Zen Food</p><p>Texture: Crisp | Cooking: Raw/Roasted</p>`;
-      }
-      
-      content += `<br><button onclick="toggleDislike('${name}')" style="background:#eee; border:none; padding:10px; border-radius:10px; margin-right:5px;">👎 Dislike</button>`;
-      content += `<button onclick="closeModal()" style="background:var(--primary); color:white; border:none; padding:10px; border-radius:10px;">Quick-Add to Spectrum</button>`;
-      
-      body.innerHTML = content;
-      modal.style.display = 'flex';
+    // --- NAVIGATION LOGIC ---
+    function switchTab(id) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
     }
 
-    function toggleDislike(name) {
-      const p = appData.profiles[appData.activeProfile];
-      if(!p.dislikes.includes(name)) p.dislikes.push(name);
-      alert(`${name} added to Dislikes. Meal plans will exclude this.`);
-      closeModal();
-    }
-
-    function closeModal() { document.getElementById('insight-modal').style.display = 'none'; }
-
-    // --- CAMERA LOGIC (FIXED) ---
-    async function startCamera() {
+    async function startScan() {
       switchTab('scan');
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        document.getElementById('camera-preview').srcObject = stream;
-        document.getElementById('camera-preview').play();
-        // Start 3-hour timer on scan
-        appData.expiry = Date.now() + (3 * 60 * 60 * 1000);
-        localStorage.setItem('az_expiry', appData.expiry);
-      } catch (err) {
-        alert("Camera Error: Please allow permissions in settings.");
-      }
+        document.getElementById('scanner-view').srcObject = stream;
+        document.getElementById('scanner-view').play();
+        // Trigger 3-hour handshake
+        const threeHours = Date.now() + (3 * 60 * 60 * 1000);
+        localStorage.setItem('az_expiry', threeHours);
+        allergyZEN.expiry = threeHours;
+      } catch (e) { alert("Camera blocked. Please check phone settings."); }
     }
 
-    // --- TIMER LOOP ---
-    function startTimerLoop() {
-      setInterval(() => {
-        if(!appData.expiry) return;
-        const diff = appData.expiry - Date.now();
-        if(diff <= 0) {
-          document.getElementById('timer-text').innerText = "00:00:00 - EXPIRED";
-          return;
-        }
-        const h = Math.floor(diff/3600000).toString().padStart(2,'0');
-        const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
-        const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
-        document.getElementById('timer-text').innerText = `${h}:${m}:${s}`;
-      }, 1000);
+    function syncSteps() {
+      alert("Syncing with health data... Please allow 'Motion & Fitness' in your phone settings.");
     }
 
-    function switchTab(t) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      if(document.getElementById(`tab-${t}`)) document.getElementById(`tab-${t}`).classList.remove('hidden');
-      if(t !== 'scan') {
-          const video = document.getElementById('camera-preview');
-          if(video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
-      }
-    }
-
-    function openEmergency() {
-        alert("Emergency Relief: Use EpiPen if prescribed. Call Emergency Services. Move to '...' menu.");
-    }
-
-    init();
+    allergyZEN.init();
   </script>
 </body>
 </html>
