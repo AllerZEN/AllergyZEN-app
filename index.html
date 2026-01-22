@@ -2,903 +2,276 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#8E55A2">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>allergyZEN Wellness Assistant</title>
-  <link rel="icon" href="/images/allergyzen-logo.png">
-  <link rel="apple-touch-icon" href="/images/allergyzen-logo.png">
+  <title>allergyZEN | Bulletproof Shield</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  
   <style>
     :root {
       --primary: #8E55A2;
-      --primary-light: #A77BB8;
-      --safe-green: #22C55E;
-      --caution-amber: #F97316;
-      --danger-red: #EF4444;
-      --boundary-blue: #3B82F6;
-      --background: #FAFAFA;
+      --danger: #EF4444;
+      --caution: #F97316;
+      --safe: #22C55E;
+      --boundary: #3B82F6;
+      --bg: #FAFAFA;
       --card: #FFFFFF;
-      --text: #1F2937;
-      --text-muted: #6B7280;
-      --border: #E5E7EB;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, sans-serif; background: var(--bg); color: #1F2937; padding-bottom: 90px; }
+
+    /* Decluttered Header & Profile Scroll */
+    .profile-scroll {
+      background: linear-gradient(135deg, #A77BB8 0%, var(--primary) 100%);
+      color: white;
+      padding: 25px 20px;
+      overflow-y: auto;
+      max-height: 180px;
     }
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    .profile-avatar {
+      width: 50px; height: 50px; border-radius: 50%; border: 2px solid white;
+      background: #eee; object-fit: cover; margin-bottom: 10px;
     }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--background);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-    
-    .header {
+
+    /* The Shield Card (Centerpiece) */
+    .shield-card {
       background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    
-    .header-content {
-      max-width: 480px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .logo {
-      height: 40px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .logo:active {
-      transform: scale(0.95);
-    }
-    
-    .settings-btn {
-      background: none;
-      border: none;
-      padding: 8px;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-    
-    .settings-btn:hover {
-      background: var(--border);
-    }
-    
-    .main {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    
-    .greeting {
-      margin-bottom: 24px;
+      margin: -20px 15px 15px 15px;
       padding: 20px;
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-      border-radius: 16px;
-      color: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid #eee;
     }
+
+    .shield-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     
-    .greeting h1 {
-      font-size: 1.5rem;
-      margin-bottom: 8px;
+    /* Pulsing Blue Dot */
+    .blue-dot {
+      width: 12px; height: 12px; background: var(--boundary); border-radius: 50%;
+      display: inline-block; animation: pulse 2s infinite;
     }
-    
-    .greeting p {
-      opacity: 0.9;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .profile-selector {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    
-    .profile-dropdown {
-      flex: 1;
-      padding: 10px 12px;
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      font-size: 1rem;
-      background: var(--card);
-      cursor: pointer;
-    }
-    
-    .profile-dropdown:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-    
-    .profile-actions {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .btn {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: var(--primary-light);
-    }
-    
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    
-    .btn-outline:hover {
-      background: var(--border);
-    }
-    
-    .btn-danger {
-      background: var(--danger-red);
-      color: white;
-    }
-    
-    .zen-score {
-      text-align: center;
-      padding: 24px;
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      border-radius: 12px;
-      margin-bottom: 16px;
-    }
-    
-    .zen-score-value {
-      font-size: 3rem;
-      font-weight: 700;
-      color: var(--safe-green);
-    }
-    
-    .zen-score-label {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    
-    .zen-score-info {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 8px;
-      padding: 8px;
-      background: white;
-      border-radius: 8px;
-    }
-    
-    .timer-card {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      border: 2px solid var(--boundary-blue);
-    }
-    
-    .timer-display {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--boundary-blue);
-      text-align: center;
-      margin: 12px 0;
-    }
-    
-    .shield-status {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 8px;
-      border-radius: 8px;
-      font-weight: 500;
-    }
-    
-    .shield-protected {
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--safe-green);
-    }
-    
-    .shield-confirmed {
-      background: rgba(59, 130, 246, 0.2);
-      color: var(--boundary-blue);
-      animation: glow 2s ease-in-out infinite;
-    }
-    
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
-      50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
-    }
-    
-    .shield-inactive {
-      background: rgba(107, 114, 128, 0.1);
-      color: var(--text-muted);
-    }
-    
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    
-    .dot-red { background: var(--danger-red); }
-    .dot-amber { background: var(--caution-amber); }
-    .dot-green { background: var(--safe-green); }
-    .dot-blue { background: var(--boundary-blue); }
-    
-    .dot-pulse {
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.1); }
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
+
+    /* Quick-Add Search Bar */
+    .search-shield {
+      width: 100%; padding: 14px; border-radius: 30px; border: 2px solid #eee;
+      font-size: 1rem; transition: border-color 0.3s;
+    }
+    .search-shield:focus { outline: none; border-color: var(--primary); }
+
+    /* Result Sorting Styles */
+    .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .status-red { color: var(--danger); font-weight: bold; }
+    .status-amber { color: var(--caution); }
+    .status-green { color: var(--safe); }
     
     /* Bottom Navigation */
     .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      padding: 8px 0;
-      padding-bottom: env(safe-area-inset-bottom, 8px);
-      z-index: 100;
+      position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
+      background: white; border-top: 1px solid #eee;
+      display: flex; justify-content: space-around; align-items: center; z-index: 1000;
     }
-    
-    .nav-content {
-      max-width: 480px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-around;
-    }
-    
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 8px 16px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.7rem;
-      transition: all 0.2s;
-    }
-    
-    .nav-item.active {
-      color: var(--primary);
-    }
-    
-    .nav-item.center {
-      background: var(--primary);
-      color: white;
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      margin-top: -20px;
-      box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3);
-    }
-    
-    .nav-icon {
-      font-size: 1.25rem;
-    }
-    
-    /* Tabs Content */
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    /* Emergency Card - Static, Non-Floating */
-    .emergency-card {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border: 1px solid #fbbf24;
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-    }
-    
-    .emergency-title {
-      font-weight: 600;
-      color: #92400e;
-      margin-bottom: 8px;
-    }
-    
-    .emergency-text {
-      font-size: 0.875rem;
-      color: #a16207;
-      line-height: 1.5;
-    }
-    
-    /* Item chips */
-    .chip-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      background: var(--border);
-    }
-    
-    .chip-red { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger-red); }
-    .chip-amber { background: rgba(249, 115, 22, 0.1); border: 1px solid var(--caution-amber); }
-    .chip-green { background: rgba(34, 197, 94, 0.1); border: 1px solid var(--safe-green); }
-    .chip-blue { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--boundary-blue); }
-    
-    /* Hidden by default */
-    .hidden { display: none !important; }
+    .nav-btn { background: none; border: none; font-size: 0.75rem; color: #6B7280; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .nav-btn.active { color: var(--primary); font-weight: bold; }
+    .nav-scan { background: var(--primary) !important; color: white !important; width: 60px; height: 60px; border-radius: 50%; margin-top: -30px; box-shadow: 0 4px 12px rgba(142,85,162,0.4); }
+
+    /* Insight Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-content { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; text-align: center; }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <img src="/images/allergyzen-logo.png" alt="allergyZEN" class="logo" onclick="goHome()">
-      <button class="settings-btn" onclick="openSettings()">
-        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-        </svg>
-      </button>
-    </div>
-  </header>
 
-  <!-- Main Content -->
-  <main class="main">
-    <!-- HOME TAB -->
-    <div id="tab-home" class="tab-content active">
-      <!-- Greeting -->
-      <div class="greeting">
-        <h1 id="greeting-name">Hey there,</h1>
-        <p id="greeting-quote">Loading your zen space...</p>
-      </div>
+  <div class="profile-scroll">
+    <img id="active-photo" src="logo.png" class="profile-avatar">
+    <h1 id="greeting">Hey son,</h1>
+    <p>Your safety window is ready.</p>
+  </div>
 
-      <!-- Emergency Card - Static at top -->
-      <div class="emergency-card">
-        <div class="emergency-title">Emergency Relief Guide</div>
-        <div class="emergency-text">
-          If you're experiencing a reaction, stay calm. Access antihistamines, use your EpiPen if prescribed, and contact emergency services if symptoms are severe.
-        </div>
-      </div>
-
-      <!-- Profile Selector -->
-      <div class="card">
-        <div class="card-title">
-          <span class="dot dot-green"></span>
-          Active Profile
-        </div>
-        <div class="profile-selector">
-          <select id="profile-select" class="profile-dropdown" onchange="switchProfile(this.value)">
-            <!-- Populated by JS -->
+  <div class="shield-card" id="main-shield">
+    <div class="shield-header">
+      <div>
+        <span class="blue-dot"></span>
+        <select id="profile-select" onchange="changeProfile(this.value)" style="border:none; font-weight:bold; font-size:1rem;">
           </select>
-        </div>
-        <div class="profile-actions">
-          <button class="btn btn-outline" onclick="addProfile()">+ Add</button>
-          <button class="btn btn-outline" onclick="editProfile()">Edit</button>
-          <button class="btn btn-outline" onclick="deleteProfile()" id="delete-profile-btn">Delete</button>
-        </div>
       </div>
-
-      <!-- Zen Score -->
-      <div class="zen-score">
-        <div class="zen-score-value" id="zen-score">85</div>
-        <div class="zen-score-label">Zen Score</div>
-        <div class="zen-score-info">
-          Measures safety based on scans and active 3-hour handshakes (+20% bonus)
-        </div>
-      </div>
-
-      <!-- Protection Timer (shown when active) -->
-      <div id="timer-card" class="card timer-card hidden">
-        <div class="card-title">
-          <span class="dot dot-blue dot-pulse"></span>
-          Protection Window
-        </div>
-        <div class="timer-display" id="timer-display">00:00:00</div>
-        <div id="shield-status" class="shield-status shield-protected">
-          <span class="dot dot-green dot-pulse"></span>
-          <span id="status-text">PROTECTED</span>
-        </div>
-        <div style="text-align: center; margin-top: 8px; font-size: 0.875rem; color: var(--text-muted);">
-          Connected to: <strong id="business-name">Local Partner</strong>
-        </div>
-      </div>
-
-      <!-- Quick Stats -->
-      <div class="card">
-        <div class="card-title">Your Shield Summary</div>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
-          <div>
-            <span class="dot dot-red"></span>
-            <div id="red-count" style="font-weight: 600;">0</div>
-            <div style="font-size: 0.7rem; color: var(--text-muted);">Blocked</div>
-          </div>
-          <div>
-            <span class="dot dot-amber"></span>
-            <div id="amber-count" style="font-weight: 600;">0</div>
-            <div style="font-size: 0.7rem; color: var(--text-muted);">Caution</div>
-          </div>
-          <div>
-            <span class="dot dot-green"></span>
-            <div id="green-count" style="font-weight: 600;">0</div>
-            <div style="font-size: 0.7rem; color: var(--text-muted);">Safe</div>
-          </div>
-          <div>
-            <span class="dot dot-blue"></span>
-            <div id="blue-count" style="font-weight: 600;">0</div>
-            <div style="font-size: 0.7rem; color: var(--text-muted);">Boundaries</div>
-          </div>
-        </div>
-      </div>
+      <span id="timer-text" style="color: var(--boundary); font-family: monospace; font-weight: bold;">03:00:00</span>
     </div>
 
-    <!-- SCAN TAB -->
-    <div id="tab-scan" class="tab-content">
-      <div class="card">
-        <div class="card-title">Scan Hub</div>
-        <input type="text" id="search-input" placeholder="Search foods, chemicals, textiles..." 
-          style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
-        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <button class="btn btn-primary" style="flex: 1;" onclick="scanBarcode()">Scan Product</button>
-          <button class="btn btn-outline" style="flex: 1;" onclick="scanBusinessQR()">Business QR</button>
-        </div>
-        <div id="search-results"></div>
-      </div>
-    </div>
+    <input type="text" class="search-shield" id="main-search" placeholder="Quick-add to Zen Spectrum..." onkeyup="handleSearch(this.value)">
+    
+    <div id="search-results" style="max-height: 300px; overflow-y: auto;"></div>
+  </div>
 
-    <!-- SAFE TAB -->
-    <div id="tab-safe" class="tab-content">
-      <div class="card">
-        <div class="card-title">
-          <span class="dot dot-green"></span>
-          Safe List
-        </div>
-        <div id="safe-items" class="chip-container">
-          <!-- Populated by JS -->
-        </div>
-      </div>
+  <div id="tab-health" class="tab-content hidden" style="padding: 20px;">
+    <div class="shield-card" style="text-align: center;">
+      <h2 style="color: var(--safe); font-size: 3rem;" id="zen-score">85</h2>
+      <p>Zen Score</p>
+      <button class="btn-primary" onclick="syncHealthData()" style="margin-top:10px; padding:10px; background:var(--primary); color:white; border:none; border-radius:10px;">Sync Activity</button>
     </div>
+  </div>
 
-    <!-- BLOCKED TAB -->
-    <div id="tab-blocked" class="tab-content">
-      <div class="card" style="border-color: var(--danger-red);">
-        <div class="card-title">
-          <span class="dot dot-red"></span>
-          Blocked (Anaphylaxis Risk)
-        </div>
-        <div id="red-items" class="chip-container">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-      <div class="card" style="border-color: var(--caution-amber);">
-        <div class="card-title">
-          <span class="dot dot-amber"></span>
-          Caution (Sensitivity)
-        </div>
-        <div id="amber-items" class="chip-container">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-    </div>
+  <div id="tab-scan" class="tab-content hidden" style="padding: 20px;">
+      <video id="camera-preview" style="width:100%; border-radius:20px; background:black;"></video>
+      <div id="scan-feedback" style="margin-top:10px;"></div>
+  </div>
 
-    <!-- NOTES TAB -->
-    <div id="tab-notes" class="tab-content">
-      <div class="card">
-        <div class="card-title">My allerZEN Notes</div>
-        <button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="addNote()">+ Add Note</button>
-        <div id="notes-list"></div>
-      </div>
-      
-      <!-- Trial Day Tracker -->
-      <div class="card">
-        <div class="card-title">Trial Day Tracker</div>
-        <button class="btn btn-outline" style="width: 100%; margin-bottom: 16px;" onclick="addTrial()">+ Log Trial</button>
-        <div id="trials-list"></div>
-      </div>
-    </div>
-  </main>
+  <div id="insight-modal" class="modal">
+    <div class="modal-content" id="modal-body"></div>
+  </div>
 
-  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <div class="nav-content">
-      <button class="nav-item" onclick="switchTab('scan')">
-        <span class="nav-icon">&#128269;</span>
-        <span>Scan</span>
-      </button>
-      <button class="nav-item" onclick="switchTab('safe')">
-        <span class="nav-icon">&#9989;</span>
-        <span>Safe</span>
-      </button>
-      <button class="nav-item center" onclick="switchTab('home')">
-        <span class="nav-icon">&#127968;</span>
-      </button>
-      <button class="nav-item" onclick="switchTab('blocked')">
-        <span class="nav-icon">&#128683;</span>
-        <span>Blocked</span>
-      </button>
-      <button class="nav-item" onclick="switchTab('notes')">
-        <span class="nav-icon">&#128221;</span>
-        <span>Notes</span>
-      </button>
-    </div>
+    <button class="nav-btn" onclick="switchTab('home')"><span>🏠</span>Home</button>
+    <button class="nav-btn" onclick="switchTab('safe')"><span>✅</span>Safe</button>
+    <button class="nav-btn nav-scan" onclick="startCamera()"><span>📷</span></button>
+    <button class="nav-btn" onclick="switchTab('health')"><span>📈</span>Health</button>
+    <button class="nav-btn" onclick="openEmergency()"><span>•••</span>More</button>
   </nav>
 
-  <!-- Scripts -->
-  <script src="/js/profile.js"></script>
   <script>
-    // Motivational quotes
-    const quotes = [
-      "Every meal is an opportunity for peace.",
-      "You're doing amazing - one scan at a time.",
-      "Your health is your superpower.",
-      "Knowledge is the first step to freedom.",
-      "Today is a good day to feel safe.",
-      "Your body, your rules, your zen.",
-      "Small steps lead to big changes.",
-      "Trust your journey to wellness.",
-      "You've got this. We've got your back.",
-      "Breathe. You're protected."
-    ];
+    // --- MASTER LOGIC ---
+    let appData = {
+      activeProfile: localStorage.getItem('az_profile') || 'Son',
+      profiles: {
+        'Son': { color: '#3B82F6', dislikes: [], red: ['Peanuts'], amber: ['Dairy'], green: ['Apple'] },
+        'Me': { color: '#8E55A2', dislikes: [], red: ['Shellfish'], amber: ['Soy'], green: ['Banana'] }
+      },
+      expiry: localStorage.getItem('az_expiry') || null
+    };
 
-    // Initialize app
     function init() {
-      loadProfiles();
-      loadSelectedChips();
-      updateGreeting();
-      updateZenScore();
-      updateTimer();
-      setInterval(updateTimer, 1000);
-      switchTab('home');
-    }
-
-    // Update greeting
-    function updateGreeting() {
-      const profile = userProfile.getActiveProfile();
-      const name = profile?.name || "Friend";
-      document.getElementById('greeting-name').textContent = `Hey ${name},`;
-      document.getElementById('greeting-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
-    }
-
-    // Load profiles into dropdown
-    function loadProfiles() {
-      const select = document.getElementById('profile-select');
-      select.innerHTML = '';
-      userProfile.profiles.forEach((p, i) => {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = `${p.name}'s Shield`;
-        if (i === userProfile.session.activeProfileIndex) {
-          option.selected = true;
-        }
-        select.appendChild(option);
+      // Setup profile dropdown
+      const sel = document.getElementById('profile-select');
+      Object.keys(appData.profiles).forEach(p => {
+        sel.innerHTML += `<option value="${p}" ${p === appData.activeProfile ? 'selected' : ''}>${p}'s Shield</option>`;
       });
-      
-      // Hide delete button for primary profile
-      document.getElementById('delete-profile-btn').style.display = 
-        userProfile.session.activeProfileIndex === 0 ? 'none' : 'inline-block';
+      updateUI();
+      startTimerLoop();
     }
 
-    // Switch profile - THE CRITICAL FUNCTION
-    function switchProfile(index) {
-      userProfile.switchProfile(parseInt(index));
-      loadSelectedChips();
-      updateGreeting();
-      updateZenScore();
-      loadProfiles();
+    function updateUI() {
+      const p = appData.profiles[appData.activeProfile];
+      document.getElementById('greeting').innerText = `Hey ${appData.activeProfile.toLowerCase()},`;
+      document.documentElement.style.setProperty('--primary', p.color);
     }
 
-    // Load chips for current profile
-    function loadSelectedChips() {
-      const profile = userProfile.getActiveProfile();
-      if (!profile || !profile.items) return;
-
-      // Update counts
-      document.getElementById('red-count').textContent = profile.items.red?.length || 0;
-      document.getElementById('amber-count').textContent = profile.items.amber?.length || 0;
-      document.getElementById('green-count').textContent = profile.items.green?.length || 0;
-      document.getElementById('blue-count').textContent = profile.items.blue?.length || 0;
-
-      // Render chips
-      renderChips('red-items', profile.items.red, 'red');
-      renderChips('amber-items', profile.items.amber, 'amber');
-      renderChips('safe-items', profile.items.green, 'green');
+    function changeProfile(val) {
+      appData.activeProfile = val;
+      localStorage.setItem('az_profile', val);
+      updateUI();
     }
 
-    function renderChips(containerId, items, color) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
+    // --- SEARCH & SORTING (RED-FIRST) ---
+    function handleSearch(query) {
+      if(query.length < 2) { document.getElementById('search-results').innerHTML = ''; return; }
       
-      if (!items || items.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem;">No items yet</div>';
-        return;
-      }
+      // Mock Database for example
+      const mockDB = [
+        { name: 'Walnuts', cat: 'red' },
+        { name: 'Milk', cat: 'amber' },
+        { name: 'Unknown Preservative', cat: 'unknown' },
+        { name: 'Carrot', cat: 'green' }
+      ];
 
-      container.innerHTML = items.map(item => `
-        <div class="chip chip-${color}">
-          <span class="dot dot-${color}"></span>
-          ${item.name || item}
-          <button onclick="removeItem('${item.name || item}', '${color}')" style="background: none; border: none; cursor: pointer; margin-left: 4px;">&times;</button>
-        </div>
-      `).join('');
+      // SORTING LOGIC: Red > Amber > Unknown > Green
+      const sorted = mockDB.sort((a,b) => {
+        const order = { 'red': 1, 'amber': 2, 'unknown': 3, 'green': 4 };
+        return order[a.cat] - order[b.cat];
+      });
+
+      let html = '';
+      sorted.forEach(item => {
+        html += `
+          <div class="result-item" onclick="openInsight('${item.name}', '${item.cat}')">
+            <span>${item.name}</span>
+            <span class="status-${item.cat}">${item.cat.toUpperCase()}</span>
+          </div>`;
+      });
+      document.getElementById('search-results').innerHTML = html;
     }
 
-    function removeItem(name, color) {
-      userProfile.removeItem(name, color);
-      loadSelectedChips();
-      updateZenScore();
-    }
-
-    // Zen Score
-    function updateZenScore() {
-      const profile = userProfile.getActiveProfile();
-      if (!profile || !profile.items) {
-        document.getElementById('zen-score').textContent = '0';
-        return;
-      }
-
-      const green = profile.items.green?.length || 0;
-      const total = (profile.items.red?.length || 0) + (profile.items.amber?.length || 0) + green;
+    // --- ZEN INSIGHT MODAL ---
+    function openInsight(name, cat) {
+      const modal = document.getElementById('insight-modal');
+      const body = document.getElementById('modal-body');
       
-      let score = total > 0 ? Math.round((green / Math.max(total, 1)) * 100) : 50;
-      
-      // +20% bonus for active handshake
-      if (userProfile.isProtectionActive()) {
-        score = Math.min(100, score + 20);
-      }
-
-      document.getElementById('zen-score').textContent = score;
-    }
-
-    // Timer
-    function updateTimer() {
-      const remaining = userProfile.getProtectionTimeRemaining();
-      const timerCard = document.getElementById('timer-card');
-      
-      if (remaining <= 0) {
-        timerCard.classList.add('hidden');
-        return;
-      }
-
-      timerCard.classList.remove('hidden');
-      
-      const hours = Math.floor(remaining / (1000 * 60 * 60));
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-      
-      document.getElementById('timer-display').textContent = 
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-      const status = userProfile.checkStatus();
-      const statusEl = document.getElementById('shield-status');
-      const statusText = document.getElementById('status-text');
-      const businessName = document.getElementById('business-name');
-
-      statusText.textContent = status;
-      businessName.textContent = userProfile.session?.protectionWindow?.businessName || 'Local Partner';
-
-      if (status === 'CONFIRMED') {
-        statusEl.className = 'shield-status shield-confirmed';
-      } else if (status === 'PROTECTED') {
-        statusEl.className = 'shield-status shield-protected';
+      let content = `<h2>${name}</h2>`;
+      if(cat === 'red' || cat === 'amber') {
+        content += `<p style="color:red">🔴 Hidden Trigger Risk</p><p>Symptom: Inflammation/Rash</p>`;
       } else {
-        statusEl.className = 'shield-status shield-inactive';
+        content += `<p style="color:green">🟢 Zen Food</p><p>Texture: Crisp | Cooking: Raw/Roasted</p>`;
+      }
+      
+      content += `<br><button onclick="toggleDislike('${name}')" style="background:#eee; border:none; padding:10px; border-radius:10px; margin-right:5px;">👎 Dislike</button>`;
+      content += `<button onclick="closeModal()" style="background:var(--primary); color:white; border:none; padding:10px; border-radius:10px;">Quick-Add to Spectrum</button>`;
+      
+      body.innerHTML = content;
+      modal.style.display = 'flex';
+    }
+
+    function toggleDislike(name) {
+      const p = appData.profiles[appData.activeProfile];
+      if(!p.dislikes.includes(name)) p.dislikes.push(name);
+      alert(`${name} added to Dislikes. Meal plans will exclude this.`);
+      closeModal();
+    }
+
+    function closeModal() { document.getElementById('insight-modal').style.display = 'none'; }
+
+    // --- CAMERA LOGIC (FIXED) ---
+    async function startCamera() {
+      switchTab('scan');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        document.getElementById('camera-preview').srcObject = stream;
+        document.getElementById('camera-preview').play();
+        // Start 3-hour timer on scan
+        appData.expiry = Date.now() + (3 * 60 * 60 * 1000);
+        localStorage.setItem('az_expiry', appData.expiry);
+      } catch (err) {
+        alert("Camera Error: Please allow permissions in settings.");
       }
     }
 
-    // Tab switching
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-      
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      event?.target?.closest('.nav-item')?.classList.add('active');
-    }
-
-    // Profile management
-    function addProfile() {
-      const name = prompt('Enter profile name (e.g., Son, Daughter):');
-      if (name) {
-        userProfile.addFamilyMember(name);
-        loadProfiles();
-      }
-    }
-
-    function editProfile() {
-      const profile = userProfile.getActiveProfile();
-      const newName = prompt('Enter new name:', profile?.name);
-      if (newName) {
-        userProfile.updateProfileName(userProfile.session.activeProfileIndex, newName);
-        loadProfiles();
-        updateGreeting();
-      }
-    }
-
-    function deleteProfile() {
-      if (confirm('Delete this profile? This cannot be undone.')) {
-        userProfile.deleteProfile(userProfile.session.activeProfileIndex);
-        loadProfiles();
-        loadSelectedChips();
-        updateGreeting();
-      }
-    }
-
-    // Navigation
-    function goHome() {
-      switchTab('home');
-    }
-
-    function openSettings() {
-      window.location.href = '/view.html';
-    }
-
-    // Scanning (placeholder)
-    function scanBarcode() {
-      alert('Barcode scanning coming soon!');
-    }
-
-    function scanBusinessQR() {
-      const businessId = prompt('Enter Business ID (or scan QR):');
-      const businessName = prompt('Enter Business Name:');
-      if (businessId && businessName) {
-        userProfile.startProtectionWindow(businessId, businessName);
-        updateTimer();
-        updateZenScore();
-        alert(`Connected to ${businessName}! Your 3-hour protection window has started.`);
-      }
-    }
-
-    // Notes
-    function addNote() {
-      const meal = prompt('What did you eat?');
-      if (!meal) return;
-      
-      const feelings = prompt('How did you feel after?');
-      const rating = parseInt(prompt('Rate 1-5:') || '3');
-      
-      userProfile.addNote({
-        mealDescription: meal,
-        feelings: feelings || '',
-        textures: '',
-        rating: Math.min(5, Math.max(1, rating))
-      });
-      
-      loadNotes();
-    }
-
-    function loadNotes() {
-      const notes = userProfile.getNotes();
-      const container = document.getElementById('notes-list');
-      
-      if (notes.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted);">No notes yet</div>';
-        return;
-      }
-
-      container.innerHTML = notes.map(note => `
-        <div style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;">
-          <div style="font-weight: 500;">${note.mealDescription}</div>
-          <div style="font-size: 0.875rem; color: var(--text-muted);">${note.feelings}</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
-            ${new Date(note.date).toLocaleDateString()}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Trials
-    function addTrial() {
-      const food = prompt('What food are you trialing?');
-      if (!food) return;
-      
-      userProfile.addTrial(food);
-      loadTrials();
-    }
-
-    function loadTrials() {
-      const trials = userProfile.getTrials();
-      const container = document.getElementById('trials-list');
-      
-      if (trials.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted);">No trials logged</div>';
-        return;
-      }
-
-      container.innerHTML = trials.map(trial => `
-        <div style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;">
-          <div style="font-weight: 500;">${trial.foodItem}</div>
-          <div style="margin-top: 8px; display: flex; gap: 8px;">
-            ${trial.status === 'pending' ? `
-              <button class="btn btn-outline" style="flex: 1;" onclick="markTrial('${trial.id}', 'liked')">Liked</button>
-              <button class="btn btn-outline" style="flex: 1;" onclick="markTrial('${trial.id}', 'disliked')">Disliked</button>
-            ` : `
-              <span style="color: ${trial.status === 'liked' ? 'var(--safe-green)' : 'var(--danger-red)'};">
-                ${trial.status === 'liked' ? 'Liked' : 'Disliked'}
-              </span>
-              ${trial.status === 'liked' ? `
-                <button class="btn btn-primary" onclick="moveToSafe('${trial.id}')">Move to Safe</button>
-              ` : ''}
-            `}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function markTrial(id, status) {
-      const result = userProfile.updateTrialStatus(id, status);
-      loadTrials();
-      
-      if (result.suggestMove) {
-        if (confirm('Great! Would you like to add this to your Safe List?')) {
-          moveToSafe(id);
+    // --- TIMER LOOP ---
+    function startTimerLoop() {
+      setInterval(() => {
+        if(!appData.expiry) return;
+        const diff = appData.expiry - Date.now();
+        if(diff <= 0) {
+          document.getElementById('timer-text').innerText = "00:00:00 - EXPIRED";
+          return;
         }
+        const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+        const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+        const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+        document.getElementById('timer-text').innerText = `${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    function switchTab(t) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      if(document.getElementById(`tab-${t}`)) document.getElementById(`tab-${t}`).classList.remove('hidden');
+      if(t !== 'scan') {
+          const video = document.getElementById('camera-preview');
+          if(video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
       }
     }
 
-    function moveToSafe(id) {
-      userProfile.moveTrialToSafeList(id);
-      loadTrials();
-      loadSelectedChips();
-      updateZenScore();
+    function openEmergency() {
+        alert("Emergency Relief: Use EpiPen if prescribed. Call Emergency Services. Move to '...' menu.");
     }
 
-    // Initialize
     init();
-    loadNotes();
-    loadTrials();
   </script>
 </body>
 </html>
