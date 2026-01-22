@@ -2,131 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>allergyZEN | Wellness App</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#8E55A2">
+  <title>allergyZEN - Launchpad</title>
+  <link rel="stylesheet" href="/style.css"> 
   <style>
-    /* RESTORING BRAND IDENTITY */
     :root {
-      --az-purple: #8E55A2;
-      --az-soft-purple: #F5F0F8;
-      --az-text: #2D3748;
-      --az-border: #E2E8F0;
+      --primary: #8E55A2;
+      --primary-light: #A77BB8;
+      --safe-green: #22C55E;
+      --caution-amber: #F97316;
+      --danger-red: #EF4444;
+      --boundary-blue: #3B82F6;
+      --background: #FAFAFA;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --border: #E5E7EB;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
-    body { background: #FFFFFF; color: var(--az-text); padding-bottom: 100px; }
-
-    /* LOGO & HEADER RESTORATION */
-    .brand-header {
-      padding: 20px; text-align: center; background: white;
-    }
-    .main-logo { width: 120px; margin-bottom: 10px; }
-    
-    .greeting-section {
-      padding: 0 20px 20px;
-    }
-    .greeting-section h1 { font-size: 24px; color: var(--az-text); }
-    .greeting-section p { font-style: italic; color: #718096; font-size: 14px; }
-    .sensitivity-counter { color: #8E55A2; font-weight: bold; margin-top: 5px; font-size: 13px; }
-
-    /* THE HIGH-FIDELITY SHIELD CARD */
-    .shield-card {
-      margin: 15px; background: var(--az-soft-purple);
-      border-radius: 24px; padding: 20px; position: relative;
-    }
-    .user-pill {
-      background: white; border-radius: 20px; padding: 10px 15px;
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .protection-status { font-size: 11px; font-weight: bold; color: #48BB78; }
-
-    /* SEARCH ENGINE UI */
-    .search-container { margin-top: 15px; }
-    .search-input {
-      width: 100%; padding: 15px 45px; border-radius: 15px;
-      border: 1px solid var(--az-border); background: white url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') no-repeat 15px center;
-    }
-
-    /* NAVIGATION BAR (MATCHING SCREENSHOT 1000122497) */
-    .bottom-nav {
-      position: fixed; bottom: 0; width: 100%; background: white;
-      height: 85px; display: flex; justify-content: space-around;
-      align-items: center; border-top: 1px solid #F1F5F9; z-index: 1000;
-    }
-    .nav-btn { border: none; background: none; color: #94A3B8; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .nav-btn.active { color: var(--az-purple); }
-    .nav-btn-center {
-      background: var(--az-purple); color: white; width: 55px; height: 55px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      margin-top: -45px; box-shadow: 0 8px 20px rgba(142, 85, 162, 0.4);
-    }
-
-    /* RESULT STYLING */
-    .result-item {
-      background: white; margin-top: 10px; padding: 15px; border-radius: 12px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .add-btn {
-      border: 1px solid #E2E8F0; padding: 6px 12px; border-radius: 8px; font-size: 12px;
-    }
+    body { font-family: sans-serif; background: var(--background); color: var(--text); padding-bottom: 80px; }
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px; text-align: center; }
+    .logo { height: 40px; cursor: pointer; }
+    .main { max-width: 480px; margin: 0 auto; padding: 16px; }
+    .greeting { background: linear-gradient(135deg, var(--primary-light), var(--primary)); padding: 20px; border-radius: 16px; color: white; margin-bottom: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .timer-card { border: 2px solid var(--boundary-blue); background: #eff6ff; }
+    .timer-display { font-size: 2rem; font-weight: 700; color: var(--boundary-blue); text-align: center; }
+    .search-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-around; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border:none; background:none; }
+    .nav-item.center { background: var(--primary); color: white; width: 56px; height: 56px; border-radius: 50%; margin-top: -25px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.3); }
+    .hidden { display: none !important; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-blue { background: var(--boundary-blue); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
 
-  <div class="brand-header">
-    <img src="logo.png" alt="allergyZEN" class="main-logo">
-    <div style="display:flex; justify-content:center; gap:5px;">
-      <span style="color:#48BB78">●</span><span style="color:#F6AD55">●</span><span style="color:#F56565">●</span>
-    </div>
-  </div>
+  <header class="header">
+    <img src="/images/allergyzen-logo.png" alt="allergyZEN" class="logo">
+  </header>
 
-  <div class="greeting-section">
-    <h1>Hey son ,</h1>
-    <p>Safety and serenity, hand in hand.</p>
-    <div class="sensitivity-counter">Tracking 243 sensitivities</div>
-  </div>
-
-  <div class="shield-card">
-    <div class="user-pill">
-      <span><strong>Me's Shield</strong></span>
-      <span class="protection-status">● PROTECTED</span>
+  <main class="main">
+    <div class="greeting">
+      <h1 id="greeting-name">Hey there,</h1>
+      <p id="greeting-quote">Breathe. You're protected.</p>
     </div>
 
-    <div class="search-container">
-      <input type="text" class="search-input" placeholder="Milk" onkeyup="searchSensitivities(this.value)">
-    </div>
-
-    <div id="results-engine">
+    <div id="timer-card" class="card timer-card hidden">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+        <span class="dot dot-blue"></span>
+        <strong style="color:var(--boundary-blue)">Handshake Active</strong>
       </div>
-  </div>
+      <div class="timer-display" id="timer-display">03:00:00</div>
+      <p style="text-align:center; font-size:0.8rem; margin-top:8px;" id="business-info">Connected to Partner</p>
+    </div>
+
+    <div class="card">
+      <h3>Your Active Shield</h3>
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center; margin-top:15px;">
+        <div><div class="dot" style="background:var(--danger-red)"></div><div id="red-count">0</div></div>
+        <div><div class="dot" style="background:var(--caution-amber)"></div><div id="amber-count">0</div></div>
+        <div><div class="dot" style="background:var(--safe-green)"></div><div id="green-count">0</div></div>
+        <div><div class="dot" style="background:var(--boundary-blue)"></div><div id="blue-count">0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Quick Search</h3>
+      <input type="text" id="search-input" class="search-input" placeholder="Search 1,750+ allergens...">
+      <div id="search-results" style="margin-top:10px;"></div>
+    </div>
+  </main>
 
   <nav class="bottom-nav">
-    <button class="nav-btn"><span>🔍</span>Scan</button>
-    <button class="nav-btn"><span>🛡️</span>Safe</button>
-    <button class="nav-btn-center" onclick="window.location.reload()"><span style="font-size:24px;">🏠</span></button>
-    <button class="nav-btn"><span>💙</span>Boundaries</button>
-    <button class="nav-btn"><span>📊</span>ZenHealth</button>
+    <button class="nav-item" onclick="location.href='/view.html'"><span>🔍</span><span>Scan</span></button>
+    <button class="nav-item"><span>✅</span><span>Safe</span></button>
+    <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
+    <button class="nav-item"><span>🚫</span><span>Blocked</span></button>
+    <button class="nav-item" onclick="location.href='/view.html'"><span>⚙️</span><span>Profile</span></button>
   </nav>
 
+  <script src="/js/profile.js"></script>
   <script>
-    // THE 243 SENSITIVITIES ENGINE (Medicinal, Woods, Fermented, etc.) [cite: 2026-01-16]
-    function searchSensitivities(q) {
-      const engine = document.getElementById('results-engine');
-      if(q.toLowerCase().includes('milk')) {
-        engine.innerHTML = `
-          <div class="result-item">
-            <div><strong>Condensed milk</strong><br><small style="color:gray">Food & Drink</small></div>
-            <button class="add-btn">Add to Red List</button>
-          </div>
-          <div class="result-item">
-            <div><strong>Cow's milk</strong><br><small style="color:gray">Food & Drink</small></div>
-            <button class="add-btn">Add to Red List</button>
-          </div>
-        `;
-      } else { engine.innerHTML = ''; }
+    let allergenList = [];
+
+    // Load the 1,750 items
+    async function initSearch() {
+      try {
+        const response = await fetch('/data/allergens.json');
+        allergenList = await response.json();
+      } catch (e) {
+        console.warn("Allergen database not loaded yet.");
+      }
     }
+
+    function updateUI() {
+      const profile = userProfile.getActiveProfile();
+      if (!profile) return;
+
+      document.getElementById('greeting-name').textContent = `Hey ${profile.name},`;
+      
+      // Update counts
+      document.getElementById('red-count').textContent = profile.items.red.length;
+      document.getElementById('amber-count').textContent = profile.items.amber.length;
+      document.getElementById('green-count').textContent = profile.items.green.length;
+      document.getElementById('blue-count').textContent = profile.items.blue.length;
+    }
+
+    function updateTimerDisplay() {
+      const remaining = userProfile.getProtectionTimeRemaining();
+      const card = document.getElementById('timer-card');
+      
+      if (remaining > 0) {
+        card.classList.remove('hidden');
+        const h = Math.floor(remaining / 3600000);
+        const m = Math.floor((remaining % 3600000) / 60000);
+        const s = Math.floor((remaining % 60000) / 1000);
+        document.getElementById('timer-display').textContent = 
+          `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        document.getElementById('business-info').textContent = `Connected to ${userProfile.session.protectionWindow.businessName}`;
+      } else {
+        card.classList.add('hidden');
+      }
+    }
+
+    // Search Logic
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const val = e.target.value.toLowerCase();
+      const results = document.getElementById('search-results');
+      if (val.length < 2) { results.innerHTML = ''; return; }
+
+      const matches = allergenList.filter(i => i.name.toLowerCase().includes(val)).slice(0, 5);
+      results.innerHTML = matches.map(m => `
+        <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+          <span>${m.name} <small>(${m.category})</small></span>
+          <button onclick="userProfile.addItem('${m.name}', '${m.category}', 'red'); updateUI();" style="color:var(--primary); background:none; border:none; cursor:pointer;">+ Add</button>
+        </div>
+      `).join('');
+    });
+
+    // Initialize
+    window.onload = () => {
+      userProfile.init();
+      updateUI();
+      initSearch();
+      setInterval(updateTimerDisplay, 1000);
+    };
   </script>
 </body>
 </html>
