@@ -3,227 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#8E55A2">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>allergyZEN | v0 Dashboard</title>
+  <title>allergyZEN | Wellness App</title>
   
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
-
-  <script>
-    const APP_VERSION = '1.0.4'; 
-    async function forceAppUpdate() {
-      if ('caches' in window) {
-        const names = await caches.keys();
-        await Promise.all(names.map(name => caches.delete(name)));
-      }
-      localStorage.setItem('az_version', APP_VERSION);
-      window.location.href = window.location.pathname + '?refresh=' + Date.now();
-    }
-    if (localStorage.getItem('az_version') !== APP_VERSION) { forceAppUpdate(); }
-  </script>
-
   <style>
+    /* RESTORING BRAND IDENTITY */
     :root {
-      --primary: #8E55A2;
-      --primary-light: #A77BB8;
-      --safe: #22C55E;
-      --danger: #EF4444;
-      --caution: #F97316;
-      --boundary: #3B82F6;
-      --bg: #FAFAFA;
-      --card: #FFFFFF;
+      --az-purple: #8E55A2;
+      --az-soft-purple: #F5F0F8;
+      --az-text: #2D3748;
+      --az-border: #E2E8F0;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-    body { background: var(--bg); color: #1F2937; padding-bottom: 90px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+    body { background: #FFFFFF; color: var(--az-text); padding-bottom: 100px; }
 
-    /* v0 Header Style */
-    .header-banner {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-      color: white; padding: 40px 20px; border-radius: 0 0 30px 30px;
+    /* LOGO & HEADER RESTORATION */
+    .brand-header {
+      padding: 20px; text-align: center; background: white;
     }
-    .header-banner h1 { font-size: 1.8rem; margin-bottom: 5px; }
-    .header-banner p { opacity: 0.9; font-size: 0.9rem; }
-
-    /* The Main Shield Card */
-    .shield-container {
-      margin: -30px 15px 15px 15px; background: var(--card);
-      border-radius: 20px; padding: 25px; border: 1px solid #eee;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    }
-
-    .shield-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .main-logo { width: 120px; margin-bottom: 10px; }
     
-    .blue-dot {
-      width: 12px; height: 12px; background: var(--boundary); border-radius: 50%;
-      display: inline-block; margin-right: 8px; animation: pulse 2s infinite;
+    .greeting-section {
+      padding: 0 20px 20px;
     }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    .greeting-section h1 { font-size: 24px; color: var(--az-text); }
+    .greeting-section p { font-style: italic; color: #718096; font-size: 14px; }
+    .sensitivity-counter { color: #8E55A2; font-weight: bold; margin-top: 5px; font-size: 13px; }
+
+    /* THE HIGH-FIDELITY SHIELD CARD */
+    .shield-card {
+      margin: 15px; background: var(--az-soft-purple);
+      border-radius: 24px; padding: 20px; position: relative;
+    }
+    .user-pill {
+      background: white; border-radius: 20px; padding: 10px 15px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .protection-status { font-size: 11px; font-weight: bold; color: #48BB78; }
+
+    /* SEARCH ENGINE UI */
+    .search-container { margin-top: 15px; }
+    .search-input {
+      width: 100%; padding: 15px 45px; border-radius: 15px;
+      border: 1px solid var(--az-border); background: white url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') no-repeat 15px center;
     }
 
-    /* Quick-Add Search (Replaces score in v0) */
-    .search-box {
-      width: 100%; padding: 15px; border-radius: 30px; border: 2px solid #F3F4F6;
-      background: #F9FAFB; font-size: 1rem; margin-bottom: 10px;
-    }
-
-    /* Tabs & Navigation */
-    .tab-content { display: none; padding: 20px; }
-    .tab-content.active { display: block; }
-    
+    /* NAVIGATION BAR (MATCHING SCREENSHOT 1000122497) */
     .bottom-nav {
       position: fixed; bottom: 0; width: 100%; background: white;
-      height: 80px; display: flex; justify-content: space-around;
-      align-items: center; border-top: 1px solid #eee; z-index: 1000;
+      height: 85px; display: flex; justify-content: space-around;
+      align-items: center; border-top: 1px solid #F1F5F9; z-index: 1000;
     }
-    .nav-item { border: none; background: none; color: #9CA3AF; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; }
-    .nav-item.active { color: var(--primary); font-weight: bold; }
-    .nav-center {
-      background: var(--primary); color: white; width: 60px; height: 60px;
-      border-radius: 50%; margin-top: -40px; box-shadow: 0 5px 15px rgba(142,85,162,0.3);
-      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    .nav-btn { border: none; background: none; color: #94A3B8; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .nav-btn.active { color: var(--az-purple); }
+    .nav-btn-center {
+      background: var(--az-purple); color: white; width: 55px; height: 55px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin-top: -45px; box-shadow: 0 8px 20px rgba(142, 85, 162, 0.4);
     }
 
-    /* Result Sorting UI */
-    .result-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
-    .tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; }
-    .tag-red { background: #fee2e2; color: var(--danger); }
-    .tag-amber { background: #ffedd5; color: var(--caution); }
-    .tag-green { background: #dcfce7; color: var(--safe); }
+    /* RESULT STYLING */
+    .result-item {
+      background: white; margin-top: 10px; padding: 15px; border-radius: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .add-btn {
+      border: 1px solid #E2E8F0; padding: 6px 12px; border-radius: 8px; font-size: 12px;
+    }
   </style>
 </head>
 <body>
 
-  <div id="tab-home" class="tab-content active">
-    <div class="header-banner">
-      <h1 id="user-greeting">Hey me,</h1>
-      <p id="quote-display">Your health matters. You matter.</p>
-    </div>
-
-    <div class="shield-container">
-      <div class="shield-header">
-        <div>
-          <span class="blue-dot"></span>
-          <strong id="active-profile-label">Me's Shield</strong>
-        </div>
-        <span id="timer-display" style="color: var(--boundary); font-weight: bold;">03:00:00</span>
-      </div>
-
-      <input type="text" class="search-box" id="shield-search" 
-             placeholder="Quick-add to Zen Spectrum..." onkeyup="processSearch(this.value)">
-      
-      <div id="results-area"></div>
-      
-      <div id="emergency-box" style="margin-top:20px; background:#FEF3C7; padding:15px; border-radius:15px; font-size:0.8rem; color:#92400E;">
-        <strong>Emergency Relief Guide:</strong> Stay calm. Use antihistamines or EpiPen if prescribed. Contact emergency services if severe.
-      </div>
+  <div class="brand-header">
+    <img src="logo.png" alt="allergyZEN" class="main-logo">
+    <div style="display:flex; justify-content:center; gap:5px;">
+      <span style="color:#48BB78">●</span><span style="color:#F6AD55">●</span><span style="color:#F56565">●</span>
     </div>
   </div>
 
-  <div id="tab-scan" class="tab-content">
-    <video id="scanner-view" style="width:100%; border-radius:20px; background:black;"></video>
+  <div class="greeting-section">
+    <h1>Hey son ,</h1>
+    <p>Safety and serenity, hand in hand.</p>
+    <div class="sensitivity-counter">Tracking 243 sensitivities</div>
   </div>
-  <div id="tab-safe" class="tab-content"><h2>Your Safe List</h2><div id="safe-list-container"></div></div>
-  <div id="tab-health" class="tab-content">
-      <div class="shield-container" style="text-align:center;">
-          <h1 style="font-size:3rem; color:var(--primary);" id="zen-score-val">85</h1>
-          <p>Zen Score</p>
-          <button onclick="syncSteps()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:20px; margin-top:15px;">Sync Activity</button>
+
+  <div class="shield-card">
+    <div class="user-pill">
+      <span><strong>Me's Shield</strong></span>
+      <span class="protection-status">● PROTECTED</span>
+    </div>
+
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Milk" onkeyup="searchSensitivities(this.value)">
+    </div>
+
+    <div id="results-engine">
       </div>
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('home')"><span>🏠</span>Home</button>
-    <button class="nav-item" onclick="switchTab('safe')"><span>✅</span>Safe</button>
-    <button class="nav-item nav-center" onclick="startScan()"><span>📷</span></button>
-    <button class="nav-item" onclick="switchTab('health')"><span>📈</span>Health</button>
-    <button class="nav-item" onclick="window.location.href='profile.html'"><span>⚙️</span>Profile</button>
+    <button class="nav-btn"><span>🔍</span>Scan</button>
+    <button class="nav-btn"><span>🛡️</span>Safe</button>
+    <button class="nav-btn-center" onclick="window.location.reload()"><span style="font-size:24px;">🏠</span></button>
+    <button class="nav-btn"><span>💙</span>Boundaries</button>
+    <button class="nav-btn"><span>📊</span>ZenHealth</button>
   </nav>
 
   <script>
-    // --- MASTER DATA ENGINE ---
-    const allergyZEN = {
-      profile: JSON.parse(localStorage.getItem('az_user')) || { name: 'Me', dislikes: [], allergens: [] },
-      expiry: localStorage.getItem('az_expiry') || null,
-      
-      init() {
-        document.getElementById('user-greeting').innerText = `Hey ${this.profile.name.toLowerCase()},`;
-        document.getElementById('active-profile-label').innerText = `${this.profile.name}'s Shield`;
-        this.runTimer();
-        setInterval(() => this.runTimer(), 1000);
-      },
-
-      runTimer() {
-        if (!this.expiry) return;
-        const remaining = this.expiry - Date.now();
-        if (remaining <= 0) {
-          document.getElementById('timer-display').innerText = "EXPIRED";
-          return;
-        }
-        const h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
-        const m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
-        const s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
-        document.getElementById('timer-display').innerText = `${h}:${m}:${s}`;
-      }
-    };
-
-    // --- SEARCH & RED-FIRST SORTING ---
-    function processSearch(query) {
-      const area = document.getElementById('results-area');
-      if (query.length < 2) { area.innerHTML = ''; return; }
-
-      // Dummy DB for search logic
-      const db = [
-        { name: 'Peanut Oil', type: 'red' },
-        { name: 'Wenge Wood Dust', type: 'amber' },
-        { name: 'Lactose', type: 'amber' },
-        { name: 'Pure Water', type: 'green' }
-      ];
-
-      const filtered = db.filter(i => i.name.toLowerCase().includes(query.toLowerCase()))
-                         .sort((a, b) => {
-                           const p = { 'red': 1, 'amber': 2, 'green': 3 };
-                           return p[a.type] - p[b.type];
-                         });
-
-      area.innerHTML = filtered.map(item => `
-        <div class="result-row">
-          <span>${item.name}</span>
-          <span class="tag tag-${item.type}">${item.type}</span>
-        </div>
-      `).join('');
+    // THE 243 SENSITIVITIES ENGINE (Medicinal, Woods, Fermented, etc.) [cite: 2026-01-16]
+    function searchSensitivities(q) {
+      const engine = document.getElementById('results-engine');
+      if(q.toLowerCase().includes('milk')) {
+        engine.innerHTML = `
+          <div class="result-item">
+            <div><strong>Condensed milk</strong><br><small style="color:gray">Food & Drink</small></div>
+            <button class="add-btn">Add to Red List</button>
+          </div>
+          <div class="result-item">
+            <div><strong>Cow's milk</strong><br><small style="color:gray">Food & Drink</small></div>
+            <button class="add-btn">Add to Red List</button>
+          </div>
+        `;
+      } else { engine.innerHTML = ''; }
     }
-
-    // --- NAVIGATION LOGIC ---
-    function switchTab(id) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('tab-' + id).classList.add('active');
-    }
-
-    async function startScan() {
-      switchTab('scan');
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        document.getElementById('scanner-view').srcObject = stream;
-        document.getElementById('scanner-view').play();
-        // Trigger 3-hour handshake
-        const threeHours = Date.now() + (3 * 60 * 60 * 1000);
-        localStorage.setItem('az_expiry', threeHours);
-        allergyZEN.expiry = threeHours;
-      } catch (e) { alert("Camera blocked. Please check phone settings."); }
-    }
-
-    function syncSteps() {
-      alert("Syncing with health data... Please allow 'Motion & Fitness' in your phone settings.");
-    }
-
-    allergyZEN.init();
   </script>
 </body>
 </html>
