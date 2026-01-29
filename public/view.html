@@ -3,227 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#3B82F6"> <title>allergyZEN - Your Shield</title>
+  <meta name="theme-color" content="#8E55A2">
+  <title>allergyZEN | Profile & Shield</title>
   <link rel="icon" href="/images/allergyzen-logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --primary-blue: #3B82F6;
-      --zen-red: #EF4444;
-      --zen-amber: #F97316;
-      --zen-brown: #78350f; /* Brown for Dislike/Reactivity */
-      --zen-green: #22C55E;
-      --background: #000000; /* High contrast black for 2026 Dark Mode */
-      --card: #111827;
-      --text: #F9FAFB;
-      --text-muted: #9CA3AF;
+      --primary: #8E55A2;
+      --zen-blue: #3b82f6;
+      --high-red: #EF4444;
+      --dislike-brown: #78350f;
+      --safe-green: #22C55E;
     }
+    .zen-gradient { background: linear-gradient(135deg, #8E55A2 0%, #3b82f6 100%); }
+    .dot { width: 14px; height: 14px; border-radius: 50%; }
+    .dot-red { background: var(--high-red); }
+    .dot-brown { background: var(--dislike-brown); }
+    .dot-green { background: var(--safe-green); }
+    .dot-blue { background: var(--zen-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
     
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--background);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    /* The Pulsing Blue Shield */
-    .shield-container {
-      height: 40vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-    }
-
-    .blue-dot {
-      width: 120px;
-      height: 120px;
-      background: var(--primary-blue);
-      border-radius: 50%;
-      box-shadow: 0 0 50px var(--primary-blue);
-      animation: pulse-shield 2s infinite ease-in-out;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-    }
-
     @keyframes pulse-shield {
-      0% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
-      50% { transform: scale(1.1); box-shadow: 0 0 60px rgba(59, 130, 246, 0.9); }
-      100% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(59, 130, 246, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
-
-    /* Handshake Timer */
-    .timer-overlay {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .timer-text {
-      font-size: 2.5rem;
-      font-weight: 900;
-      letter-spacing: -1px;
-    }
-
-    .timer-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--primary-blue);
-      font-weight: 800;
-    }
-
-    /* Grid Layout for Triggers */
-    .zen-spectrum-grid {
-      display: grid;
-      grid-cols-2;
-      gap: 12px;
-      padding: 20px;
-    }
-
-    .trigger-card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 16px;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .dot-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 8px;
-    }
-
-    /* Knowledge Hub Section */
-    .hub-section {
-      padding: 20px;
-      background: #0a0a0a;
-      border-top: 1px solid #1f2937;
-    }
-
-    .hub-title {
-      font-size: 0.9rem;
-      font-weight: 900;
-      color: var(--text-muted);
-      margin-bottom: 15px;
-      text-transform: uppercase;
-    }
-
-    .tip-card {
-      background: #1f2937;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .action-bar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(10px);
-      padding: 15px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-action {
-      flex: 1;
-      padding: 15px;
-      border-radius: 15px;
-      border: none;
-      font-weight: 900;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-    }
+    .active-shield { animation: pulse-shield 2s infinite ease-in-out; }
   </style>
 </head>
-<body>
+<body class="bg-slate-50 font-sans text-slate-900">
 
-  <div class="shield-container">
-    <div class="blue-dot">
-      <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
-        <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
-      </svg>
+  <header class="bg-white border-b border-slate-100 p-6 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+        <button onclick="window.location.href='/index.html'" class="text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <h1 class="text-xl font-black uppercase tracking-tighter">My Shield</h1>
     </div>
-    <div class="timer-overlay">
-      <div class="timer-text" id="countdown">02:59:59</div>
-      <div class="timer-label">Handshake Active</div>
-    </div>
-  </div>
+    <select id="duration-select" onchange="updateHandshakeDuration(this.value)" class="bg-slate-100 border-none rounded-xl text-[10px] font-black uppercase p-2 focus:ring-2 ring-blue-500">
+        <option value="30">30 Min</option>
+        <option value="60">1 Hr</option>
+        <option value="180" selected>3 Hr</option>
+        <option value="1440">24 Hr</option>
+    </select>
+  </header>
 
-  <div class="hub-section">
-    <h2 class="hub-title">The Zen Spectrum</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <div class="trigger-card" style="border-left: 4px solid var(--zen-red);">
-        <span class="dot-indicator" style="background: var(--zen-red);"></span>
-        <span style="font-size: 0.8rem; font-weight: 700;">Anaphylaxis (RED)</span>
-      </div>
-      <div class="trigger-card" style="border-left: 4px solid var(--zen-brown);">
-        <span class="dot-indicator" style="background: var(--zen-brown);"></span>
-        <span style="font-size: 0.8rem; font-weight: 700;">Dislike (BROWN)</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="hub-section" id="knowledge-hub">
-    <h2 class="hub-title">Knowledge Hub Tips</h2>
-    <div class="tip-card">
-      <span style="font-size: 1.5rem;">💡</span>
-      <p style="font-size: 0.85rem;">Hidden cross-contamination: Ask if the grill is shared with dairy/soy.</p>
-    </div>
-    <div class="tip-card">
-      <span style="font-size: 1.5rem;">💙</span>
-      <p style="font-size: 0.85rem;">Neutral Environment: The blue dot tells the kitchen to skip the garnish.</p>
-    </div>
-  </div>
-
-  <div class="action-bar">
-    <button class="btn-action" style="background: #333; color: white;" onclick="location.href='profile.html'">Edit Shield</button>
-    <button class="btn-action" style="background: var(--primary-blue); color: white;" onclick="location.href='index.html'">Scan Menu</button>
-  </div>
-
-  <script>
-    // 3-Hour Countdown Logic
-    let timeLeft = 3 * 60 * 60; // Start with 3 hours
+  <main class="max-w-md mx-auto p-4 space-y-6 pb-24">
     
-    // Load preference from localStorage (set in edit-profile.tsx)
-    const savedDuration = localStorage.getItem("zen_handshake_duration");
-    if (savedDuration === "30m") timeLeft = 30 * 60;
-    if (savedDuration === "1h") timeLeft = 60 * 60;
-    if (savedDuration === "24h") timeLeft = 24 * 60 * 60;
+    <div id="shield-card" class="bg-slate-200 rounded-[2.5rem] p-10 text-center transition-all duration-500 relative overflow-hidden">
+      <div id="shield-icon" class="text-6xl mb-4 relative z-10">🛡️</div>
+      <h2 id="shield-status" class="text-2xl font-black uppercase tracking-tighter relative z-10">Shield Inactive</h2>
+      <p id="shield-timer" class="text-xs font-bold opacity-70 uppercase tracking-widest mt-2 relative z-10"></p>
+      <div id="shield-progress" class="absolute bottom-0 left-0 h-2 bg-white/30 transition-all duration-1000" style="width: 0%"></div>
+    </div>
 
-    const timerDisplay = document.getElementById('countdown');
+    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
+      <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Active Spectrum</h3>
+          <button onclick="window.location.href='/edit-profile.tsx'" class="text-[10px] font-black uppercase text-blue-600">Edit Triggers</button>
+      </div>
 
-    function updateTimer() {
-      const hours = Math.floor(timeLeft / 3600);
-      const mins = Math.floor((timeLeft % 3600) / 60);
-      const secs = timeLeft % 60;
-      
-      timerDisplay.innerHTML = 
-        `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      
-      if (timeLeft > 0) {
-        timeLeft--;
+      <div class="space-y-3" id="items-list">
+        </div>
+    </div>
+
+    <div id="safe-swap-box" class="hidden bg-green-50 rounded-[2.5rem] p-6 border-2 border-green-100 animate-in fade-in slide-in-from-bottom-4">
+        <h4 class="text-green-700 font-black uppercase text-[10px] mb-2 tracking-widest">Safe Zen Alternatives</h4>
+        <div id="swap-content" class="text-sm font-bold text-green-900"></div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    import userProfile from '/lib/profile.ts';
+
+    async function loadSwaps() {
+        const response = await fetch('/safe-alternatives.json');
+        return await response.json();
+    }
+
+    function updateUI() {
+      const status = userProfile.checkStatus();
+      const card = document.getElementById('shield-card');
+      const text = document.getElementById('shield-status');
+      const timer = document.getElementById('shield-timer');
+      const progress = document.getElementById('shield-progress');
+
+      if (status === 'PROTECTED') {
+        card.classList.add('bg-blue-600', 'text-white', 'active-shield');
+        card.classList.remove('bg-slate-200', 'text-slate-400');
+        text.textContent = 'Shield Active';
+        
+        const remaining = userProfile.getRemainingProtectionTime();
+        const total = userProfile.session.protectionWindow.durationMs;
+        const percent = (remaining / total) * 100;
+        
+        timer.textContent = `${Math.ceil(remaining / 60000)}m Remaining`;
+        progress.style.width = `${percent}%`;
       } else {
-        timerDisplay.innerHTML = "EXPIRED";
-        timerDisplay.style.color = "var(--zen-red)";
-        document.querySelector('.blue-dot').style.background = "#333";
-        document.querySelector('.blue-dot').style.animation = "none";
+        card.classList.remove('bg-blue-600', 'text-white', 'active-shield');
+        card.classList.add('bg-slate-200', 'text-slate-400');
+        text.textContent = 'Shield Inactive';
+        timer.textContent = 'Scan QR to Protect';
+        progress.style.width = '0%';
+        // Bulletproof Wipe: Clear items from view if shield expires
+        if (status === 'EXPIRED') renderEmpty();
       }
     }
 
-    setInterval(updateTimer, 1000);
-    updateTimer();
+    window.showAlternatives = async (triggerName) => {
+        const data = await loadSwaps();
+        const swap = data.alternatives.find(a => a.trigger.toLowerCase() === triggerName.toLowerCase());
+        const box = document.getElementById('safe-swap-box');
+        const content = document.getElementById('swap-content');
+        
+        if (swap) {
+            box.classList.remove('hidden');
+            content.innerHTML = `Instead of ${triggerName}, try: <span class="underline">${swap.swaps.join(', ')}</span>`;
+        } else {
+            content.innerHTML = "No specific swaps found. Consult the Knowledge Hub.";
+            box.classList.remove('hidden');
+        }
+    };
+
+    function renderItems() {
+      const list = document.getElementById('items-list');
+      const profile = userProfile.getActiveProfile();
+      if (!profile) return;
+
+      let html = '';
+      ['red', 'brown', 'blue'].forEach(tier => {
+        profile.items[tier]?.forEach(item => {
+          html += `
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="dot dot-${tier}"></div>
+                <span class="text-xs font-black uppercase text-slate-700">${item.name}</span>
+              </div>
+              <button onclick="showAlternatives('${item.name}')" class="bg-white p-2 rounded-lg shadow-sm border border-slate-100">
+                <span class="text-[9px] font-black text-blue-600 uppercase">Swaps</span>
+              </button>
+            </div>`;
+        });
+      });
+      list.innerHTML = html || '<p class="text-center font-bold text-slate-300 py-4">Shield is Empty</p>';
+    }
+
+    window.updateHandshakeDuration = (mins) => {
+        userProfile.session.protectionWindow.durationMs = mins * 60 * 1000;
+        userProfile.saveToStorage();
+        updateUI();
+    };
+
+    setInterval(updateUI, 1000);
+    renderItems();
+    updateUI();
   </script>
 </body>
 </html>
