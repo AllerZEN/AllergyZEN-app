@@ -1,354 +1,178 @@
 "use client"
 
-import React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { 
-  User, Users, Plus, Trash2, Search, Check,
-  AlertTriangle, AlertCircle, Heart, Pill, Camera, Palette
+  Users, Plus, Trash2, Search, Timer,
+  AlertTriangle, AlertCircle, Heart, ShieldCheck, X, ChevronRight
 } from "lucide-react"
-import userProfile, { FamilyMember, THEME_COLORS, ThemeColor } from "@/lib/profile"
+import userProfile, { FamilyMember } from "@/lib/profile"
 import allergensData from "@/allergens.json"
+import { cn } from "@/lib/utils"
 
-interface AllergenItem {
-  name: string
-  category: string
-}
-
-type TriggerCategory = "red" | "amber" | "blue"
+type TriggerCategory = "red" | "amber" | "brown" | "blue"
 
 export function EditProfile() {
   const [profiles, setProfiles] = useState<FamilyMember[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
-  const [newName, setNewName] = useState("")
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<TriggerCategory>("red")
+  const [handshakeDuration, setHandshakeDuration] = useState("3h")
   const [mounted, setMounted] = useState(false)
-  const [selectedTheme, setSelectedTheme] = useState<ThemeColor>("purple")
 
   useEffect(() => {
     setMounted(true)
     setProfiles([...userProfile.profiles])
     setActiveIndex(userProfile.session?.activeProfileIndex || 0)
-    setSelectedTheme(userProfile.getThemeColor())
+    setHandshakeDuration(localStorage.getItem("zen_handshake_duration") || "3h")
   }, [])
+
+  // 1,750 Item Search Engine Logic
+  const searchResults = useMemo(() => {
+    if (search.length < 2) return []
+    const allItems = [
+      ...allergensData.high_reactivity.map(i => ({ ...i, type: 'red' })),
+      ...allergensData.moderate_reactivity.map(i => ({ ...i, type: 'amber' })),
+      ...allergensData.no_reactivity.map(i => ({ ...i, type: 'green' }))
+    ]
+    return allItems
+      .filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
+      .slice(0, 10) // Keep it fast on mobile
+  }, [search])
 
   const activeProfile = profiles[activeIndex]
 
-  const allAllergens: AllergenItem[] = [
-    ...(allergensData.high_reactivity || []),
-    ...(allergensData.moderate_reactivity || [])
-  ] as AllergenItem[]
+  const handleHandshakeChange = (val: string) => {
+    setHandshakeDuration(val)
+    localStorage.setItem("zen_handshake_duration", val)
+    // Bulletproof sync: Update profile session window
+    const mins = val === "30m" ? 30 : val === "1h" ? 60 : val === "3h" ? 180 : 1440
+    userProfile.session.protectionWindow.durationMs = mins * 60 * 1000
+    userProfile.saveToStorage()
+  }
 
-  const filteredAllergens = search.trim()
-    ? allAllergens.filter(item =>
-        item.name.toLowerCase().includes(search.toLowerCase().trim())
-      ).slice(0, 20)
-    : []
-
-  const handleAddProfile = () => {
-    if (!newName.trim()) return
-    const member = userProfile.addFamilyMember(newName.trim())
+  const addTrigger = (name: string, cat: TriggerCategory) => {
+    userProfile.addItem(name, "General", cat)
     setProfiles([...userProfile.profiles])
-    setNewName("")
-  }
-
-  const handleRemoveProfile = (index: number) => {
-    if (index === 0) return
-    userProfile.removeFamilyMember(index)
-    setProfiles([...userProfile.profiles])
-    if (activeIndex >= userProfile.profiles.length) {
-      setActiveIndex(0)
-    }
-  }
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const base64 = reader.result as string
-      userProfile.setProfilePhoto(base64)
-      setProfiles([...userProfile.profiles])
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const handleThemeChange = (theme: ThemeColor) => {
-    setSelectedTheme(theme)
-    userProfile.setThemeColor(theme)
-    setProfiles([...userProfile.profiles])
-  }
-
-  const handleSwitchProfile = (index: number) => {
-    setActiveIndex(index)
-    userProfile.switchProfile(index)
-    setSelectedTheme(userProfile.profiles[index]?.themeColor || "purple")
-  }
-
-  const handleAddTrigger = (item: AllergenItem, category: TriggerCategory) => {
-    if (!activeProfile) return
-    
-    const triggerKey = `${category}:${item.name}`
-    const currentAllergies = activeProfile.allergies || []
-    
-    if (!currentAllergies.includes(triggerKey)) {
-      const updated = [...currentAllergies, triggerKey]
-      userProfile.updateAllergies(activeIndex, updated)
-      setProfiles([...userProfile.profiles])
-    }
     setSearch("")
   }
 
-  const handleRemoveTrigger = (trigger: string) => {
-    if (!activeProfile) return
-    
-    const updated = (activeProfile.allergies || []).filter(t => t !== trigger)
-    userProfile.updateAllergies(activeIndex, updated)
+  const removeTrigger = (name: string, cat: TriggerCategory) => {
+    userProfile.removeItem(name, cat)
     setProfiles([...userProfile.profiles])
   }
 
-  const getCategoryIcon = (cat: TriggerCategory) => {
+  const getStyle = (cat: TriggerCategory) => {
     switch (cat) {
-      case "red": return <AlertTriangle className="w-4 h-4 text-red-500" />
-      case "amber": return <AlertCircle className="w-4 h-4 text-orange-500" />
-      case "blue": return <Heart className="w-4 h-4 text-blue-500" />
+      case "red": return { color: "text-red-600", bg: "bg-red-500", label: "Block", icon: AlertTriangle }
+      case "amber": return { color: "text-orange-600", bg: "bg-orange-500", label: "Caution", icon: AlertCircle }
+      case "brown": return { color: "text-[#78350f]", bg: "bg-[#78350f]", label: "Dislike", icon: ShieldCheck }
+      case "blue": return { color: "text-blue-600", bg: "bg-blue-500", label: "Bound", icon: Heart }
     }
   }
 
-  const getCategoryColor = (cat: TriggerCategory) => {
-    switch (cat) {
-      case "red": return "bg-red-500"
-      case "amber": return "bg-orange-500"
-      case "blue": return "bg-blue-500"
-    }
-  }
-
-  const parseTrigger = (trigger: string): { category: TriggerCategory; name: string } => {
-    const [cat, ...rest] = trigger.split(":")
-    return {
-      category: (cat as TriggerCategory) || "red",
-      name: rest.join(":") || trigger
-    }
-  }
-
-  if (!mounted) {
-    return <div className="animate-pulse h-96 bg-muted rounded-lg" />
-  }
+  if (!mounted) return <div className="h-screen bg-slate-50 animate-pulse" />
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
-            Family Profiles
-          </CardTitle>
-          <CardDescription>Manage profiles for yourself and family members</CardDescription>
+    <div className="max-w-md mx-auto space-y-6 pb-24 px-4 pt-4">
+      {/* HANDSHAKE SHIELD */}
+      <Card className="rounded-[2rem] border-none shadow-xl shadow-blue-100/40 bg-white">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <Badge className="bg-blue-600 font-black uppercase tracking-widest text-[10px]">Active Shield</Badge>
+            <Timer className="w-5 h-5 text-blue-600" />
+          </div>
+          <CardTitle className="font-black text-2xl uppercase tracking-tighter pt-2">Handshake Protocol</CardTitle>
+          <CardDescription className="font-bold text-slate-400">Data wipes automatically after your stay.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {profiles.map((profile, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSwitchProfile(idx)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
-                  activeIndex === idx
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                {profile.photoUrl ? (
-                  <img src={profile.photoUrl || "/placeholder.svg"} alt="" className="w-6 h-6 rounded-full object-cover" />
-                ) : (
-                  <User className="w-4 h-4" />
-                )}
-                <span className="font-medium">{profile.name}</span>
-                {idx === 0 && <Badge variant="secondary" className="text-xs">Primary</Badge>}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add child or family member..."
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAddProfile()}
-            />
-            <Button onClick={handleAddProfile} disabled={!newName.trim()}>
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {activeIndex > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
-              onClick={() => handleRemoveProfile(activeIndex)}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Remove {activeProfile?.name}
-            </Button>
-          )}
-
-          {/* Photo Upload */}
-          <div className="pt-4 border-t">
-            <Label className="text-sm font-medium flex items-center gap-2 mb-2">
-              <Camera className="w-4 h-4" /> Profile Photo
-            </Label>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                {activeProfile?.photoUrl ? (
-                  <img src={activeProfile.photoUrl || "/placeholder.svg"} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-8 h-8 text-gray-400" />
-                )}
+        <CardContent>
+          <RadioGroup value={handshakeDuration} onValueChange={handleHandshakeChange} className="grid grid-cols-4 gap-2">
+            {["30m", "1h", "3h", "24h"].map(d => (
+              <div key={d}>
+                <RadioGroupItem value={d} id={d} className="peer sr-only" />
+                <Label htmlFor={d} className="flex h-12 items-center justify-center rounded-2xl border-2 border-slate-50 bg-slate-50 font-black text-xs peer-data-[state=checked]:border-blue-600 peer-data-[state=checked]:bg-white peer-data-[state=checked]:shadow-md transition-all cursor-pointer">
+                  {d.toUpperCase()}
+                </Label>
               </div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-              />
-            </div>
-          </div>
-
-          {/* Theme Selection */}
-          <div className="pt-4 border-t">
-            <Label className="text-sm font-medium flex items-center gap-2 mb-3">
-              <Palette className="w-4 h-4" /> Color Theme
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {(Object.keys(THEME_COLORS) as ThemeColor[]).map(theme => (
-                <button
-                  key={theme}
-                  onClick={() => handleThemeChange(theme)}
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
-                    selectedTheme === theme ? "border-gray-800 scale-110" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: THEME_COLORS[theme].primary }}
-                  title={theme.charAt(0).toUpperCase() + theme.slice(1)}
-                />
-              ))}
-            </div>
-          </div>
+            ))}
+          </RadioGroup>
         </CardContent>
       </Card>
 
-      {activeProfile && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {activeProfile.name}&apos;s Triggers
-            </CardTitle>
-            <CardDescription>
-              Add items to Red (anaphylaxis), Amber (sensitivity), or Blue (boundaries)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2 p-1 bg-muted rounded-lg">
-              {(["red", "amber", "blue"] as TriggerCategory[]).map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-                    selectedCategory === cat
-                      ? `${getCategoryColor(cat)} text-white shadow-sm`
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {getCategoryIcon(cat)}
-                  <span className="capitalize">{cat}</span>
-                </button>
-              ))}
-            </div>
+      {/* SPECTRUM ENGINE */}
+      <Card className="rounded-[2.5rem] border-none shadow-2xl shadow-slate-200/50 bg-white overflow-hidden">
+        <div className="p-8 bg-slate-50 border-b border-slate-100">
+          <h2 className="text-2xl font-black uppercase tracking-tighter mb-6">{activeProfile?.name}'s Spectrum</h2>
+          <div className="grid grid-cols-4 gap-2">
+            {(["red", "amber", "brown", "blue"] as TriggerCategory[]).map(cat => (
+              <button 
+                key={cat} 
+                onClick={() => setSelectedCategory(cat)}
+                className={cn(
+                  "flex flex-col items-center gap-2 p-4 rounded-3xl transition-all border-2",
+                  selectedCategory === cat ? "bg-white border-slate-900 shadow-lg scale-105" : "border-transparent opacity-30"
+                )}
+              >
+                {React.createElement(getStyle(cat).icon, { className: cn("w-6 h-6", getStyle(cat).color) })}
+                <span className="text-[9px] font-black uppercase">{getStyle(cat).label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search allergens, medications, excipients..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {filteredAllergens.length > 0 && (
-              <div className="border rounded-lg max-h-48 overflow-y-auto">
-                {filteredAllergens.map((item, idx) => (
+        <CardContent className="p-8 space-y-6">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
+            <Input 
+              placeholder={`Search 1,750+ items for ${selectedCategory}...`} 
+              className="h-14 pl-12 rounded-2xl border-slate-100 bg-slate-100/50 font-bold focus:bg-white transition-all"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            
+            {/* SEARCH DROPDOWN */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-16 left-0 right-0 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                {searchResults.map((item, i) => (
                   <button
-                    key={idx}
-                    onClick={() => handleAddTrigger(item, selectedCategory)}
-                    className="w-full flex items-center justify-between p-3 hover:bg-muted transition-colors border-b last:border-0 text-left"
+                    key={i}
+                    onClick={() => addTrigger(item.name, selectedCategory)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-none"
                   >
-                    <div>
-                      <p className="font-medium text-sm">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.category}</p>
+                    <div className="flex items-center gap-3">
+                      <div className={cn("w-2 h-2 rounded-full", item.type === 'red' ? 'bg-red-500' : item.type === 'amber' ? 'bg-orange-500' : 'bg-green-500')} />
+                      <span className="font-bold text-slate-700">{item.name}</span>
                     </div>
-                    <Badge className={`${getCategoryColor(selectedCategory)} text-white`}>
-                      Add to {selectedCategory}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                       <span className="text-[10px] font-black text-slate-300 uppercase">Add to {selectedCategory}</span>
+                       <Plus className="w-4 h-4 text-slate-400" />
+                    </div>
                   </button>
                 ))}
+                <button className="w-full p-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
+                  See Safe Alternatives <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
             )}
+          </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Current Triggers</Label>
-              <div className="flex flex-wrap gap-2">
-                {(activeProfile.allergies || []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No triggers added yet</p>
-                ) : (
-                  (activeProfile.allergies || []).map((trigger, idx) => {
-                    const { category, name } = parseTrigger(trigger)
-                    return (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className={`flex items-center gap-1 pr-1 ${
-                          category === "red" ? "border-red-300 bg-red-50 text-red-700" :
-                          category === "amber" ? "border-orange-300 bg-orange-50 text-orange-700" :
-                          "border-blue-300 bg-blue-50 text-blue-700"
-                        }`}
-                      >
-                        <div className={`w-2 h-2 rounded-full ${getCategoryColor(category)}`} />
-                        {name}
-                        <button
-                          onClick={() => handleRemoveTrigger(trigger)}
-                          className="ml-1 p-0.5 rounded hover:bg-black/10"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    )
-                  })
-                )}
-              </div>
+          {/* ACTIVE TRIGGERS */}
+          <div className="space-y-4">
+            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Shield Triggers</Label>
+            <div className="flex flex-wrap gap-2">
+              {userProfile.getItemsByDot(selectedCategory).map((item, idx) => (
+                <Badge key={idx} className={cn("rounded-xl px-4 py-3 border-none font-black text-[11px] uppercase text-white flex gap-2", getStyle(selectedCategory).bg)}>
+                  {item.name}
+                  <button onClick={() => removeTrigger(item.name, selectedCategory)}><X className="w-3 h-3" strokeWidth={4} /></button>
+                </Badge>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Pill className="w-5 h-5 text-primary" />
-            Medicinal Excipients
-          </CardTitle>
-          <CardDescription>Track hidden ingredients in medications</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Use the search above to add medicinal excipients like Lactose, Gelatin, or specific dyes to your trigger list.
-          </p>
+          </div>
         </CardContent>
       </Card>
     </div>
