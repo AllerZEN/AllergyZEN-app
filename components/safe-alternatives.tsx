@@ -1,102 +1,87 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ShieldCheck, ExternalLink, Sparkles } from "lucide-react"
+import { ShieldCheck, ShoppingCart, PlusCircle, FileText, Sparkles, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getAlternativesForProduct, detectProductCategory } from "@/lib/safe-alternatives"
+import { cn } from "@/lib/utils"
 
 interface SafeAlternativesProps {
   productName: string
-  ingredients?: string[]
-  status: "danger" | "warning" | "caution" | "safe"
-  onAlternativeClick?: (alternativeName: string) => void
+  alternatives: any[]
+  onAction?: (action: string, item: string) => void
 }
 
-export function SafeAlternatives({ productName, ingredients = [], status, onAlternativeClick }: SafeAlternativesProps) {
-  if (status === "safe") {
-    return null
-  }
-
-  const category = detectProductCategory(productName, ingredients)
-  const alternatives = getAlternativesForProduct(productName, category)
-
-  if (alternatives.length === 0) {
-    return null
-  }
-
-  const handleClick = (alt: { name: string; brand: string; purchaseUrl?: string }) => {
-    onAlternativeClick?.(`${alt.brand} ${alt.name}`)
-    if (alt.purchaseUrl) {
-      window.open(alt.purchaseUrl, "_blank", "noopener,noreferrer")
-    }
-  }
+export function SafeAlternatives({ productName, alternatives, onAction }: SafeAlternativesProps) {
+  if (!alternatives || alternatives.length === 0) return null
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-      <Card className="border-success/30 bg-success/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-success text-lg">
-            <ShieldCheck className="w-5 h-5" />
-            Safe Alternatives
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">Try these safer options that avoid your triggers</p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {alternatives.map((alt, index) => (
-            <motion.div
-              key={`${alt.brand}-${alt.name}`}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 * index }}
-            >
-              <Card className="bg-card/50 border-success/20 hover:border-success/40 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    {/* Product Image Placeholder */}
-                    <div className="w-16 h-16 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-6 h-6 text-success" />
-                    </div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 px-1">
+        <div className="p-1.5 bg-green-100 rounded-full">
+          <ShieldCheck className="w-4 h-4 text-green-600" />
+        </div>
+        <h3 className="font-bold text-sm uppercase tracking-tight">Safe Swaps for {productName}</h3>
+      </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 className="font-semibold text-foreground leading-tight">{alt.name}</h4>
-                          <p className="text-sm text-muted-foreground">{alt.brand}</p>
-                        </div>
-                        <Badge variant="outline" className="border-success/50 text-success text-xs flex-shrink-0">
-                          Safe
-                        </Badge>
-                      </div>
-
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{alt.description}</p>
-
-                      <div className="mt-2 p-2 rounded bg-success/10 border border-success/20">
-                        <p className="text-xs text-success">
-                          <span className="font-semibold">Why it&apos;s safe:</span> {alt.whyItsSafe}
-                        </p>
-                      </div>
-
-                      {alt.purchaseUrl && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 h-8 text-xs border-success/30 text-success hover:bg-success/10 bg-transparent"
-                          onClick={() => handleClick(alt)}
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          Where to Buy
-                        </Button>
-                      )}
-                    </div>
+      <div className="grid gap-3">
+        {alternatives.map((alt, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card className="border-2 border-green-100 shadow-sm hover:border-green-300 transition-all bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-4 flex gap-4">
+                  <div className="w-20 h-20 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 relative overflow-hidden">
+                    <Sparkles className="absolute top-1 right-1 w-3 h-3 text-green-500" />
+                    <img src={alt.image || "/api/placeholder/80/80"} alt={alt.name} className="w-16 h-16 object-contain" />
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </CardContent>
-      </Card>
-    </motion.div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-black text-slate-900 leading-tight truncate">{alt.name}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{alt.brand}</p>
+                      </div>
+                      <Badge className="bg-green-500 text-white border-none text-[9px] px-1.5 py-0">VERIFIED SAFE</Badge>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{alt.description || "Safe alternative found for your profile."}</p>
+                  </div>
+                </div>
+
+                {/* INTERACTIVE BUTTON BAR */}
+                <div className="grid grid-cols-3 border-t border-slate-50 bg-slate-50/30">
+                  <button 
+                    onClick={() => onAction?.("meal", alt.name)}
+                    className="flex flex-col items-center py-2 gap-1 border-r border-slate-100 hover:bg-green-50 transition-colors"
+                  >
+                    <PlusCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-[9px] font-bold uppercase text-slate-500">Add Meal</span>
+                  </button>
+                  <button 
+                    onClick={() => onAction?.("note", alt.name)}
+                    className="flex flex-col items-center py-2 gap-1 border-r border-slate-100 hover:bg-blue-50 transition-colors"
+                  >
+                    <FileText className="w-4 h-4 text-blue-600" />
+                    <span className="text-[9px] font-bold uppercase text-slate-500">Save Note</span>
+                  </button>
+                  <button 
+                    onClick={() => window.open(alt.purchaseUrl, '_blank')}
+                    className="flex flex-col items-center py-2 gap-1 hover:bg-orange-50 transition-colors"
+                  >
+                    <ShoppingCart className="w-4 h-4 text-orange-600" />
+                    <span className="text-[9px] font-bold uppercase text-slate-500">Shop</span>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   )
 }
