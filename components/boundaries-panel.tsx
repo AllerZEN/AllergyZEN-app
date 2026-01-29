@@ -9,38 +9,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { 
-  Heart, 
-  Utensils, 
-  Droplets, 
-  Layers, 
-  Plus, 
-  X,
-  FileText,
-  CheckCircle2,
-  Thermometer,
-  Palette,
-  Scale,
-  Blend
+  Heart, Utensils, Droplets, Layers, Plus, X,
+  FileText, CheckCircle2, Thermometer, Palette,
+  Scale, Blend, ShieldCheck, Timer
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import userProfile, { type BoundaryPreferences } from "@/lib/profile"
-
-const deconstructionExamples = [
-  { dish: "Lasagna", instruction: "Sauce only, no pasta sheets" },
-  { dish: "Burger", instruction: "Components separated, no bun" },
-  { dish: "Salad", instruction: "Dressing on the side, no croutons" },
-  { dish: "Pasta", instruction: "Plain noodles, sauce separate" },
-  { dish: "Sandwich", instruction: "Fillings only, bread separate" },
-  { dish: "Pizza", instruction: "Toppings on plate, crust separate" }
-]
-
-const temperatureOptions = [
-  { value: "room-temp", label: "Room Temperature Only" },
-  { value: "warm-only", label: "Warm Foods Only" },
-  { value: "cold-only", label: "Cold Foods Only" }
-]
-
-const colorPresets = ["White", "Beige", "Yellow", "Brown", "Green"]
 
 export function BoundariesPanel() {
   const [boundaries, setBoundaries] = useState<BoundaryPreferences>({
@@ -59,12 +33,19 @@ export function BoundariesPanel() {
   })
   const [newNote, setNewNote] = useState("")
   const [saved, setSaved] = useState(false)
+  const [handshakeActive, setHandshakeActive] = useState(false)
 
   useEffect(() => {
     const profile = userProfile.getActiveProfile()
     if (profile?.boundaries) {
       setBoundaries(profile.boundaries)
     }
+    setHandshakeActive(userProfile.isProtectionActive())
+    
+    const interval = setInterval(() => {
+      setHandshakeActive(userProfile.isProtectionActive())
+    }, 2000)
+    return () => clearInterval(interval)
   }, [])
 
   const updateBoundary = <K extends keyof BoundaryPreferences>(
@@ -74,449 +55,124 @@ export function BoundariesPanel() {
     const updated = { ...boundaries, [key]: value }
     setBoundaries(updated)
     userProfile.updateBoundaries(userProfile.session.activeProfileIndex, updated)
-    showSaved()
-  }
-
-  const addCustomNote = () => {
-    if (newNote.trim()) {
-      const updated = {
-        ...boundaries,
-        customNotes: [...boundaries.customNotes, newNote.trim()]
-      }
-      setBoundaries(updated)
-      userProfile.updateBoundaries(userProfile.session.activeProfileIndex, updated)
-      setNewNote("")
-      showSaved()
-    }
-  }
-
-  const removeCustomNote = (index: number) => {
-    const updated = {
-      ...boundaries,
-      customNotes: boundaries.customNotes.filter((_, i) => i !== index)
-    }
-    setBoundaries(updated)
-    userProfile.updateBoundaries(userProfile.session.activeProfileIndex, updated)
-    showSaved()
-  }
-
-  const showSaved = () => {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
   const activeCount = [
-    boundaries.softTextures,
-    boundaries.noSaltSauce,
-    boundaries.deconstructed,
-    boundaries.temperatureSensitive,
-    boundaries.singleColorMeals,
-    boundaries.noMixedTextures,
-    boundaries.specificPortions,
-    boundaries.customNotes.length > 0
+    boundaries.softTextures, boundaries.noSaltSauce,
+    boundaries.deconstructed, boundaries.temperatureSensitive,
+    boundaries.singleColorMeals, boundaries.noMixedTextures,
+    boundaries.specificPortions, boundaries.customNotes.length > 0
   ].filter(Boolean).length
 
   return (
-    <Card className="border-blue-600/30 bg-gradient-to-br from-blue-600/10 to-background">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <span className="text-blue-500">💙</span>
-            ED Boundaries
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            {saved && (
-              <Badge variant="outline" className="text-success border-success/30 gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                Saved
-              </Badge>
-            )}
-            {activeCount > 0 && (
-              <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">
-                {activeCount} active
-              </Badge>
-            )}
-          </div>
-        </div>
-        <CardDescription>
-          Sensory and texture preferences for your Trusted Kitchen Ticket
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        {/* Core Boundaries */}
-        <div className="space-y-3">
-          {/* Soft Textures */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.softTextures 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
+    <div className="space-y-6">
+      {/* Handshake Quick-Action (Bulletproof Requirement) */}
+      {!handshakeActive && activeCount > 0 && (
+        <Card className="border-blue-500 border-2 bg-blue-50 animate-in fade-in slide-in-from-top-4">
+          <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.softTextures ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Utensils className={cn(
-                  "w-4 h-4",
-                  boundaries.softTextures ? "text-blue-600" : "text-muted-foreground"
-                )} />
+              <div className="p-2 bg-blue-500 rounded-full">
+                <ShieldCheck className="w-5 h-5 text-white" />
               </div>
               <div>
-                <Label className="font-medium">Soft Textures Only</Label>
-                <p className="text-xs text-muted-foreground">
-                  No crunchy, hard, or chewy items
-                </p>
+                <p className="text-sm font-black text-blue-900 leading-tight">Activate Protection</p>
+                <p className="text-[10px] font-bold text-blue-600 uppercase">Ready for Business Scan</p>
               </div>
             </div>
-            <Switch
-              checked={boundaries.softTextures}
-              onCheckedChange={(checked) => updateBoundary("softTextures", checked)}
-            />
-          </div>
-
-          {/* No Salt/Sauce */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.noSaltSauce 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.noSaltSauce ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Droplets className={cn(
-                  "w-4 h-4",
-                  boundaries.noSaltSauce ? "text-blue-600" : "text-muted-foreground"
-                )} />
-              </div>
-              <div>
-                <Label className="font-medium">No Salt or Sauce</Label>
-                <p className="text-xs text-muted-foreground">
-                  Plain preparation, seasonings on side
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={boundaries.noSaltSauce}
-              onCheckedChange={(checked) => updateBoundary("noSaltSauce", checked)}
-            />
-          </div>
-
-          {/* Deconstructed */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.deconstructed 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.deconstructed ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Layers className={cn(
-                  "w-4 h-4",
-                  boundaries.deconstructed ? "text-blue-600" : "text-muted-foreground"
-                )} />
-              </div>
-              <div>
-                <Label className="font-medium">Deconstructed Meals</Label>
-                <p className="text-xs text-muted-foreground">
-                  Serve components separately
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={boundaries.deconstructed}
-              onCheckedChange={(checked) => updateBoundary("deconstructed", checked)}
-            />
-          </div>
-          
-          {/* Temperature Sensitive - NEW */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.temperatureSensitive 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.temperatureSensitive ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Thermometer className={cn(
-                  "w-4 h-4",
-                  boundaries.temperatureSensitive ? "text-blue-600" : "text-muted-foreground"
-                )} />
-              </div>
-              <div>
-                <Label className="font-medium">Temperature Sensitive</Label>
-                <p className="text-xs text-muted-foreground">
-                  Specific food temperature needs
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={boundaries.temperatureSensitive}
-              onCheckedChange={(checked) => updateBoundary("temperatureSensitive", checked)}
-            />
-          </div>
-          
-          {/* Single-Color Meals - NEW */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.singleColorMeals 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.singleColorMeals ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Palette className={cn(
-                  "w-4 h-4",
-                  boundaries.singleColorMeals ? "text-blue-600" : "text-muted-foreground"
-                )} />
-              </div>
-              <div>
-                <Label className="font-medium">Single-Color Meals</Label>
-                <p className="text-xs text-muted-foreground">
-                  Prefer foods of one color group
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={boundaries.singleColorMeals}
-              onCheckedChange={(checked) => updateBoundary("singleColorMeals", checked)}
-            />
-          </div>
-          
-          {/* No Mixed Textures - NEW */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.noMixedTextures 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.noMixedTextures ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Blend className={cn(
-                  "w-4 h-4",
-                  boundaries.noMixedTextures ? "text-blue-600" : "text-muted-foreground"
-                )} />
-              </div>
-              <div>
-                <Label className="font-medium">No Mixed Textures</Label>
-                <p className="text-xs text-muted-foreground">
-                  Uniform texture throughout
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={boundaries.noMixedTextures}
-              onCheckedChange={(checked) => updateBoundary("noMixedTextures", checked)}
-            />
-          </div>
-          
-          {/* Specific Portions - NEW */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-lg border-2 transition-all",
-            boundaries.specificPortions 
-              ? "border-blue-600 bg-blue-600/15 shadow-sm" 
-              : "border-border bg-muted/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                boundaries.specificPortions ? "bg-blue-500/20" : "bg-muted"
-              )}>
-                <Scale className={cn(
-                  "w-4 h-4",
-                  boundaries.specificPortions ? "text-blue-600" : "text-muted-foreground"
-                )} />
-              </div>
-              <div>
-                <Label className="font-medium">Specific Portions</Label>
-                <p className="text-xs text-muted-foreground">
-                  Measured/consistent amounts
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={boundaries.specificPortions}
-              onCheckedChange={(checked) => updateBoundary("specificPortions", checked)}
-            />
-          </div>
-        </div>
-        
-        {/* Temperature Preferences (shown when active) */}
-        {boundaries.temperatureSensitive && (
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Temperature preference:</Label>
-            <div className="flex flex-wrap gap-2">
-              {temperatureOptions.map((option) => (
-                <Badge 
-                  key={option.value}
-                  variant={boundaries.temperaturePreference === option.value ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer",
-                    boundaries.temperaturePreference === option.value && "bg-blue-500"
-                  )}
-                  onClick={() => updateBoundary("temperaturePreference", option.value as BoundaryPreferences["temperaturePreference"])}
-                >
-                  {option.label}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Color Preferences (shown when active) */}
-        {boundaries.singleColorMeals && (
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Preferred color group:</Label>
-            <div className="flex flex-wrap gap-2">
-              {colorPresets.map((color) => (
-                <Badge 
-                  key={color}
-                  variant={boundaries.singleColorPreference === color.toLowerCase() ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer",
-                    boundaries.singleColorPreference === color.toLowerCase() && "bg-blue-500"
-                  )}
-                  onClick={() => updateBoundary("singleColorPreference", color.toLowerCase())}
-                >
-                  {color}
-                </Badge>
-              ))}
-            </div>
-            <Input
-              placeholder="Or specify custom color preference..."
-              value={boundaries.singleColorPreference}
-              onChange={(e) => updateBoundary("singleColorPreference", e.target.value)}
-              className="text-sm mt-2"
-            />
-          </div>
-        )}
-        
-        {/* Portion Notes (shown when active) */}
-        {boundaries.specificPortions && (
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Portion requirements:</Label>
-            <Textarea
-              placeholder="e.g., 'Half portions only' or 'Exact 200g servings'"
-              value={boundaries.portionNotes}
-              onChange={(e) => updateBoundary("portionNotes", e.target.value)}
-              className="text-sm min-h-[60px]"
-            />
-          </div>
-        )}
-
-        {/* Deconstruction Examples */}
-        {boundaries.deconstructed && (
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">
-              Example deconstruction requests:
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {deconstructionExamples.slice(0, 4).map((example) => (
-                <Badge 
-                  key={example.dish}
-                  variant="outline" 
-                  className="text-xs border-blue-500/30 cursor-pointer hover:bg-blue-500/10"
-                  onClick={() => updateBoundary("deconstructedNotes", example.instruction)}
-                >
-                  {example.dish}: {example.instruction}
-                </Badge>
-              ))}
-            </div>
-            <Textarea
-              placeholder="Add specific deconstruction notes..."
-              value={boundaries.deconstructedNotes}
-              onChange={(e) => updateBoundary("deconstructedNotes", e.target.value)}
-              className="text-sm min-h-[60px] mt-2"
-            />
-          </div>
-        )}
-
-        {/* Custom Notes */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground flex items-center gap-1">
-            <FileText className="w-3 h-3" />
-            Additional Instructions
-          </Label>
-          
-          {boundaries.customNotes.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {boundaries.customNotes.map((note, index) => (
-                <Badge 
-                  key={index}
-                  variant="secondary"
-                  className="gap-1 pr-1"
-                >
-                  {note}
-                  <button
-                    onClick={() => removeCustomNote(index)}
-                    className="ml-1 p-0.5 rounded-full hover:bg-destructive/20"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-          
-          <div className="flex gap-2">
-            <Textarea
-              placeholder="e.g., 'No food touching on plate' or 'Room temperature only'"
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              className="text-sm min-h-[40px] flex-1"
-            />
             <Button 
               size="sm" 
-              variant="outline"
-              onClick={addCustomNote}
-              disabled={!newNote.trim()}
-              className="shrink-0 bg-transparent"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl"
+              onClick={() => {
+                userProfile.startHandshake(180) // Standard 3-hour handshake
+                window.dispatchEvent(new Event('themeChanged'))
+              }}
             >
-              <Plus className="w-4 h-4" />
+              Start Handshake
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border-blue-100 shadow-xl rounded-[2rem] overflow-hidden">
+        <div className="bg-blue-600 p-6 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-black tracking-tighter flex items-center gap-2">
+              <Heart className="w-6 h-6 fill-white" />
+              BLUE SHIELD
+            </h2>
+            <Badge className="bg-white/20 text-white border-none">{activeCount} Set</Badge>
           </div>
+          <p className="text-xs font-bold opacity-80 uppercase tracking-widest leading-relaxed">
+            Define your sensory & ED boundaries for a shame-free dining experience.
+          </p>
         </div>
 
-        {/* Preview Ticket */}
-        {activeCount > 0 && (
-          <div className="p-3 rounded-lg bg-muted/50 border border-dashed">
-            <p className="text-xs font-medium text-muted-foreground mb-2">
-              Trusted Kitchen Ticket Preview:
-            </p>
-            <div className="space-y-1 text-sm">
-              {boundaries.softTextures && (
-                <p className="text-blue-600">- Soft textures only</p>
+        <CardContent className="p-6 space-y-4">
+          {/* SENSORY TOGGLES */}
+          <div className="grid gap-3">
+            {[
+              { id: "softTextures", label: "Soft Textures Only", icon: Utensils, sub: "No crunchy or hard items" },
+              { id: "noSaltSauce", label: "No Salt or Sauce", icon: Droplets, sub: "Seasonings on side only" },
+              { id: "deconstructed", label: "Deconstructed", icon: Layers, sub: "Serve components separately" },
+              { id: "noMixedTextures", label: "Uniform Texture", icon: Blend, sub: "No chunks or mixed consistency" }
+            ].map((item) => (
+              <div key={item.id} className={cn(
+                "flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer",
+                boundaries[item.id as keyof BoundaryPreferences] ? "border-blue-500 bg-blue-50" : "border-slate-50 bg-slate-50/50"
               )}
-              {boundaries.noSaltSauce && (
-                <p className="text-blue-600">- No salt or sauce</p>
-              )}
-              {boundaries.deconstructed && (
-                <p className="text-blue-600 font-medium">
-                  - DECONSTRUCTED: {boundaries.deconstructedNotes || "Serve components separately"}
-                </p>
-              )}
-              {boundaries.customNotes.map((note, i) => (
-                <p key={i} className="text-blue-600">- {note}</p>
-              ))}
-            </div>
+              onClick={() => updateBoundary(item.id as any, !boundaries[item.id as keyof BoundaryPreferences])}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon className={cn("w-5 h-5", boundaries[item.id as keyof BoundaryPreferences] ? "text-blue-600" : "text-slate-400")} />
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{item.label}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.sub}</p>
+                  </div>
+                </div>
+                <Switch 
+                  checked={!!boundaries[item.id as keyof BoundaryPreferences]} 
+                  className="data-[state=checked]:bg-blue-600"
+                />
+              </div>
+            ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* DECONSTRUCTION NOTES */}
+          {boundaries.deconstructed && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2">
+              <Label className="text-[10px] font-black uppercase text-blue-600 ml-1">Deconstruction Instructions</Label>
+              <Textarea
+                placeholder="e.g. Please put the pasta, sauce, and cheese in three separate bowls."
+                value={boundaries.deconstructedNotes}
+                onChange={(e) => updateBoundary("deconstructedNotes", e.target.value)}
+                className="rounded-xl border-blue-100 focus:ring-blue-500 min-h-[80px]"
+              />
+            </motion.div>
+          )}
+
+          {/* PREVIEW TICKET (The 'Business View' Bridge) */}
+          {activeCount > 0 && (
+            <div className="mt-6 p-5 rounded-[1.5rem] bg-slate-900 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <ShieldCheck className="w-12 h-12" />
+              </div>
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3">Kitchen Ticket Preview</p>
+              <div className="space-y-2 font-mono text-xs uppercase tracking-wider">
+                {boundaries.softTextures && <p className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-400" /> Soft Textures Only</p>}
+                {boundaries.noSaltSauce && <p className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-400" /> No Salt / No Sauce</p>}
+                {boundaries.deconstructed && (
+                  <div className="bg-white/10 p-2 rounded">
+                    <p className="text-blue-300 mb-1">DECONSTRUCT MEAL:</p>
+                    <p className="text-[10px] normal-case italic">{boundaries.deconstructedNotes || "Components separate"}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
