@@ -1,33 +1,27 @@
-// AllergyZEN Profile Management - Master Script v4.5
-// This file manages profile logic, persistence, variable handshakes, and global theming
+// AllergyZEN Profile Management - Master Script v5.0 (2026 Bulletproof Build)
+// Focus: Variable Handshakes, Zen Spectrum Integrity, and Business Privacy Wipe
 
 const STORAGE_KEY = "allergyzen_family_profiles";
-const NOTES_KEY = "allergyzen_personal_notes";
-const TRIALS_KEY = "allergyzen_trials";
+const SETTINGS_KEY = "allergyzen_app_settings";
 
-// Profile Manager
 const userProfile = {
   profiles: [],
   session: {
     activeProfileIndex: 0,
     protectionWindow: {
       startTime: null,
-      durationMs: 3 * 60 * 60 * 1000, // Default 3 hours
-      businessId: null,
+      durationMs: 180 * 60 * 1000, // Default 3 hours
       businessName: null,
-      acknowledged: false,
-      confirmedByBusiness: false
+      handshakeType: "3h", 
+      active: false
     }
   },
-  personalNotes: [],
-  trials: [],
 
-  // Initialize on load
   init() {
     this.loadFromStorage();
     this.cleanupExpiredData();
-    this.setupScannerListeners(); // New: Make buttons "Live"
-    this.applyGlobalTheme(); // New: Make profile color "Stick"
+    this.applyGlobalTheme();
+    this.startGlobalTimer(); // Constant check for Handshake expiry
     return this;
   },
 
@@ -37,231 +31,122 @@ const userProfile = {
       if (stored) {
         const data = JSON.parse(stored);
         this.profiles = data.profiles || [];
-        this.session = data.session || {
-          activeProfileIndex: 0,
-          protectionWindow: {
-            startTime: null,
-            durationMs: 3 * 60 * 60 * 1000,
-            businessId: null,
-            businessName: null,
-            acknowledged: false,
-            confirmedByBusiness: false
-          }
-        };
+        this.session = data.session || this.session;
       }
 
-      // Load personal notes & trials
-      const notesStored = localStorage.getItem(NOTES_KEY);
-      if (notesStored) this.personalNotes = JSON.parse(notesStored);
-      const trialsStored = localStorage.getItem(TRIALS_KEY);
-      if (trialsStored) this.trials = JSON.parse(trialsStored);
-
-      // Create default profile if none exists
       if (this.profiles.length === 0) {
         this.profiles.push({
-          name: "Me",
-          color: "#8E55A2", // Default Primary
-          items: { red: [], amber: [], brown: [], green: [], blue: [] }, // Updated Categories
-          createdAt: new Date().toISOString(),
-          boundaries: { softTextures: false, noSaltSauce: false, deconstructed: false }
+          name: "Primary User",
+          color: "#3B82F6", // Default Zen Blue
+          // FULL ZEN SPECTRUM INITIALIZATION
+          items: { 
+            red: [], // 🔴 Anaphylaxis
+            amber: [], // 🟠 Sensitivity
+            brown: [], // 🟤 Dislike/Intolerance
+            blue: [], // 💙 Sensory Boundary
+            green: [] // 🟢 Safe Alternatives
+          },
+          createdAt: new Date().toISOString()
         });
         this.saveToStorage();
       }
     } catch (e) {
-      console.error("Error loading profiles:", e);
+      console.error("Profile Load Error:", e);
     }
   },
 
   saveToStorage() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        profiles: this.profiles,
-        session: this.session
-      }));
-    } catch (e) {
-      console.error("Error saving profiles:", e);
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      profiles: this.profiles,
+      session: this.session
+    }));
   },
 
-  // NEW: Global Theming Logic
-  applyGlobalTheme() {
-    const activeProfile = this.getActiveProfile();
-    if (activeProfile && activeProfile.color) {
-      document.documentElement.style.setProperty('--profile-theme', activeProfile.color);
-      // Update UI elements that need immediate color sync
-      const homeCircle = document.querySelector('.home-circle');
-      if (homeCircle) homeCircle.style.background = activeProfile.color;
-    }
-  },
-
-  // Profile switching with Sticky Theme
-  switchProfile(index) {
-    if (index >= 0 && index < this.profiles.length) {
-      this.session.activeProfileIndex = index;
-      this.saveToStorage();
-      this.applyGlobalTheme(); // Ensure color sticks immediately
-      
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("profileSwitched", { 
-          detail: { index, profile: this.profiles[index] }
-        }));
-      }
-      return this.profiles[index];
-    }
-    return null;
-  },
-
-  getActiveProfile() {
-    return this.profiles[this.session.activeProfileIndex] || null;
-  },
-
-  // Updated Item management with Brown (Dislike)
-  addItem(itemName, category, dotColor) {
-    const profile = this.getActiveProfile();
-    if (!profile) return false;
-
-    if (!profile.items) {
-      profile.items = { red: [], amber: [], brown: [], green: [], blue: [] };
-    }
-
-    // Clear existing to avoid duplicates across categories
-    ["red", "amber", "brown", "green", "blue"].forEach(color => {
-      if (!profile.items[color]) profile.items[color] = [];
-      profile.items[color] = profile.items[color].filter(i => i.name !== itemName);
-    });
-
-    if (dotColor && profile.items[dotColor]) {
-      profile.items[dotColor].push({
-        name: itemName,
-        category: category,
-        addedAt: new Date().toISOString()
-      });
-    }
-
-    this.saveToStorage();
-    return true;
-  },
-
-  // SCANNER & HANDSHAKE LOGIC
-  setupScannerListeners() {
-    const scanTriggers = ['nav-scan', 'scan-trigger-icon'];
-    
-    scanTriggers.forEach(id => {
-      const btn = document.getElementById(id);
-      if (btn) {
-        btn.onclick = () => this.startScanner();
-      }
-    });
-
-    const closeBtn = document.getElementById('close-scanner');
-    if (closeBtn) {
-        closeBtn.onclick = () => this.stopScanner();
-    }
-  },
-
-  startScanner() {
-    const reader = document.getElementById('reader-container');
-    reader.style.display = 'block';
-
-    this.scanner = new Html5Qrcode("qr-reader");
-    this.scanner.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      (decodedText) => this.handleScanResult(decodedText)
-    ).catch(err => alert("Camera error: Please check permissions."));
-  },
-
-  stopScanner() {
-    if (this.scanner) {
-      this.scanner.stop().then(() => {
-        document.getElementById('reader-container').style.display = 'none';
-      });
-    }
-  },
-
-  handleScanResult(data) {
-    this.stopScanner();
-    // Simulate detecting a Business QR code
-    if (data.includes("business") || data.startsWith("AZ")) {
-        this.openHandshakeModal(data);
-    } else {
-        alert("Product Scanned: " + data + "\nChecking ZEN Spectrum...");
-    }
-  },
-
-  // Variable Handshake: 30m, 1h, 3h, 24h
-  openHandshakeModal(businessId) {
-    const overlay = document.getElementById('modal-overlay');
-    const content = document.getElementById('modal-content');
-    
-    overlay.style.display = 'flex';
-    content.innerHTML = `
-        <h3>🤝 Connect to Business</h3>
-        <p>Choose your handshake duration:</p>
-        <div style="display:grid; gap:10px;">
-            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 30)">30 Minutes</button>
-            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 60)">1 Hour</button>
-            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 180)">3 Hours</button>
-            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 1440)">24 Hours</button>
-            <button class="spec-btn" style="background:#6B7280" onclick="document.getElementById('modal-overlay').style.display='none'">Cancel</button>
-        </div>
-    `;
-  },
-
-  activateHandshake(bizId, minutes) {
+  // HANDSHAKE DURATION LOGIC (30m, 1h, 3h, 24h)
+  activateHandshake(bizName, minutes) {
     const durationMs = minutes * 60 * 1000;
     this.session.protectionWindow = {
       startTime: new Date().toISOString(),
       durationMs: durationMs,
-      businessId: bizId,
-      acknowledged: true,
-      confirmedByBusiness: false
+      businessName: bizName || "Partner Business",
+      handshakeType: this.formatDurationLabel(minutes),
+      active: true
     };
     
     this.saveToStorage();
-    document.getElementById('modal-overlay').style.display = 'none';
-    alert(`Handshake active for ${minutes} minutes! Your Shield is now pulsing.`);
-    
-    if (typeof window.updateProfileUI === "function") window.updateProfileUI();
+    this.triggerShieldPulse();
   },
 
-  getProtectionTimeRemaining() {
-    const start = this.session?.protectionWindow?.startTime;
-    const duration = this.session?.protectionWindow?.durationMs || 0;
-    if (!start) return 0;
-
-    const elapsed = Date.now() - new Date(start).getTime();
-    return Math.max(0, duration - elapsed);
+  formatDurationLabel(min) {
+    if (min === 30) return "30m";
+    if (min === 60) return "1h";
+    if (min === 180) return "3h";
+    if (min === 1440) return "24h";
+    return min + "m";
   },
 
-  isProtectionActive() {
-    return this.getProtectionTimeRemaining() > 0;
+  // THE BULLETPROOF WIPE
+  cleanupExpiredData() {
+    const window = this.session.protectionWindow;
+    if (window.active && window.startTime) {
+      const elapsed = Date.now() - new Date(window.startTime).getTime();
+      if (elapsed >= window.durationMs) {
+        this.forcePrivacyWipe();
+      }
+    }
   },
 
-  // Manual "Un-shake" button
-  clearProtectionWindow() {
+  forcePrivacyWipe() {
     this.session.protectionWindow = {
       startTime: null,
       durationMs: 0,
-      businessId: null,
-      acknowledged: false,
-      confirmedByBusiness: false
+      businessName: null,
+      active: false
     };
     this.saveToStorage();
-    alert("Handshake disconnected. Business data wiped.");
+    console.log("🛡️ Zen Shield: Privacy Wipe Executed. Business access revoked.");
+    
+    // Notify UI if on the Shield Page
+    window.dispatchEvent(new CustomEvent("handshakeExpired"));
   },
 
-  cleanupExpiredData() {
-    if (this.session?.protectionWindow?.startTime && !this.isProtectionActive()) {
-      this.clearProtectionWindow();
+  // SPECTRUM ENGINE: Ensures items go to the right bucket
+  addItemToSpectrum(name, tier) {
+    const profile = this.getActiveProfile();
+    if (!profile || !profile.items[tier]) return;
+
+    // Clean duplicates from other tiers first
+    Object.keys(profile.items).forEach(t => {
+      profile.items[t] = profile.items[t].filter(i => i.name !== name);
+    });
+
+    profile.items[tier].push({
+      name: name,
+      timestamp: Date.now()
+    });
+
+    this.saveToStorage();
+  },
+
+  getActiveProfile() {
+    return this.profiles[this.session.activeProfileIndex];
+  },
+
+  applyGlobalTheme() {
+    const profile = this.getActiveProfile();
+    if (profile) {
+      document.documentElement.style.setProperty('--profile-theme', profile.color);
     }
+  },
+
+  startGlobalTimer() {
+    setInterval(() => this.cleanupExpiredData(), 10000); // Check every 10s
+  },
+
+  triggerShieldPulse() {
+    // Communication with index.html and view.html
+    window.dispatchEvent(new CustomEvent("shieldActivated"));
   }
 };
 
-// Initialize
 userProfile.init();
-
-// Export
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = userProfile;
-}
