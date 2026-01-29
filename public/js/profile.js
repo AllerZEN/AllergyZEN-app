@@ -1,10 +1,9 @@
-// AllergyZEN Profile Management - Vanilla JavaScript
-// This file manages all profile logic, persistence, and the 3-hour handshake
+// AllergyZEN Profile Management - Master Script v4.5
+// This file manages profile logic, persistence, variable handshakes, and global theming
 
 const STORAGE_KEY = "allergyzen_family_profiles";
 const NOTES_KEY = "allergyzen_personal_notes";
 const TRIALS_KEY = "allergyzen_trials";
-const PROTECTION_DURATION_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 // Profile Manager
 const userProfile = {
@@ -13,6 +12,7 @@ const userProfile = {
     activeProfileIndex: 0,
     protectionWindow: {
       startTime: null,
+      durationMs: 3 * 60 * 60 * 1000, // Default 3 hours
       businessId: null,
       businessName: null,
       acknowledged: false,
@@ -26,6 +26,8 @@ const userProfile = {
   init() {
     this.loadFromStorage();
     this.cleanupExpiredData();
+    this.setupScannerListeners(); // New: Make buttons "Live"
+    this.applyGlobalTheme(); // New: Make profile color "Stick"
     return this;
   },
 
@@ -39,6 +41,7 @@ const userProfile = {
           activeProfileIndex: 0,
           protectionWindow: {
             startTime: null,
+            durationMs: 3 * 60 * 60 * 1000,
             businessId: null,
             businessName: null,
             acknowledged: false,
@@ -47,48 +50,25 @@ const userProfile = {
         };
       }
 
-      // Load personal notes
+      // Load personal notes & trials
       const notesStored = localStorage.getItem(NOTES_KEY);
-      if (notesStored) {
-        this.personalNotes = JSON.parse(notesStored);
-      }
-
-      // Load trials
+      if (notesStored) this.personalNotes = JSON.parse(notesStored);
       const trialsStored = localStorage.getItem(TRIALS_KEY);
-      if (trialsStored) {
-        this.trials = JSON.parse(trialsStored);
-      }
+      if (trialsStored) this.trials = JSON.parse(trialsStored);
 
       // Create default profile if none exists
       if (this.profiles.length === 0) {
         this.profiles.push({
           name: "Me",
-          items: { red: [], amber: [], green: [], blue: [] },
+          color: "#8E55A2", // Default Primary
+          items: { red: [], amber: [], brown: [], green: [], blue: [] }, // Updated Categories
           createdAt: new Date().toISOString(),
-          boundaries: {
-            softTextures: false,
-            noSaltSauce: false,
-            deconstructed: false,
-            deconstructedNotes: "",
-            customNotes: []
-          }
+          boundaries: { softTextures: false, noSaltSauce: false, deconstructed: false }
         });
         this.saveToStorage();
       }
     } catch (e) {
       console.error("Error loading profiles:", e);
-      this.profiles = [{
-        name: "Me",
-        items: { red: [], amber: [], green: [], blue: [] },
-        createdAt: new Date().toISOString(),
-        boundaries: {
-          softTextures: false,
-          noSaltSauce: false,
-          deconstructed: false,
-          deconstructedNotes: "",
-          customNotes: []
-        }
-      }];
     }
   },
 
@@ -103,43 +83,29 @@ const userProfile = {
     }
   },
 
-  saveNotes() {
-    try {
-      localStorage.setItem(NOTES_KEY, JSON.stringify(this.personalNotes));
-    } catch (e) {
-      console.error("Error saving notes:", e);
+  // NEW: Global Theming Logic
+  applyGlobalTheme() {
+    const activeProfile = this.getActiveProfile();
+    if (activeProfile && activeProfile.color) {
+      document.documentElement.style.setProperty('--profile-theme', activeProfile.color);
+      // Update UI elements that need immediate color sync
+      const homeCircle = document.querySelector('.home-circle');
+      if (homeCircle) homeCircle.style.background = activeProfile.color;
     }
   },
 
-  saveTrials() {
-    try {
-      localStorage.setItem(TRIALS_KEY, JSON.stringify(this.trials));
-    } catch (e) {
-      console.error("Error saving trials:", e);
-    }
-  },
-
-  // Profile switching - THE CRITICAL FIX
+  // Profile switching with Sticky Theme
   switchProfile(index) {
     if (index >= 0 && index < this.profiles.length) {
       this.session.activeProfileIndex = index;
       this.saveToStorage();
+      this.applyGlobalTheme(); // Ensure color sticks immediately
       
-      // Trigger UI updates
-      if (typeof loadSelectedChips === "function") {
-        loadSelectedChips();
-      }
-      if (typeof window !== "undefined" && typeof window.updateProfileUI === "function") {
-        window.updateProfileUI();
-      }
-      
-      // Dispatch custom event for React components
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("profileSwitched", { 
           detail: { index, profile: this.profiles[index] }
         }));
       }
-      
       return this.profiles[index];
     }
     return null;
@@ -149,23 +115,21 @@ const userProfile = {
     return this.profiles[this.session.activeProfileIndex] || null;
   },
 
-  // Item management with dot colors
+  // Updated Item management with Brown (Dislike)
   addItem(itemName, category, dotColor) {
     const profile = this.getActiveProfile();
     if (!profile) return false;
 
-    // Ensure items object exists with all dot categories
     if (!profile.items) {
-      profile.items = { red: [], amber: [], green: [], blue: [] };
+      profile.items = { red: [], amber: [], brown: [], green: [], blue: [] };
     }
 
-    // Remove from all other categories first
-    ["red", "amber", "green", "blue"].forEach(color => {
+    // Clear existing to avoid duplicates across categories
+    ["red", "amber", "brown", "green", "blue"].forEach(color => {
       if (!profile.items[color]) profile.items[color] = [];
       profile.items[color] = profile.items[color].filter(i => i.name !== itemName);
     });
 
-    // Add to the selected category
     if (dotColor && profile.items[dotColor]) {
       profile.items[dotColor].push({
         name: itemName,
@@ -178,219 +142,126 @@ const userProfile = {
     return true;
   },
 
-  removeItem(itemName, dotColor) {
-    const profile = this.getActiveProfile();
-    if (!profile || !profile.items || !profile.items[dotColor]) return false;
-
-    profile.items[dotColor] = profile.items[dotColor].filter(i => i.name !== itemName);
-    this.saveToStorage();
-    return true;
-  },
-
-  getItemsByDot(dotColor) {
-    const profile = this.getActiveProfile();
-    if (!profile || !profile.items) return [];
-    return profile.items[dotColor] || [];
-  },
-
-  // Family management
-  addFamilyMember(name) {
-    const newMember = {
-      name: name,
-      items: { red: [], amber: [], green: [], blue: [] },
-      createdAt: new Date().toISOString(),
-      boundaries: {
-        softTextures: false,
-        noSaltSauce: false,
-        deconstructed: false,
-        deconstructedNotes: "",
-        customNotes: []
+  // SCANNER & HANDSHAKE LOGIC
+  setupScannerListeners() {
+    const scanTriggers = ['nav-scan', 'scan-trigger-icon'];
+    
+    scanTriggers.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.onclick = () => this.startScanner();
       }
-    };
-    this.profiles.push(newMember);
-    this.saveToStorage();
-    return newMember;
-  },
+    });
 
-  updateProfileName(index, newName) {
-    if (index >= 0 && index < this.profiles.length) {
-      this.profiles[index].name = newName;
-      this.saveToStorage();
-      return true;
+    const closeBtn = document.getElementById('close-scanner');
+    if (closeBtn) {
+        closeBtn.onclick = () => this.stopScanner();
     }
-    return false;
   },
 
-  deleteProfile(index) {
-    if (index > 0 && index < this.profiles.length) {
-      this.profiles.splice(index, 1);
-      if (this.session.activeProfileIndex >= this.profiles.length) {
-        this.session.activeProfileIndex = 0;
-      }
-      this.saveToStorage();
-      return true;
+  startScanner() {
+    const reader = document.getElementById('reader-container');
+    reader.style.display = 'block';
+
+    this.scanner = new Html5Qrcode("qr-reader");
+    this.scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      (decodedText) => this.handleScanResult(decodedText)
+    ).catch(err => alert("Camera error: Please check permissions."));
+  },
+
+  stopScanner() {
+    if (this.scanner) {
+      this.scanner.stop().then(() => {
+        document.getElementById('reader-container').style.display = 'none';
+      });
     }
-    return false;
   },
 
-  // 3-Hour Protection Window
-  startProtectionWindow(businessId, businessName) {
+  handleScanResult(data) {
+    this.stopScanner();
+    // Simulate detecting a Business QR code
+    if (data.includes("business") || data.startsWith("AZ")) {
+        this.openHandshakeModal(data);
+    } else {
+        alert("Product Scanned: " + data + "\nChecking ZEN Spectrum...");
+    }
+  },
+
+  // Variable Handshake: 30m, 1h, 3h, 24h
+  openHandshakeModal(businessId) {
+    const overlay = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content');
+    
+    overlay.style.display = 'flex';
+    content.innerHTML = `
+        <h3>🤝 Connect to Business</h3>
+        <p>Choose your handshake duration:</p>
+        <div style="display:grid; gap:10px;">
+            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 30)">30 Minutes</button>
+            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 60)">1 Hour</button>
+            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 180)">3 Hours</button>
+            <button class="spec-btn" style="background:var(--profile-theme)" onclick="userProfile.activateHandshake('${businessId}', 1440)">24 Hours</button>
+            <button class="spec-btn" style="background:#6B7280" onclick="document.getElementById('modal-overlay').style.display='none'">Cancel</button>
+        </div>
+    `;
+  },
+
+  activateHandshake(bizId, minutes) {
+    const durationMs = minutes * 60 * 1000;
     this.session.protectionWindow = {
       startTime: new Date().toISOString(),
-      businessId: businessId,
-      businessName: businessName,
+      durationMs: durationMs,
+      businessId: bizId,
       acknowledged: true,
       confirmedByBusiness: false
     };
+    
     this.saveToStorage();
-  },
-
-  confirmByBusiness() {
-    if (this.session?.protectionWindow) {
-      this.session.protectionWindow.confirmedByBusiness = true;
-      this.saveToStorage();
-    }
+    document.getElementById('modal-overlay').style.display = 'none';
+    alert(`Handshake active for ${minutes} minutes! Your Shield is now pulsing.`);
+    
+    if (typeof window.updateProfileUI === "function") window.updateProfileUI();
   },
 
   getProtectionTimeRemaining() {
-    const startTime = this.session?.protectionWindow?.startTime;
-    if (!startTime) return 0;
+    const start = this.session?.protectionWindow?.startTime;
+    const duration = this.session?.protectionWindow?.durationMs || 0;
+    if (!start) return 0;
 
-    const startTimeMs = new Date(startTime).getTime();
-    const elapsed = Date.now() - startTimeMs;
-    const remaining = PROTECTION_DURATION_MS - elapsed;
-
-    return Math.max(0, remaining);
+    const elapsed = Date.now() - new Date(start).getTime();
+    return Math.max(0, duration - elapsed);
   },
 
   isProtectionActive() {
     return this.getProtectionTimeRemaining() > 0;
   },
 
-  checkStatus() {
-    const activeProfile = this.profiles?.[this.session?.activeProfileIndex];
-    if (!activeProfile) return "UNKNOWN";
-
-    const protectionWindow = this.session?.protectionWindow;
-
-    if (protectionWindow?.startTime) {
-      if (this.isProtectionActive()) {
-        if (protectionWindow.confirmedByBusiness) {
-          return "CONFIRMED";
-        }
-        return "PROTECTED";
-      }
-      return "EXPIRED";
-    }
-
-    // Check if user has items
-    if (activeProfile.items) {
-      const totalItems = 
-        (activeProfile.items.red?.length || 0) +
-        (activeProfile.items.amber?.length || 0) +
-        (activeProfile.items.green?.length || 0) +
-        (activeProfile.items.blue?.length || 0);
-      
-      if (totalItems > 0) return "PROTECTED";
-    }
-
-    return "INACTIVE";
-  },
-
+  // Manual "Un-shake" button
   clearProtectionWindow() {
     this.session.protectionWindow = {
       startTime: null,
+      durationMs: 0,
       businessId: null,
-      businessName: null,
       acknowledged: false,
       confirmedByBusiness: false
     };
     this.saveToStorage();
+    alert("Handshake disconnected. Business data wiped.");
   },
 
   cleanupExpiredData() {
     if (this.session?.protectionWindow?.startTime && !this.isProtectionActive()) {
       this.clearProtectionWindow();
     }
-  },
-
-  // Trial Day Tracker
-  addTrial(foodItem, date) {
-    const trial = {
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-      foodItem: foodItem,
-      date: date || new Date().toISOString(),
-      status: "pending", // pending, liked, disliked
-      notes: ""
-    };
-    this.trials.push(trial);
-    this.saveTrials();
-    return trial;
-  },
-
-  updateTrialStatus(trialId, status, notes) {
-    const trial = this.trials.find(t => t.id === trialId);
-    if (trial) {
-      trial.status = status;
-      if (notes) trial.notes = notes;
-      this.saveTrials();
-
-      // If liked, offer to move to green list
-      if (status === "liked") {
-        return { trial, suggestMove: true };
-      }
-    }
-    return { trial, suggestMove: false };
-  },
-
-  moveTrialToSafeList(trialId) {
-    const trial = this.trials.find(t => t.id === trialId);
-    if (trial && trial.status === "liked") {
-      this.addItem(trial.foodItem, "Trial Success", "green");
-      // Remove from trials
-      this.trials = this.trials.filter(t => t.id !== trialId);
-      this.saveTrials();
-      return true;
-    }
-    return false;
-  },
-
-  // Notes management
-  addNote(note) {
-    const newNote = {
-      ...note,
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-      date: new Date().toISOString()
-    };
-    this.personalNotes.unshift(newNote);
-    this.saveNotes();
-    return newNote;
-  },
-
-  deleteNote(id) {
-    this.personalNotes = this.personalNotes.filter(n => n.id !== id);
-    this.saveNotes();
-  },
-
-  getNotes() {
-    return this.personalNotes;
-  },
-
-  getTrials() {
-    return this.trials;
   }
 };
 
-// Initialize on script load
+// Initialize
 userProfile.init();
 
-// Helper function to load chips (will be defined in view.html)
-function loadSelectedChips() {
-  // This will be overridden in the HTML file
-  console.log("loadSelectedChips called - override this in your HTML");
-}
-
-// Export for use in other files
+// Export
 if (typeof module !== "undefined" && module.exports) {
   module.exports = userProfile;
 }
