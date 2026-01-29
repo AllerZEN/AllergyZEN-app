@@ -4,36 +4,38 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Shield, ShieldCheck, ShieldX, Timer, Building2, Clock, RefreshCw } from "lucide-react"
+import { Shield, ShieldCheck, ShieldX, Timer, Building2, Clock, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
-import userProfile from "@/lib/profile"
+import userProfile, { HANDSHAKE_DURATIONS } from "@/lib/profile"
 
-// Handshake Timer Options: Standard allergyZEN presets
+// Handshake Timer Options derived from lib/profile logic
 const TIMER_OPTIONS = [
-  { label: "30m", value: 30 * 60 * 1000 },
-  { label: "1h", value: 60 * 60 * 1000 },
-  { label: "3h", value: 3 * 60 * 60 * 1000 },
-  { label: "24h", value: 24 * 60 * 60 * 1000 }
+  { label: "30min", minutes: 30, short: "30m" },
+  { label: "1 hour", minutes: 60, short: "1h" },
+  { label: "3 hours", minutes: 180, short: "3h" },
+  { label: "24 hours", minutes: 1440, short: "24h" }
 ]
 
 export function ProtectionTimer() {
   const [timeRemaining, setTimeRemaining] = useState(0)
-  const [status, setStatus] = useState<"PROTECTED" | "EXPIRED" | "CONFIRMED" | "UNKNOWN">("UNKNOWN")
+  const [status, setStatus] = useState<string>("UNKNOWN")
   const [businessName, setBusinessName] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
-  const [selectedDuration, setSelectedDuration] = useState(3 * 60 * 60 * 1000)
+  const [totalDuration, setTotalDuration] = useState(HANDSHAKE_DURATIONS.THREE_HOURS)
 
   useEffect(() => {
     const updateTimer = () => {
       const remaining = userProfile.getProtectionTimeRemaining()
+      const currentStatus = userProfile.checkStatus()
+      const session = userProfile.session?.protectionWindow
+
       setTimeRemaining(remaining)
-      setStatus(userProfile.checkStatus() as any)
+      setStatus(currentStatus)
+      setBusinessName(session?.businessName || null)
+      setConfirmed(session?.confirmedByBusiness || false)
+      setTotalDuration(session?.durationMs || HANDSHAKE_DURATIONS.THREE_HOURS)
       
-      const protectionWindow = userProfile.session?.protectionWindow
-      setBusinessName(protectionWindow?.businessName || null)
-      setConfirmed(protectionWindow?.confirmedByBusiness || false)
-      
-      // Auto-wipe logic per business plan: data is removed from local state on expiry
+      // Auto-wipe if expired
       userProfile.cleanupExpiredData()
     }
 
@@ -43,53 +45,42 @@ export function ProtectionTimer() {
   }, [])
 
   const formatTime = (ms: number): string => {
-    const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+    const totalSeconds = Math.floor(ms / 1000)
     const hours = Math.floor(totalSeconds / 3600)
     const minutes = Math.floor((totalSeconds % 3600) / 60)
     const seconds = totalSeconds % 60
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
   }
 
-  const startNewTimer = (duration: number) => {
-    setSelectedDuration(duration)
-    if (userProfile.session) {
-      userProfile.session.protectionWindow = {
-        startTime: Date.now(),
-        duration: duration,
-        businessName: businessName || "Manual Handshake",
-        confirmedByBusiness: false
-      }
-      userProfile.saveToStorage()
+  const handleManualHandshake = (minutes: number) => {
+    userProfile.startProtectionWindow("MANUAL_ENTRY", "Guest Session", minutes)
+  }
+
+  const handleUnshake = () => {
+    if (confirm("Disconnect Handshake? This will wipe your details from the business dashboard for your privacy.")) {
+      userProfile.clearProtectionWindow()
     }
-    setTimeRemaining(duration)
-    setStatus("PROTECTED")
   }
 
-  const hasActiveSession = userProfile.session?.protectionWindow?.startTime
-  const isExpired = status === "EXPIRED"
-  const isActive = (status === "PROTECTED" || status === "CONFIRMED") && !isExpired
-
-  // 1. SELECTOR VIEW (No active session)
-  if (status === "UNKNOWN" || !hasActiveSession) {
+  // State: No active protection - Show Duration Options
+  if (!userProfile.isProtectionActive() && status !== "EXPIRED") {
     return (
-      <Card className="border-2 border-blue-100 bg-white shadow-sm rounded-3xl overflow-hidden">
-        <CardContent className="p-5">
+      <Card className="border-2 border-dashed border-slate-300 bg-slate-50/50 shadow-none">
+        <CardContent className="p-6">
           <div className="text-center">
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Clock className="w-6 h-6 text-blue-600" />
-            </div>
-            <h3 className="font-black text-slate-800 uppercase tracking-tighter">Handshake Timer</h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Duration of stay</p>
-            
-            <div className="grid grid-cols-4 gap-2">
+            <Clock className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+            <h3 className="font-bold text-base text-slate-800 mb-1">Activate Handshake</h3>
+            <p className="text-xs text-slate-500 mb-5">Select duration to enable your shield at this venue.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {TIMER_OPTIONS.map((option) => (
                 <Button
-                  key={option.value}
+                  key={option.minutes}
                   variant="outline"
-                  onClick={() => startNewTimer(option.value)}
-                  className="h-14 border-2 rounded-2xl font-black text-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
+                  className="flex flex-col items-center py-4 h-auto border-2 hover:border-[var(--profile-theme)] hover:bg-white transition-all"
+                  onClick={() => handleManualHandshake(option.minutes)}
                 >
-                  {option.label}
+                  <span className="text-lg font-black text-slate-900">{option.short}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500">{option.label}</span>
                 </Button>
               ))}
             </div>
@@ -99,63 +90,80 @@ export function ProtectionTimer() {
     )
   }
 
-  // 2. ACTIVE OR EXPIRED VIEW
+  const isActive = status === "PROTECTED" || status === "CONFIRMED"
+  const isExpired = status === "EXPIRED"
+
   return (
     <Card className={cn(
-      "border-2 transition-all rounded-3xl shadow-lg",
+      "border-2 transition-all shadow-md",
       confirmed ? "border-green-500 bg-green-50/30" : 
-      isActive ? "border-blue-600 bg-blue-50/30" : 
-      "border-red-500 bg-red-50"
+      isActive ? "border-[var(--profile-theme)] bg-white" : 
+      "border-red-500 bg-red-50/30"
     )}>
-      <CardContent className="p-5">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className={cn(
               "p-2 rounded-full",
-              confirmed ? "bg-green-500" : isActive ? "bg-blue-600" : "bg-red-500"
+              isActive ? "bg-[var(--profile-theme)] text-white animate-pulse" : "bg-red-100 text-red-600"
             )}>
-              {confirmed ? <ShieldCheck className="w-5 h-5 text-white" /> : 
-               isActive ? <Shield className="w-5 h-5 text-white animate-pulse" /> : 
-               <ShieldX className="w-5 h-5 text-white" />}
+              {confirmed ? <ShieldCheck className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {isExpired ? "Protection Void" : "Session Active"}
+              <h3 className="font-bold text-sm leading-tight">Handshake Active</h3>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-tighter flex items-center gap-1">
+                <Building2 className="w-3 h-3" />
+                {businessName || "Private Shield"}
               </p>
-              <h3 className="font-bold text-slate-800 leading-tight">
-                {businessName || "Trusted Venue"}
-              </h3>
             </div>
           </div>
-          <Badge className={cn(
-            "rounded-full px-3 py-1 text-[10px] font-black border-none",
-            confirmed ? "bg-green-500" : isExpired ? "bg-red-500" : "bg-blue-600"
+          <Badge variant={isExpired ? "destructive" : "outline"} className={cn(
+            !isExpired && "border-[var(--profile-theme)] text-[var(--profile-theme)]"
           )}>
             {status}
           </Badge>
         </div>
 
         {isActive ? (
-          <div className="text-center py-2">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Timer className="w-4 h-4 text-slate-400" />
-              <span className="text-4xl font-black tracking-tighter text-slate-900">
+          <>
+            <div className="flex flex-col items-center justify-center py-2">
+              <span className="text-4xl font-black font-mono tracking-tighter text-slate-800">
                 {formatTime(timeRemaining)}
               </span>
+              <div className="flex items-center gap-1 mt-1 text-slate-400">
+                <Timer className="w-3 h-3" />
+                <span className="text-[10px] font-bold uppercase">Time Remaining</span>
+              </div>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase">
-              {confirmed ? "Business has your ticket" : "Handshake in progress..."}
-            </p>
-          </div>
+
+            {/* Progress Bar */}
+            <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden">
+              <div 
+                className="h-full bg-[var(--profile-theme)] transition-all duration-1000"
+                style={{ width: `${(timeRemaining / totalDuration) * 100}%` }}
+              />
+            </div>
+
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleUnshake}
+              className="w-full mt-4 text-xs text-slate-400 hover:text-red-500 gap-2"
+            >
+              <LogOut className="w-3 h-3" />
+              Disconnect Handshake (Wipe Data)
+            </Button>
+          </>
         ) : (
           <div className="text-center py-2">
-            <p className="text-sm font-bold text-red-600 mb-3">Your QR protection has expired.</p>
+            <ShieldX className="w-8 h-8 mx-auto text-red-500 mb-2" />
+            <p className="text-sm font-bold text-red-600">Shield Expired</p>
             <Button 
-              onClick={() => setStatus("UNKNOWN")}
-              className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl font-black uppercase tracking-tighter"
+              variant="link" 
+              onClick={() => userProfile.clearProtectionWindow()}
+              className="text-xs text-slate-500"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Rescan for Safety
+              Reset Shield
             </Button>
           </div>
         )}

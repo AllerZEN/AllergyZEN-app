@@ -1,13 +1,13 @@
 "use client"
 
-// Family Shield Profile Management with 3-Hour Safety Timer
+// Family Shield Profile Management with Variable Safety Timers (30m, 1h, 3h, 24h)
 
 export interface DotItems {
   red: AllergenItem[]
   amber: AllergenItem[]
-  brown: AllergenItem[] // Dislike/Thumb Down - personal preference
+  brown: AllergenItem[] // ZEN Spectrum: Dislike - personal preference
   green: AllergenItem[]
-  blue: AllergenItem[]
+  blue: AllergenItem[] // ZEN Spectrum: ED/Sensory boundaries
 }
 
 export interface AllergenItem {
@@ -16,7 +16,7 @@ export interface AllergenItem {
   addedAt: string
 }
 
-// Theme colors for profile-specific vibes
+// Theme colors for profile-specific vibes - Updated to ensure color "sticks"
 export type ThemeColor = "purple" | "teal" | "rose" | "amber" | "sky"
 
 export const THEME_COLORS: Record<ThemeColor, { primary: string; accent: string; bg: string }> = {
@@ -31,9 +31,9 @@ export interface FamilyMember {
   name: string
   allergies: string[]
   items?: DotItems
-  dislikedItems?: string[] // Items user dislikes regardless of safety
+  dislikedItems?: string[] 
   themeColor?: ThemeColor
-  photoUrl?: string // Profile photo (base64 or URL)
+  photoUrl?: string 
   createdAt: string
   boundaries?: BoundaryPreferences
 }
@@ -44,20 +44,20 @@ export interface BoundaryPreferences {
   noSaltSauce: boolean
   deconstructed: boolean
   deconstructedNotes: string
-  // New expanded sensory options
+  // Sensory options
   temperatureSensitive: boolean
   temperaturePreference: "room-temp" | "warm-only" | "cold-only" | ""
   singleColorMeals: boolean
-  singleColorPreference: string // e.g., "white", "beige"
+  singleColorPreference: string 
   noMixedTextures: boolean
   specificPortions: boolean
   portionNotes: string
-  // Custom notes
   customNotes: string[]
 }
 
 export interface ProtectionSession {
   startTime: string | null
+  durationMs: number // Dynamic duration based on user choice
   businessId: string | null
   businessName: string | null
   acknowledged: boolean
@@ -78,7 +78,13 @@ export interface PersonalNote {
   rating: number
 }
 
-const PROTECTION_DURATION_MS = 3 * 60 * 60 * 1000 // 3 hours in milliseconds
+// Global Protection Constants for Handshake
+export const HANDSHAKE_DURATIONS = {
+  THIRTY_MIN: 30 * 60 * 1000,
+  ONE_HOUR: 60 * 60 * 1000,
+  THREE_HOURS: 180 * 60 * 1000,
+  TWENTY_FOUR_HOURS: 1440 * 60 * 1000
+}
 
 class UserProfileManager {
   profiles: FamilyMember[] = []
@@ -86,6 +92,7 @@ class UserProfileManager {
     activeProfileIndex: 0,
     protectionWindow: {
       startTime: null,
+      durationMs: HANDSHAKE_DURATIONS.THREE_HOURS, // Default to 3h
       businessId: null,
       businessName: null,
       acknowledged: false,
@@ -113,6 +120,7 @@ class UserProfileManager {
           activeProfileIndex: 0,
           protectionWindow: {
             startTime: null,
+            durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
             businessId: null,
             businessName: null,
             acknowledged: false,
@@ -121,23 +129,30 @@ class UserProfileManager {
         }
       }
       
-      // Load personal notes
       const notesStored = localStorage.getItem(this.NOTES_KEY)
       if (notesStored) {
         this.personalNotes = JSON.parse(notesStored)
       }
       
-      // Create default profile if none exists
       if (this.profiles.length === 0) {
         this.profiles.push({
           name: "Me",
           allergies: [],
+          themeColor: "purple",
+          items: { red: [], amber: [], brown: [], green: [], blue: [] },
           createdAt: new Date().toISOString(),
           boundaries: {
             softTextures: false,
             noSaltSauce: false,
             deconstructed: false,
             deconstructedNotes: "",
+            temperatureSensitive: false,
+            temperaturePreference: "",
+            singleColorMeals: false,
+            singleColorPreference: "",
+            noMixedTextures: false,
+            specificPortions: false,
+            portionNotes: "",
             customNotes: []
           }
         })
@@ -145,18 +160,6 @@ class UserProfileManager {
       }
     } catch (e) {
       console.error("Error loading profiles:", e)
-      this.profiles = [{
-        name: "Me",
-        allergies: [],
-        createdAt: new Date().toISOString(),
-        boundaries: {
-          softTextures: false,
-          noSaltSauce: false,
-          deconstructed: false,
-          deconstructedNotes: "",
-          customNotes: []
-        }
-      }]
     }
   }
   
@@ -171,26 +174,26 @@ class UserProfileManager {
       console.error("Error saving profiles:", e)
     }
   }
-  
-  private saveNotes() {
-    if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(this.NOTES_KEY, JSON.stringify(this.personalNotes))
-    } catch (e) {
-      console.error("Error saving notes:", e)
-    }
-  }
-  
-  // 3-Hour Protection Window Logic
-  startProtectionWindow(businessId: string, businessName: string) {
+
+  // UPDATED: Start Protection with Custom Duration (30m, 1h, 3h, 24h)
+  startProtectionWindow(businessId: string, businessName: string, durationMinutes: number = 180) {
+    const durationMs = durationMinutes * 60 * 1000
     this.session.protectionWindow = {
       startTime: new Date().toISOString(),
+      durationMs: durationMs,
       businessId,
       businessName,
       acknowledged: true,
       confirmedByBusiness: false
     }
     this.saveToStorage()
+    
+    // Dispatch event to notify UI that Handshake is active
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("handshakeStarted", { 
+        detail: { durationMinutes, businessName } 
+      }))
+    }
   }
   
   confirmByBusiness() {
@@ -202,11 +205,13 @@ class UserProfileManager {
   
   getProtectionTimeRemaining(): number {
     const startTime = this.session?.protectionWindow?.startTime
+    const durationMs = this.session?.protectionWindow?.durationMs || HANDSHAKE_DURATIONS.THREE_HOURS
+    
     if (!startTime) return 0
     
     const startTimeMs = new Date(startTime).getTime()
     const elapsed = Date.now() - startTimeMs
-    const remaining = PROTECTION_DURATION_MS - elapsed
+    const remaining = durationMs - elapsed
     
     return Math.max(0, remaining)
   }
@@ -219,32 +224,24 @@ class UserProfileManager {
     const activeProfile = this.profiles?.[this.session?.activeProfileIndex]
     if (!activeProfile) return "UNKNOWN"
     
-    // Ensure protectionWindow exists with safe access
     const protectionWindow = this.session?.protectionWindow
     
-    // Check if protection window is active (only if protectionWindow exists and has startTime)
     if (protectionWindow?.startTime) {
       if (this.isProtectionActive()) {
-        if (protectionWindow.confirmedByBusiness) {
-          return "CONFIRMED"
-        }
+        if (protectionWindow.confirmedByBusiness) return "CONFIRMED"
         return "PROTECTED"
       }
       return "EXPIRED"
     }
     
-    // If user has set up allergies, they're protected
-    if (activeProfile.allergies && activeProfile.allergies.length > 0) {
-      return "PROTECTED"
-    }
-    
-    // No protection window started yet
     return "INACTIVE"
   }
   
+  // Manual "Un-shake" button handler
   clearProtectionWindow() {
     this.session.protectionWindow = {
       startTime: null,
+      durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
       businessId: null,
       businessName: null,
       acknowledged: false,
@@ -253,91 +250,51 @@ class UserProfileManager {
     this.saveToStorage()
   }
   
-  // Auto-wipe expired sessions
   cleanupExpiredData() {
     if (this.session?.protectionWindow?.startTime && !this.isProtectionActive()) {
       this.clearProtectionWindow()
     }
   }
   
-  addFamilyMember(name: string): FamilyMember {
-    const newMember: FamilyMember = {
-      name,
-      allergies: [],
-      createdAt: new Date().toISOString(),
-      boundaries: {
-        softTextures: false,
-        noSaltSauce: false,
-        deconstructed: false,
-        deconstructedNotes: "",
-        customNotes: []
-      }
-    }
-    this.profiles.push(newMember)
-    this.saveToStorage()
-    return newMember
-  }
-  
-  removeFamilyMember(index: number) {
-    if (index > 0 && index < this.profiles.length) {
-      this.profiles.splice(index, 1)
-      if (this.session.activeProfileIndex >= this.profiles.length) {
-        this.session.activeProfileIndex = 0
-      }
-      this.saveToStorage()
-    }
-  }
-  
-  updateAllergies(profileIndex: number, allergies: string[]) {
-    if (profileIndex >= 0 && profileIndex < this.profiles.length) {
-      this.profiles[profileIndex].allergies = allergies
-      this.saveToStorage()
-    }
-  }
-  
-  updateBoundaries(profileIndex: number, boundaries: BoundaryPreferences) {
-    if (profileIndex >= 0 && profileIndex < this.profiles.length) {
-      this.profiles[profileIndex].boundaries = boundaries
-      this.saveToStorage()
-    }
-  }
-  
-  getActiveProfile(): FamilyMember | null {
-    return this.profiles[this.session.activeProfileIndex] || null
-  }
-  
-  // Profile switching - THE CRITICAL FIX
+  // Profile Switching & Theme Persistence
   switchProfile(index: number): FamilyMember | null {
     if (index >= 0 && index < this.profiles.length) {
       this.session.activeProfileIndex = index
       this.saveToStorage()
+      
+      // Update Global CSS variable for theme "Stickiness"
+      const color = this.THEME_COLOR_VALUES[this.profiles[index].themeColor || "purple"]
+      if (typeof window !== "undefined") {
+        document.documentElement.style.setProperty('--profile-theme', color)
+        window.dispatchEvent(new CustomEvent("profileSwitched", { detail: { index } }))
+      }
       return this.profiles[index]
     }
     return null
   }
+
+  private THEME_COLOR_VALUES: Record<ThemeColor, string> = {
+    purple: "#8E55A2", teal: "#0D9488", rose: "#E11D48", amber: "#D97706", sky: "#0284C7"
+  }
   
-  // Dot-based item management (red, amber, brown, green, blue) - ZEN Spectrum
-  addItem(itemName: string, category: string, dotColor: "red" | "amber" | "brown" | "green" | "blue") {
+  // ZEN Spectrum Management
+  addItem(itemName: string, category: string, dotColor: keyof DotItems) {
     const profile = this.getActiveProfile()
     if (!profile) return false
     
-    // Ensure items object exists with all 5 spectrum colors
     if (!profile.items) {
       profile.items = { red: [], amber: [], brown: [], green: [], blue: [] }
     }
-    // Ensure brown exists for legacy profiles
-    if (!profile.items.brown) {
-      profile.items.brown = []
-    }
     
-    // Remove from all categories first (item can only be in one dot)
-    const colors: ("red" | "amber" | "brown" | "green" | "blue")[] = ["red", "amber", "brown", "green", "blue"]
+    // Remove from all categories first to ensure priority order
+    const colors: (keyof DotItems)[] = ["red", "amber", "brown", "green", "blue"]
     for (const color of colors) {
-      if (!profile.items[color]) profile.items[color] = []
-      profile.items[color] = profile.items[color].filter(i => i.name !== itemName)
+      if (profile.items[color]) {
+        profile.items[color] = profile.items[color].filter(i => i.name !== itemName)
+      }
     }
     
-    // Add to selected category
+    // Add to specific ZEN Spectrum home
     profile.items[dotColor].push({
       name: itemName,
       category: category,
@@ -348,7 +305,7 @@ class UserProfileManager {
     return true
   }
   
-  removeItem(itemName: string, dotColor: "red" | "amber" | "brown" | "green" | "blue") {
+  removeItem(itemName: string, dotColor: keyof DotItems) {
     const profile = this.getActiveProfile()
     if (!profile?.items?.[dotColor]) return false
     
@@ -357,110 +314,26 @@ class UserProfileManager {
     return true
   }
   
-  getItemsByDot(dotColor: "red" | "amber" | "brown" | "green" | "blue"): AllergenItem[] {
+  getItemsByDot(dotColor: keyof DotItems): AllergenItem[] {
     const profile = this.getActiveProfile()
     if (!profile?.items) return []
     return profile.items[dotColor] || []
   }
-  
-  // Personal Notes (stored locally only for privacy)
-  addNote(note: Omit<PersonalNote, "id" | "date">): PersonalNote {
-    const newNote: PersonalNote = {
-      ...note,
-      id: crypto.randomUUID(),
-      date: new Date().toISOString()
-    }
-    this.personalNotes.unshift(newNote)
-    this.saveNotes()
-    return newNote
-  }
-  
-  deleteNote(id: string) {
-    this.personalNotes = this.personalNotes.filter(n => n.id !== id)
-    this.saveNotes()
-  }
-  
-  getNotes(): PersonalNote[] {
-    return this.personalNotes
-  }
-  
-  // Theme management
-  setThemeColor(themeColor: ThemeColor) {
-    const profile = this.getActiveProfile()
-    if (profile) {
-      profile.themeColor = themeColor
-      this.saveToStorage()
-      // Dispatch event for UI updates
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("themeChanged", { detail: { themeColor } }))
-      }
-    }
-  }
-  
-  getThemeColor(): ThemeColor {
-    const profile = this.getActiveProfile()
-    return profile?.themeColor || "purple"
-  }
-  
-  // Profile photo management
-  setProfilePhoto(photoUrl: string) {
-    const profile = this.getActiveProfile()
-    if (profile) {
-      profile.photoUrl = photoUrl
-      this.saveToStorage()
-    }
-  }
-  
-  getProfilePhoto(): string | null {
-    const profile = this.getActiveProfile()
-    return profile?.photoUrl || null
-  }
-  
-  // Update profile name
-  updateProfileName(name: string) {
-    const profile = this.getActiveProfile()
-    if (profile) {
-      profile.name = name
-      this.saveToStorage()
-    }
-  }
-  
-  // Dislike filter for meal planning
+
+  // Dislike List Synchronization with Spectrum Brown
   addDislike(itemName: string) {
-    const profile = this.getActiveProfile()
-    if (!profile) return false
-    
-    if (!profile.dislikedItems) {
-      profile.dislikedItems = []
-    }
-    
-    if (!profile.dislikedItems.includes(itemName)) {
-      profile.dislikedItems.push(itemName)
-      this.saveToStorage()
-    }
-    return true
+    return this.addItem(itemName, "Dislike", "brown")
   }
-  
-  removeDislike(itemName: string) {
-    const profile = this.getActiveProfile()
-    if (!profile?.dislikedItems) return false
-    
-    profile.dislikedItems = profile.dislikedItems.filter(i => i !== itemName)
-    this.saveToStorage()
-    return true
-  }
-  
+
   getDislikedItems(): string[] {
     const profile = this.getActiveProfile()
-    return profile?.dislikedItems || []
+    return profile?.items?.brown?.map(i => i.name) || []
   }
-  
-  isDisliked(itemName: string): boolean {
-    return this.getDislikedItems().includes(itemName)
+
+  getActiveProfile(): FamilyMember | null {
+    return this.profiles[this.session.activeProfileIndex] || null
   }
 }
 
-// Singleton instance
 const userProfile = new UserProfileManager()
-
 export default userProfile
