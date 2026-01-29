@@ -125,11 +125,18 @@
       font-weight: 500;
       cursor: pointer;
       width: 100%;
+      transition: all 0.2s;
     }
     
     .btn-primary {
       background: var(--primary);
       color: white;
+    }
+    
+    .btn-dashboard {
+        background: #3b82f6;
+        color: white;
+        margin-top: 12px;
     }
     
     .btn-primary:hover {
@@ -164,7 +171,6 @@
     .qr-result {
       text-align: center;
       padding: 32px;
-      display: none;
     }
     
     .qr-code {
@@ -227,7 +233,6 @@
       <div class="step" id="step3"></div>
     </div>
 
-    <!-- Step 1: Business Details -->
     <div id="form-step1" class="card">
       <div class="card-title">Step 1: Business Details</div>
       
@@ -262,7 +267,6 @@
       <button class="btn btn-primary" onclick="goToStep2()">Continue to Pledge</button>
     </div>
 
-    <!-- Step 2: Pledge Signing -->
     <div id="form-step2" class="card hidden">
       <div class="card-title">Step 2: Neutral Language & Privacy Pledge</div>
       
@@ -296,9 +300,9 @@
       <div class="checkbox-group">
         <input type="checkbox" id="pledge3">
         <label class="checkbox-label" for="pledge3">
-          <strong>Data Minimization:</strong> We understand that all shared data is 
-          automatically wiped after 180 minutes (3 hours) and we will not retain any 
-          copies beyond this window.
+          <strong>Handshake Privacy:</strong> We understand that all shared data is 
+          automatically wiped after the handshake window (30m, 1h, 3h, or 24h) and we will 
+          not retain any copies beyond this window.
         </label>
       </div>
       
@@ -318,11 +322,10 @@
       <button class="btn btn-primary" id="sign-btn" onclick="signPledge()" disabled>Sign Pledge & Generate QR</button>
     </div>
 
-    <!-- Step 3: QR Code Result -->
     <div id="form-step3" class="card hidden">
       <div class="card-title">Step 3: Your Partner QR Code</div>
       
-      <div class="qr-result" id="qr-result" style="display: block;">
+      <div class="qr-result" id="qr-result">
         <div class="qr-code" id="qr-display">&#9635;</div>
         <h2 id="result-business-name">Your Business</h2>
         <p style="color: var(--text-muted); margin: 8px 0;">Display this QR code for allergyZEN users to scan</p>
@@ -331,14 +334,18 @@
         <button class="btn btn-primary" style="margin-top: 24px;" onclick="downloadQR()">
           Download QR Code
         </button>
+
+        <button class="btn btn-dashboard" onclick="window.location.href='partner.html'">
+          Go to Business Dashboard
+        </button>
         
         <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: left;">
           <strong style="color: #166534;">Next Steps:</strong>
           <ul style="margin: 8px 0 0 20px; color: #15803d; font-size: 0.875rem;">
             <li>Print and display your QR code at the entrance</li>
-            <li>Train staff on the Neutral Language Pledge</li>
-            <li>When a guest scans, you'll receive their Trusted Kitchen Ticket</li>
-            <li>Click "Accept" to confirm and activate their Glowing Shield</li>
+            <li>Train staff on the <strong>Neutral Language Pledge</strong></li>
+            <li>Open your Dashboard to receive <strong>Trusted Kitchen Tickets</strong></li>
+            <li>Ensure the guest's <strong>Glowing Shield</strong> is active upon scan</li>
           </ul>
         </div>
       </div>
@@ -349,7 +356,6 @@
     const PARTNER_STORAGE_KEY = 'allergyzen_partner_data';
     let businessData = {};
 
-    // Enable sign button when all pledges checked
     document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       cb.addEventListener('change', checkPledges);
     });
@@ -374,12 +380,7 @@
         return;
       }
 
-      businessData = {
-        name,
-        type,
-        email,
-        phone: document.getElementById('contact-phone').value.trim()
-      };
+      businessData = { name, type, email, phone: document.getElementById('contact-phone').value.trim() };
 
       document.getElementById('form-step1').classList.add('hidden');
       document.getElementById('form-step2').classList.remove('hidden');
@@ -390,23 +391,15 @@
 
     function signPledge() {
       const signatory = document.getElementById('signatory-name').value.trim();
-      
-      // Generate business ID
       const businessId = 'AZ-' + Math.random().toString(36).substr(2, 6).toUpperCase();
       
       businessData.signatory = signatory;
       businessData.signedAt = new Date().toISOString();
       businessData.businessId = businessId;
-      businessData.pledges = {
-        neutralLanguage: true,
-        privacyProtection: true,
-        dataMinimization: true
-      };
+      businessData.pledges = { neutralLanguage: true, privacyProtection: true, dataMinimization: true };
 
-      // Save to localStorage
       localStorage.setItem(PARTNER_STORAGE_KEY, JSON.stringify(businessData));
 
-      // Show result
       document.getElementById('form-step2').classList.add('hidden');
       document.getElementById('form-step3').classList.remove('hidden');
       document.getElementById('step2').classList.remove('active');
@@ -419,8 +412,9 @@
     }
 
     function downloadQR() {
-      // In production, this would generate an actual QR code image
-      alert(`QR Code for ${businessData.name}\nID: ${businessData.businessId}\n\nIn production, this would download a printable QR code image.`);
+      // Logic for the final handshake link
+      const dashboardLink = `${window.location.origin}/partner.html?id=${businessData.businessId}`;
+      alert(`QR Code Link Generated for ${businessData.name}:\n\n${dashboardLink}\n\nThis QR will point directly to your dashboard.`);
     }
   </script>
 </body>
