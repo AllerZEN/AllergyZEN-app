@@ -4,11 +4,15 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Shield, ShieldCheck, ShieldX, Timer, Building2, Clock, LogOut } from "lucide-react"
+import { Shield, ShieldCheck, ShieldX, Timer, Building2, Clock, LogOut, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
-import userProfile, { HANDSHAKE_DURATIONS } from "@/lib/profile"
+import userProfile from "@/lib/profile"
 
-// Handshake Timer Options derived from lib/profile logic
+/**
+ * 2026 HANDSHAKE PROTOCOL:
+ * Options: 30min, 1hr, 3hr, 24hr
+ * Primary function: Data wipe after expiry for absolute privacy.
+ */
 const TIMER_OPTIONS = [
   { label: "30min", minutes: 30, short: "30m" },
   { label: "1 hour", minutes: 60, short: "1h" },
@@ -18,24 +22,22 @@ const TIMER_OPTIONS = [
 
 export function ProtectionTimer() {
   const [timeRemaining, setTimeRemaining] = useState(0)
-  const [status, setStatus] = useState<string>("UNKNOWN")
+  const [status, setStatus] = useState<string>("INACTIVE")
   const [businessName, setBusinessName] = useState<string | null>(null)
-  const [confirmed, setConfirmed] = useState(false)
-  const [totalDuration, setTotalDuration] = useState(HANDSHAKE_DURATIONS.THREE_HOURS)
+  const [totalDuration, setTotalDuration] = useState(180 * 60 * 1000)
 
   useEffect(() => {
     const updateTimer = () => {
       const remaining = userProfile.getProtectionTimeRemaining()
-      const currentStatus = userProfile.checkStatus()
+      const currentStatus = userProfile.isProtectionActive() ? "PROTECTED" : "EXPIRED"
       const session = userProfile.session?.protectionWindow
 
       setTimeRemaining(remaining)
-      setStatus(currentStatus)
+      setStatus(session?.active ? currentStatus : "INACTIVE")
       setBusinessName(session?.businessName || null)
-      setConfirmed(session?.confirmedByBusiness || false)
-      setTotalDuration(session?.durationMs || HANDSHAKE_DURATIONS.THREE_HOURS)
+      setTotalDuration(session?.durationMs || 180 * 60 * 1000)
       
-      // Auto-wipe if expired
+      // Auto-wipe logic from engine
       userProfile.cleanupExpiredData()
     }
 
@@ -49,38 +51,41 @@ export function ProtectionTimer() {
     const hours = Math.floor(totalSeconds / 3600)
     const minutes = Math.floor((totalSeconds % 3600) / 60)
     const seconds = totalSeconds % 60
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
   }
 
   const handleManualHandshake = (minutes: number) => {
-    userProfile.startProtectionWindow("MANUAL_ENTRY", "Guest Session", minutes)
+    userProfile.activateHandshake("Guest Session", minutes)
   }
 
   const handleUnshake = () => {
-    if (confirm("Disconnect Handshake? This will wipe your details from the business dashboard for your privacy.")) {
+    if (confirm("Disconnect Handshake? This will wipe your details from the business dashboard immediately.")) {
       userProfile.clearProtectionWindow()
     }
   }
 
-  // State: No active protection - Show Duration Options
-  if (!userProfile.isProtectionActive() && status !== "EXPIRED") {
+  // View 1: Selector (When inactive)
+  if (status === "INACTIVE" || status === "EXPIRED") {
     return (
-      <Card className="border-2 border-dashed border-slate-300 bg-slate-50/50 shadow-none">
+      <Card className="border-2 border-blue-100 bg-blue-50/20 shadow-none rounded-3xl overflow-hidden">
         <CardContent className="p-6">
           <div className="text-center">
-            <Clock className="w-10 h-10 mx-auto text-slate-400 mb-3" />
-            <h3 className="font-bold text-base text-slate-800 mb-1">Activate Handshake</h3>
-            <p className="text-xs text-slate-500 mb-5">Select duration to enable your shield at this venue.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <Shield className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="font-black text-lg text-slate-900 mb-1 uppercase tracking-tight">Init Handshake</h3>
+            <p className="text-xs font-medium text-slate-500 mb-6">Choose how long your shield stays active at this location.</p>
+            
+            <div className="grid grid-cols-2 gap-3">
               {TIMER_OPTIONS.map((option) => (
                 <Button
                   key={option.minutes}
                   variant="outline"
-                  className="flex flex-col items-center py-4 h-auto border-2 hover:border-[var(--profile-theme)] hover:bg-white transition-all"
+                  className="flex flex-col items-center py-6 h-auto border-2 rounded-2xl hover:border-blue-600 hover:bg-white transition-all group"
                   onClick={() => handleManualHandshake(option.minutes)}
                 >
-                  <span className="text-lg font-black text-slate-900">{option.short}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500">{option.label}</span>
+                  <span className="text-xl font-black text-slate-900 group-hover:text-blue-600">{option.short}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Duration</span>
                 </Button>
               ))}
             </div>
@@ -90,83 +95,55 @@ export function ProtectionTimer() {
     )
   }
 
-  const isActive = status === "PROTECTED" || status === "CONFIRMED"
-  const isExpired = status === "EXPIRED"
-
+  // View 2: Active Pulsing Shield
   return (
-    <Card className={cn(
-      "border-2 transition-all shadow-md",
-      confirmed ? "border-green-500 bg-green-50/30" : 
-      isActive ? "border-[var(--profile-theme)] bg-white" : 
-      "border-red-500 bg-red-50/30"
-    )}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
+    <Card className="border-2 border-blue-500 bg-white shadow-xl shadow-blue-100 rounded-3xl overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "p-2 rounded-full",
-              isActive ? "bg-[var(--profile-theme)] text-white animate-pulse" : "bg-red-100 text-red-600"
-            )}>
-              {confirmed ? <ShieldCheck className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+            <div className="relative">
+              <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-20"></div>
+              <div className="relative p-3 bg-blue-600 rounded-2xl text-white">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
             </div>
             <div>
-              <h3 className="font-bold text-sm leading-tight">Handshake Active</h3>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-tighter flex items-center gap-1">
-                <Building2 className="w-3 h-3" />
-                {businessName || "Private Shield"}
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-black text-sm uppercase tracking-tight">Active Shield</h3>
+                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[9px] font-black">LIVE</Badge>
+              </div>
+              <p className="text-[11px] font-bold text-slate-400 flex items-center gap-1 uppercase">
+                <Building2 className="w-3 h-3" /> {businessName}
               </p>
             </div>
           </div>
-          <Badge variant={isExpired ? "destructive" : "outline"} className={cn(
-            !isExpired && "border-[var(--profile-theme)] text-[var(--profile-theme)]"
-          )}>
-            {status}
-          </Badge>
         </div>
 
-        {isActive ? (
-          <>
-            <div className="flex flex-col items-center justify-center py-2">
-              <span className="text-4xl font-black font-mono tracking-tighter text-slate-800">
-                {formatTime(timeRemaining)}
-              </span>
-              <div className="flex items-center gap-1 mt-1 text-slate-400">
-                <Timer className="w-3 h-3" />
-                <span className="text-[10px] font-bold uppercase">Time Remaining</span>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full h-1.5 bg-slate-100 rounded-full mt-4 overflow-hidden">
-              <div 
-                className="h-full bg-[var(--profile-theme)] transition-all duration-1000"
-                style={{ width: `${(timeRemaining / totalDuration) * 100}%` }}
-              />
-            </div>
-
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleUnshake}
-              className="w-full mt-4 text-xs text-slate-400 hover:text-red-500 gap-2"
-            >
-              <LogOut className="w-3 h-3" />
-              Disconnect Handshake (Wipe Data)
-            </Button>
-          </>
-        ) : (
-          <div className="text-center py-2">
-            <ShieldX className="w-8 h-8 mx-auto text-red-500 mb-2" />
-            <p className="text-sm font-bold text-red-600">Shield Expired</p>
-            <Button 
-              variant="link" 
-              onClick={() => userProfile.clearProtectionWindow()}
-              className="text-xs text-slate-500"
-            >
-              Reset Shield
-            </Button>
+        <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl py-6 border border-slate-100">
+          <span className="text-5xl font-black tabular-nums tracking-tighter text-slate-900">
+            {formatTime(timeRemaining)}
+          </span>
+          <div className="flex items-center gap-2 mt-2">
+            <Timer className="w-3 h-3 text-blue-500" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Time Until Auto-Wipe</span>
           </div>
-        )}
+        </div>
+
+        {/* Dynamic Progress Bar */}
+        <div className="w-full h-2 bg-slate-100 rounded-full mt-6 overflow-hidden">
+          <div 
+            className="h-full bg-blue-600 transition-all duration-1000 ease-linear"
+            style={{ width: `${(timeRemaining / totalDuration) * 100}%` }}
+          />
+        </div>
+
+        <button 
+          onClick={handleUnshake}
+          className="w-full mt-6 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors"
+        >
+          <LogOut className="w-3 h-3" />
+          Terminate Handshake & Wipe
+        </button>
       </CardContent>
     </Card>
   )
