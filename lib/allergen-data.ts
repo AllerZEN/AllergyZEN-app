@@ -1,275 +1,115 @@
+// allergyZEN Wellness Assistant App - Master Data Structure
+// 🔴 Red | 🟠 Amber | 🟤 Brown | 🟢 Green | 💙 Blue
+
+export type ZenTier = "red" | "amber" | "brown" | "green" | "blue";
+
 export interface Allergen {
   id: string
   name: string
-  category: "food" | "chemical" | "fabric"
-  tier: "red" | "yellow" | "green"
+  category: "food" | "chemical" | "fabric" | "laboratory" | "medicinal" | "material" | "sensory"
+  tier: ZenTier
   aliases: string[]
   derivatives?: string[]
 }
 
-export interface SafeAlternative {
-  id: string
-  name: string
-  category: string
-  description: string
-  replaces: string[]
-}
-
-// Red Tier - Strict Block
+// RED TIER - Severe Reactivity 🔴
 export const redTierAllergens: Allergen[] = [
-  // Food Allergens
+  {
+    id: "sds",
+    name: "SDS (Sodium Dodecyl Sulfate)",
+    category: "laboratory",
+    tier: "red",
+    aliases: ["sodium lauryl sulfate", "SLS", "laurilsulfate"],
+  },
+  {
+    id: "croscarmellose",
+    name: "Croscarmellose Sodium",
+    category: "medicinal",
+    tier: "red",
+    aliases: ["cross-linked sodium carboxymethylcellulose", "E468"],
+    derivatives: ["tablet disintegrants"],
+  },
   {
     id: "dairy",
     name: "All Dairy",
     category: "food",
     tier: "red",
-    aliases: ["milk", "cheese", "butter", "cream", "yogurt", "whey", "casein", "lactose", "ghee"],
-  },
-  {
-    id: "rice",
-    name: "All Rice",
-    category: "food",
-    tier: "red",
-    aliases: ["rice flour", "rice starch", "rice syrup", "rice bran", "rice protein"],
-    derivatives: ["rice bran oil", "rice vinegar", "sake", "mirin", "rice milk"],
-  },
-  {
-    id: "wheat",
-    name: "All Wheat/Gluten",
-    category: "food",
-    tier: "red",
-    aliases: ["gluten", "flour", "bread", "pasta", "semolina", "spelt", "kamut", "durum", "farina", "seitan"],
-  },
-  {
-    id: "coconut",
-    name: "All Coconut",
-    category: "food",
-    tier: "red",
-    aliases: ["coconut oil", "coconut milk", "coconut cream", "coconut flour", "coco", "copra"],
-    derivatives: ["MCT oil", "coconut sugar", "coconut aminos"],
-  },
-  {
-    id: "almonds",
-    name: "Almonds",
-    category: "food",
-    tier: "red",
-    aliases: ["almond flour", "almond milk", "almond butter", "marzipan", "frangipane"],
-  },
-  { id: "walnuts", name: "Walnuts", category: "food", tier: "red", aliases: ["walnut oil", "walnut butter"] },
-  {
-    id: "sesame",
-    name: "Sesame",
-    category: "food",
-    tier: "red",
-    aliases: ["sesame oil", "tahini", "sesame seeds", "halvah", "hummus"],
-  },
-  {
-    id: "sunflower",
-    name: "Sunflower",
-    category: "food",
-    tier: "red",
-    aliases: ["sunflower oil", "sunflower seeds", "sunflower lecithin", "sunflower butter"],
-    derivatives: ["sunflower lecithin", "high oleic sunflower oil"],
-  },
+    aliases: ["milk", "whey", "casein", "lactose"],
+  }
+];
 
-  // Chemical/Contact Block
+// AMBER TIER - Moderate Reactivity 🟠
+export const amberTierAllergens: Allergen[] = [
   {
-    id: "e1202",
-    name: "E1202 (Polyvinylpolypyrrolidone)",
+    id: "fragrance",
+    name: "Synthetic Fragrance",
     category: "chemical",
-    tier: "red",
-    aliases: ["PVPP", "Polyclar"],
-  },
-  { id: "e284", name: "E284 (Boric Acid)", category: "chemical", tier: "red", aliases: ["boric acid", "boracic acid"] },
+    tier: "amber",
+    aliases: ["parfum", "fragrance", "scent"],
+  }
+];
+
+// BROWN TIER - Dislikes/Sensitivities 🟤
+export const brownTierAllergens: Allergen[] = [
   {
-    id: "e515",
-    name: "E515 (Potassium Sulphates)",
-    category: "chemical",
-    tier: "red",
-    aliases: ["potassium sulfate", "K2SO4"],
-  },
-  {
-    id: "e553b",
-    name: "E553b (Talc)",
-    category: "chemical",
-    tier: "red",
-    aliases: ["talc", "talcum", "magnesium silicate"],
-  },
-
-  // Fabric Allergens
-  { id: "pique", name: "Piqué Fabric", category: "fabric", tier: "red", aliases: ["pique", "piqué", "waffle weave"] },
-  {
-    id: "polyester",
-    name: "Polyester",
-    category: "fabric",
-    tier: "red",
-    aliases: ["polyester", "PET", "polyethylene terephthalate"],
-  },
-]
-
-// Cleaning product flags
-export const cleaningProductFlags = [
-  "synthetic fragrance",
-  "fragrance",
-  "parfum",
-  "plastic softener",
-  "phthalates",
-  "DEP",
-  "DBP",
-  "DEHP",
-  "fabric softener",
-]
-
-// Fabric flags
-export const fabricFlags = ["easy-care", "easy care", "wrinkle-free", "permanent press", "formaldehyde"]
-
-export const medicationFillers = [
-  { name: "Talc", trigger: "e553b", description: "Magnesium silicate - common tablet filler" },
-  { name: "PVP", trigger: "e1202", description: "Polyvinylpyrrolidone - binder/coating agent" },
-  { name: "Crospovidone", trigger: "e1202", description: "Cross-linked PVP - tablet disintegrant" },
-  { name: "Povidone", trigger: "e1202", description: "Another name for PVP" },
-  { name: "Lactose", trigger: "dairy", description: "Milk sugar - common tablet filler" },
-  { name: "Lactose Monohydrate", trigger: "dairy", description: "Hydrated milk sugar filler" },
-  { name: "Magnesium Stearate", trigger: null, description: "Lubricant - generally safe but watch source" },
-  { name: "Pregelatinized Starch", trigger: "wheat", description: "May be wheat-derived" },
-  { name: "Corn Starch", trigger: null, description: "Generally safe alternative" },
-  { name: "Microcrystalline Cellulose", trigger: null, description: "Wood pulp derived - safe" },
-  { name: "Croscarmellose Sodium", trigger: null, description: "Cellulose derivative - safe" },
-  { name: "Rice Starch", trigger: "rice", description: "Rice-derived filler" },
-  { name: "Coconut Oil", trigger: "coconut", description: "Often in softgel capsules" },
-  { name: "MCT Oil", trigger: "coconut", description: "Usually coconut-derived" },
-]
-
-// Green Zone - Super-Safe Substitutes
-export const safeAlternatives: SafeAlternative[] = [
-  {
-    id: "quinoa",
-    name: "Quinoa",
-    category: "Grain Alternative",
-    description: "Complete protein, gluten-free grain substitute",
-    replaces: ["rice", "wheat"],
+    id: "wenge",
+    name: "Wenge Wood",
+    category: "material",
+    tier: "brown",
+    aliases: ["Millettia laurentii"],
   },
   {
-    id: "tiger-nut",
-    name: "Tiger Nut",
-    category: "Nut Alternative",
-    description: "Nut-free tuber, great for milk and flour",
-    replaces: ["almonds", "walnuts", "coconut"],
-  },
+    id: "pla",
+    name: "PLA (Polylactic Acid)",
+    category: "material",
+    tier: "brown",
+    aliases: ["corn plastic", "bioplastic"],
+  }
+];
+
+// BLUE TIER - ED/Sensory Boundaries 💙
+export const blueTierAllergens: Allergen[] = [
   {
-    id: "olive-oil",
-    name: "Olive Oil",
-    category: "Oil Alternative",
-    description: "Heart-healthy cooking oil",
-    replaces: ["coconut", "sunflower", "sesame"],
-  },
-]
+    id: "crunchy-texture",
+    name: "Crunchy Texture",
+    category: "sensory",
+    tier: "blue",
+    aliases: ["hard foods", "crispy bits"],
+  }
+];
 
-export const greenListFoods = [
-  { name: "Quinoa", category: "grain" },
-  { name: "Tiger Nut", category: "nut-alternative" },
-  { name: "Olive Oil", category: "oil" },
-  { name: "Turkey", category: "protein" },
-  { name: "Chicken", category: "protein" },
-  { name: "Salmon", category: "protein" },
-  { name: "Sweet Potato", category: "vegetable" },
-  { name: "Spinach", category: "vegetable" },
-  { name: "Broccoli", category: "vegetable" },
-  { name: "Zucchini", category: "vegetable" },
-  { name: "Carrots", category: "vegetable" },
-  { name: "Avocado", category: "fat" },
-  { name: "Eggs", category: "protein" },
-  { name: "Beef", category: "protein" },
-  { name: "Lamb", category: "protein" },
-  { name: "Buckwheat", category: "grain" },
-  { name: "Millet", category: "grain" },
-  { name: "Apple", category: "fruit" },
-  { name: "Blueberries", category: "fruit" },
-  { name: "Lemon", category: "fruit" },
-]
+/**
+ * Master Ingredient Check Logic
+ * Checks against all 5 tiers and returns the highest risk match.
+ */
+export function checkIngredient(ingredient: string): { safe: boolean; tier: ZenTier; matches: Allergen[] } {
+  const normalized = ingredient.toLowerCase().trim();
+  const matches: Allergen[] = [];
 
-export function checkIngredient(ingredient: string): { safe: boolean; matches: Allergen[]; warnings: string[] } {
-  const normalizedIngredient = ingredient.toLowerCase().trim()
-  const matches: Allergen[] = []
-  const warnings: string[] = []
+  const allCheckable = [
+    ...redTierAllergens, 
+    ...amberTierAllergens, 
+    ...brownTierAllergens, 
+    ...blueTierAllergens
+  ];
 
-  for (const allergen of redTierAllergens) {
-    // Check main name
-    if (normalizedIngredient.includes(allergen.name.toLowerCase())) {
-      matches.push(allergen)
-      continue
-    }
-
-    // Check aliases
-    for (const alias of allergen.aliases) {
-      if (normalizedIngredient.includes(alias.toLowerCase())) {
-        matches.push(allergen)
-        break
-      }
-    }
-
-    // Check derivatives
-    if (allergen.derivatives) {
-      for (const derivative of allergen.derivatives) {
-        if (normalizedIngredient.includes(derivative.toLowerCase())) {
-          matches.push(allergen)
-          warnings.push(`Hidden derivative detected: ${derivative} (from ${allergen.name})`)
-          break
-        }
-      }
+  for (const allergen of allCheckable) {
+    if (normalized.includes(allergen.name.toLowerCase()) || 
+        allergen.aliases.some(a => normalized.includes(a.toLowerCase()))) {
+      matches.push(allergen);
     }
   }
 
-  // Check cleaning product flags
-  for (const flag of cleaningProductFlags) {
-    if (normalizedIngredient.includes(flag.toLowerCase())) {
-      warnings.push(`Cleaning product flag: ${flag}`)
-    }
-  }
-
-  // Check fabric flags
-  for (const flag of fabricFlags) {
-    if (normalizedIngredient.includes(flag.toLowerCase())) {
-      warnings.push(`Fabric treatment flag: ${flag}`)
-    }
-  }
+  // Determine highest tier found
+  let highestTier: ZenTier = "green";
+  if (matches.some(m => m.tier === "red")) highestTier = "red";
+  else if (matches.some(m => m.tier === "amber")) highestTier = "amber";
+  else if (matches.some(m => m.tier === "brown")) highestTier = "brown";
+  else if (matches.some(m => m.tier === "blue")) highestTier = "blue";
 
   return {
-    safe: matches.length === 0 && warnings.length === 0,
+    safe: matches.length === 0,
+    tier: highestTier,
     matches: [...new Set(matches)],
-    warnings: [...new Set(warnings)],
-  }
-}
-
-export function checkIngredientWithMedication(ingredient: string): {
-  safe: boolean
-  matches: Allergen[]
-  warnings: string[]
-  medicationWarnings: { name: string; trigger: string | null; description: string }[]
-} {
-  const baseResult = checkIngredient(ingredient)
-  const normalizedIngredient = ingredient.toLowerCase().trim()
-  const medicationWarnings: { name: string; trigger: string | null; description: string }[] = []
-
-  for (const filler of medicationFillers) {
-    if (normalizedIngredient.includes(filler.name.toLowerCase())) {
-      medicationWarnings.push(filler)
-      if (filler.trigger) {
-        const triggerAllergen = redTierAllergens.find((a) => a.id === filler.trigger)
-        if (triggerAllergen && !baseResult.matches.some((m) => m.id === filler.trigger)) {
-          baseResult.matches.push(triggerAllergen)
-        }
-      }
-    }
-  }
-
-  return {
-    ...baseResult,
-    safe: baseResult.safe && medicationWarnings.filter((m) => m.trigger).length === 0,
-    medicationWarnings,
-  }
-}
-
-export function getSafeAlternativesFor(allergenId: string): SafeAlternative[] {
-  return safeAlternatives.filter((alt) => alt.replaces.includes(allergenId))
+  };
 }
