@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>allergyZEN v4.3</title>
+    <style>
+        :root { 
+            --primary: #8E55A2; 
+            --bg: #F3F4F6; 
+            --text: #1F2937; 
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --green: #10B981;
+        }
+        
+        /* Forces the app to feel like a mobile app */
+        html, body { 
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            font-family: -apple-system, system-ui, sans-serif;
+            background: var(--bg);
+        }
+
+        /* FIXED HEADER - This stays at the absolute top */
+        .header { 
+            background: white; 
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #e5e7eb;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 9999;
+        }
+
+        /* SCROLLABLE AREA - Everything inside here moves */
+        .content-scroll {
+            position: absolute;
+            top: 60px; /* Starts below the header */
+            bottom: 90px; /* Ends above the nav */
+            left: 0;
+            right: 0;
+            overflow-y: auto;
+            padding: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* HORIZONTAL CAROUSEL (Top Box) */
+        .top-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 12px;
+            padding-bottom: 15px;
+            scrollbar-width: none;
+        }
+        .top-carousel::-webkit-scrollbar { display: none; }
+
+        .scroll-card {
+            flex: 0 0 85%;
+            scroll-snap-align: center;
+            background: linear-gradient(135deg, #8E55A2, #6D3B84);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* SEARCH BAR */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 12px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            margin: 10px 0 20px 0;
+        }
+        .search-input { flex: 1; border: none; outline: none; font-size: 16px; }
+
+        /* SPECTRUM BUTTONS */
+        .spectrum-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .spec-btn { padding: 15px 5px; border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 11px; }
+        .btn-red { background: var(--red); }
+        .btn-amber { background: var(--amber); }
+        .btn-green { background: var(--green); }
+
+        /* BOTTOM NAV - The circular Home button from your photo */
+        .bottom-nav { 
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 90px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #eee;
+            z-index: 9999;
+        }
+        .nav-item { border: none; background: none; color: #6B7280; display: flex; flex-direction: column; align-items: center; font-size: 11px; }
+        .home-circle { 
+            background: var(--primary); 
+            color: white !important; 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            margin-top: -40px; 
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <strong style="color: var(--primary); font-size: 1.2rem;">allergyZEN</strong>
+    </header>
+
+    <div class="content-scroll">
+        <div class="top-carousel">
+            <div class="scroll-card">
+                <h3>Shield Active</h3>
+                <p>2h 45m protection remaining.</p>
+            </div>
+            <div class="scroll-card" style="background: #10B981;">
+                <h3>Zen Tip</h3>
+                <p>Carry your EpiPen even on green days!</p>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <span style="margin-right:10px">🔍</span>
+            <input type="text" class="search-input" placeholder="Search or scan...">
+            <span style="margin-left:10px">📷</span>
+            <span style="margin-left:10px">➕</span>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 18px; margin-bottom: 15px;">
+            <h2>Hey Me,</h2>
+            <p>Breathe easy knowing you're protected.</p>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 18px;">
+            <h3>Zen Spectrum</h3>
+            <div class="spectrum-grid">
+                <button class="spec-btn btn-red">RED INFO</button>
+                <button class="spec-btn btn-amber">AMBER INFO</button>
+                <button class="spec-btn btn-green">GREEN INFO</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item">🔍<span>Scan</span></button>
+        <button class="nav-item">🛡️<span>Safe</span></button>
+        <button class="nav-item home-circle"><span style="font-size: 24px;">🏠</span><span>Home</span></button>
+        <button class="nav-item">🧬<span>ED</span></button>
+        <button class="nav-item">📈<span>ZenHealth</span></button>
+        <button class="nav-item">•••<span>More</span></button>
+    </nav>
+
+</body>
+</html>

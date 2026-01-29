@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8E55A2">
+  <title>allergyZEN Partner Enrollment</title>
+  <link rel="icon" href="/images/allergyzen-logo.png">
+  <style>
+    :root {
+      --primary: #8E55A2;
+      --primary-light: #A77BB8;
+      --safe-green: #22C55E;
+      --background: #FAFAFA;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 24px 16px;
+      text-align: center;
+    }
+    
+    .header img {
+      height: 60px;
+      margin-bottom: 12px;
+    }
+    
+    .header h1 {
+      font-size: 1.5rem;
+    }
+    
+    .main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .checkbox-group input {
+      margin-top: 4px;
+      width: 20px;
+      height: 20px;
+    }
+    
+    .checkbox-label {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+    
+    .btn-primary:disabled {
+      background: var(--border);
+      cursor: not-allowed;
+    }
+    
+    .pledge-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 2px solid var(--safe-green);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .pledge-title {
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+    }
+    
+    .pledge-text {
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: #15803d;
+    }
+    
+    .qr-result {
+      text-align: center;
+      padding: 32px;
+      display: none;
+    }
+    
+    .qr-code {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border: 4px solid var(--primary);
+      border-radius: 16px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+    }
+    
+    .business-id {
+      font-family: monospace;
+      background: var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-top: 12px;
+    }
+    
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    
+    .step {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    
+    .step.active {
+      background: var(--primary);
+    }
+    
+    .step.complete {
+      background: var(--safe-green);
+    }
+    
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <img src="/images/allergyzen-logo.png" alt="allergyZEN">
+    <h1>Partner Enrollment</h1>
+  </header>
+
+  <main class="main">
+    <div class="step-indicator">
+      <div class="step active" id="step1"></div>
+      <div class="step" id="step2"></div>
+      <div class="step" id="step3"></div>
+    </div>
+
+    <!-- Step 1: Business Details -->
+    <div id="form-step1" class="card">
+      <div class="card-title">Step 1: Business Details</div>
+      
+      <div class="form-group">
+        <label class="form-label">Business Name *</label>
+        <input type="text" id="business-name" class="form-input" placeholder="e.g., The Zen Kitchen" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Business Type *</label>
+        <select id="business-type" class="form-select">
+          <option value="">Select type...</option>
+          <option value="restaurant">Restaurant</option>
+          <option value="cafe">Cafe</option>
+          <option value="hotel">Hotel</option>
+          <option value="catering">Catering Service</option>
+          <option value="retail">Retail / Grocery</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Contact Email *</label>
+        <input type="email" id="contact-email" class="form-input" placeholder="manager@example.com">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Contact Phone</label>
+        <input type="tel" id="contact-phone" class="form-input" placeholder="+44 123 456 7890">
+      </div>
+      
+      <button class="btn btn-primary" onclick="goToStep2()">Continue to Pledge</button>
+    </div>
+
+    <!-- Step 2: Pledge Signing -->
+    <div id="form-step2" class="card hidden">
+      <div class="card-title">Step 2: Neutral Language & Privacy Pledge</div>
+      
+      <div class="pledge-box">
+        <div class="pledge-title">The allergyZEN Partner Pledge</div>
+        <div class="pledge-text">
+          As an allergyZEN Trusted Partner, we commit to creating a safe, welcoming environment 
+          for all guests with dietary requirements. We pledge to use neutral, non-judgmental 
+          language and protect the privacy of all allergyZEN users.
+        </div>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="pledge1">
+        <label class="checkbox-label" for="pledge1">
+          <strong>Neutral Language:</strong> We will use respectful, non-judgmental language 
+          when discussing dietary requirements. We will never question, minimize, or dismiss 
+          a guest's allergy or sensitivity.
+        </label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="pledge2">
+        <label class="checkbox-label" for="pledge2">
+          <strong>Privacy Protection:</strong> We will treat all allergyZEN data as strictly 
+          confidential. Guest information shared via Trusted Kitchen Tickets will only be 
+          used for food preparation purposes.
+        </label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="pledge3">
+        <label class="checkbox-label" for="pledge3">
+          <strong>Data Minimization:</strong> We understand that all shared data is 
+          automatically wiped after 180 minutes (3 hours) and we will not retain any 
+          copies beyond this window.
+        </label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="pledge4">
+        <label class="checkbox-label" for="pledge4">
+          <strong>I Agree:</strong> By checking this box, I digitally sign this pledge on 
+          behalf of my business and agree to uphold these standards.
+        </label>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Signatory Name *</label>
+        <input type="text" id="signatory-name" class="form-input" placeholder="Full name of authorized signatory">
+      </div>
+      
+      <button class="btn btn-primary" id="sign-btn" onclick="signPledge()" disabled>Sign Pledge & Generate QR</button>
+    </div>
+
+    <!-- Step 3: QR Code Result -->
+    <div id="form-step3" class="card hidden">
+      <div class="card-title">Step 3: Your Partner QR Code</div>
+      
+      <div class="qr-result" id="qr-result" style="display: block;">
+        <div class="qr-code" id="qr-display">&#9635;</div>
+        <h2 id="result-business-name">Your Business</h2>
+        <p style="color: var(--text-muted); margin: 8px 0;">Display this QR code for allergyZEN users to scan</p>
+        <div class="business-id" id="result-business-id">ID: AZ-000000</div>
+        
+        <button class="btn btn-primary" style="margin-top: 24px;" onclick="downloadQR()">
+          Download QR Code
+        </button>
+        
+        <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: left;">
+          <strong style="color: #166534;">Next Steps:</strong>
+          <ul style="margin: 8px 0 0 20px; color: #15803d; font-size: 0.875rem;">
+            <li>Print and display your QR code at the entrance</li>
+            <li>Train staff on the Neutral Language Pledge</li>
+            <li>When a guest scans, you'll receive their Trusted Kitchen Ticket</li>
+            <li>Click "Accept" to confirm and activate their Glowing Shield</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const PARTNER_STORAGE_KEY = 'allergyzen_partner_data';
+    let businessData = {};
+
+    // Enable sign button when all pledges checked
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', checkPledges);
+    });
+
+    function checkPledges() {
+      const allChecked = ['pledge1', 'pledge2', 'pledge3', 'pledge4'].every(
+        id => document.getElementById(id).checked
+      );
+      const hasSignatory = document.getElementById('signatory-name').value.trim().length > 0;
+      document.getElementById('sign-btn').disabled = !(allChecked && hasSignatory);
+    }
+
+    document.getElementById('signatory-name').addEventListener('input', checkPledges);
+
+    function goToStep2() {
+      const name = document.getElementById('business-name').value.trim();
+      const type = document.getElementById('business-type').value;
+      const email = document.getElementById('contact-email').value.trim();
+
+      if (!name || !type || !email) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      businessData = {
+        name,
+        type,
+        email,
+        phone: document.getElementById('contact-phone').value.trim()
+      };
+
+      document.getElementById('form-step1').classList.add('hidden');
+      document.getElementById('form-step2').classList.remove('hidden');
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step1').classList.add('complete');
+      document.getElementById('step2').classList.add('active');
+    }
+
+    function signPledge() {
+      const signatory = document.getElementById('signatory-name').value.trim();
+      
+      // Generate business ID
+      const businessId = 'AZ-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+      
+      businessData.signatory = signatory;
+      businessData.signedAt = new Date().toISOString();
+      businessData.businessId = businessId;
+      businessData.pledges = {
+        neutralLanguage: true,
+        privacyProtection: true,
+        dataMinimization: true
+      };
+
+      // Save to localStorage
+      localStorage.setItem(PARTNER_STORAGE_KEY, JSON.stringify(businessData));
+
+      // Show result
+      document.getElementById('form-step2').classList.add('hidden');
+      document.getElementById('form-step3').classList.remove('hidden');
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('complete');
+      document.getElementById('step3').classList.add('active');
+      document.getElementById('step3').classList.add('complete');
+
+      document.getElementById('result-business-name').textContent = businessData.name;
+      document.getElementById('result-business-id').textContent = `ID: ${businessId}`;
+    }
+
+    function downloadQR() {
+      // In production, this would generate an actual QR code image
+      alert(`QR Code for ${businessData.name}\nID: ${businessData.businessId}\n\nIn production, this would download a printable QR code image.`);
+    }
+  </script>
+</body>
+</html>
