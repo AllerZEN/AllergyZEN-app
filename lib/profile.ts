@@ -1,13 +1,17 @@
 "use client"
 
-// Family Shield Profile Management with Variable Safety Timers (30m, 1h, 3h, 24h)
+/**
+ * allergyZEN Profile & Handshake Engine
+ * Manages the Family Shield, Zen Spectrum items, and Bulletproof 3-hour handshakes.
+ * 2026 SPEC: Includes 🟤 Brown tier (Dislikes) and 💙 Blue tier (Sensory).
+ */
 
 export interface DotItems {
-  red: AllergenItem[]
-  amber: AllergenItem[]
-  brown: AllergenItem[] // ZEN Spectrum: Dislike - personal preference
-  green: AllergenItem[]
-  blue: AllergenItem[] // ZEN Spectrum: ED/Sensory boundaries
+  red: AllergenItem[] // High Reactivity / Strict Avoidance
+  amber: AllergenItem[] // Moderate Sensitivity
+  brown: AllergenItem[] // Dislike / Personal Preference (🟤)
+  green: AllergenItem[] // Verified Safe
+  blue: AllergenItem[] // ED/Sensory Boundaries (💙)
 }
 
 export interface AllergenItem {
@@ -16,7 +20,6 @@ export interface AllergenItem {
   addedAt: string
 }
 
-// Theme colors for profile-specific vibes - Updated to ensure color "sticks"
 export type ThemeColor = "purple" | "teal" | "rose" | "amber" | "sky"
 
 export const THEME_COLORS: Record<ThemeColor, { primary: string; accent: string; bg: string }> = {
@@ -29,9 +32,8 @@ export const THEME_COLORS: Record<ThemeColor, { primary: string; accent: string;
 
 export interface FamilyMember {
   name: string
-  allergies: string[]
+  allergies: string[] // Combined high-reactivity names for easy access
   items?: DotItems
-  dislikedItems?: string[] 
   themeColor?: ThemeColor
   photoUrl?: string 
   createdAt: string
@@ -39,12 +41,10 @@ export interface FamilyMember {
 }
 
 export interface BoundaryPreferences {
-  // Core ED Boundaries
   softTextures: boolean
   noSaltSauce: boolean
   deconstructed: boolean
   deconstructedNotes: string
-  // Sensory options
   temperatureSensitive: boolean
   temperaturePreference: "room-temp" | "warm-only" | "cold-only" | ""
   singleColorMeals: boolean
@@ -57,7 +57,7 @@ export interface BoundaryPreferences {
 
 export interface ProtectionSession {
   startTime: string | null
-  durationMs: number // Dynamic duration based on user choice
+  durationMs: number 
   businessId: string | null
   businessName: string | null
   acknowledged: boolean
@@ -69,16 +69,7 @@ export interface ProfileSession {
   protectionWindow: ProtectionSession
 }
 
-export interface PersonalNote {
-  id: string
-  date: string
-  mealDescription: string
-  feelings: string
-  textures: string
-  rating: number
-}
-
-// Global Protection Constants for Handshake
+// 2026 BULLETPROOF HANDSHAKE OPTIONS
 export const HANDSHAKE_DURATIONS = {
   THIRTY_MIN: 30 * 60 * 1000,
   ONE_HOUR: 60 * 60 * 1000,
@@ -92,17 +83,15 @@ class UserProfileManager {
     activeProfileIndex: 0,
     protectionWindow: {
       startTime: null,
-      durationMs: HANDSHAKE_DURATIONS.THREE_HOURS, // Default to 3h
+      durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
       businessId: null,
       businessName: null,
       acknowledged: false,
       confirmedByBusiness: false
     }
   }
-  personalNotes: PersonalNote[] = []
   
   private STORAGE_KEY = "allergyzen_family_profiles"
-  private NOTES_KEY = "allergyzen_personal_notes"
   
   constructor() {
     if (typeof window !== "undefined") {
@@ -116,22 +105,7 @@ class UserProfileManager {
       if (stored) {
         const data = JSON.parse(stored)
         this.profiles = data.profiles || []
-        this.session = data.session || { 
-          activeProfileIndex: 0,
-          protectionWindow: {
-            startTime: null,
-            durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
-            businessId: null,
-            businessName: null,
-            acknowledged: false,
-            confirmedByBusiness: false
-          }
-        }
-      }
-      
-      const notesStored = localStorage.getItem(this.NOTES_KEY)
-      if (notesStored) {
-        this.personalNotes = JSON.parse(notesStored)
+        this.session = data.session || this.session
       }
       
       if (this.profiles.length === 0) {
@@ -141,193 +115,89 @@ class UserProfileManager {
           themeColor: "purple",
           items: { red: [], amber: [], brown: [], green: [], blue: [] },
           createdAt: new Date().toISOString(),
-          boundaries: {
-            softTextures: false,
-            noSaltSauce: false,
-            deconstructed: false,
-            deconstructedNotes: "",
-            temperatureSensitive: false,
-            temperaturePreference: "",
-            singleColorMeals: false,
-            singleColorPreference: "",
-            noMixedTextures: false,
-            specificPortions: false,
-            portionNotes: "",
-            customNotes: []
-          }
+          boundaries: this.getDefaultBoundaries()
         })
         this.saveToStorage()
       }
     } catch (e) {
-      console.error("Error loading profiles:", e)
+      console.error("Profile load error:", e)
     }
   }
   
-  private saveToStorage() {
-    if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
-        profiles: this.profiles,
-        session: this.session
-      }))
-    } catch (e) {
-      console.error("Error saving profiles:", e)
+  private getDefaultBoundaries(): BoundaryPreferences {
+    return {
+      softTextures: false, noSaltSauce: false, deconstructed: false,
+      deconstructedNotes: "", temperatureSensitive: false, temperaturePreference: "",
+      singleColorMeals: false, singleColorPreference: "", noMixedTextures: false,
+      specificPortions: false, portionNotes: "", customNotes: []
     }
   }
+  
+  saveToStorage() {
+    if (typeof window === "undefined") return
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+      profiles: this.profiles,
+      session: this.session
+    }))
+  }
 
-  // UPDATED: Start Protection with Custom Duration (30m, 1h, 3h, 24h)
+  // --- HANDSHAKE LOGIC ---
+
   startProtectionWindow(businessId: string, businessName: string, durationMinutes: number = 180) {
-    const durationMs = durationMinutes * 60 * 1000
     this.session.protectionWindow = {
       startTime: new Date().toISOString(),
-      durationMs: durationMs,
+      durationMs: durationMinutes * 60 * 1000,
       businessId,
       businessName,
       acknowledged: true,
       confirmedByBusiness: false
     }
     this.saveToStorage()
-    
-    // Dispatch event to notify UI that Handshake is active
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("handshakeStarted", { 
-        detail: { durationMinutes, businessName } 
-      }))
-    }
+    window.dispatchEvent(new CustomEvent("handshakeStarted", { detail: { durationMinutes, businessName } }))
   }
   
-  confirmByBusiness() {
-    if (this.session?.protectionWindow) {
-      this.session.protectionWindow.confirmedByBusiness = true
-      this.saveToStorage()
-    }
-  }
-  
-  getProtectionTimeRemaining(): number {
-    const startTime = this.session?.protectionWindow?.startTime
-    const durationMs = this.session?.protectionWindow?.durationMs || HANDSHAKE_DURATIONS.THREE_HOURS
-    
+  getRemainingProtectionTime(): number {
+    const { startTime, durationMs } = this.session.protectionWindow
     if (!startTime) return 0
-    
-    const startTimeMs = new Date(startTime).getTime()
-    const elapsed = Date.now() - startTimeMs
-    const remaining = durationMs - elapsed
-    
-    return Math.max(0, remaining)
+    const elapsed = Date.now() - new Date(startTime).getTime()
+    return Math.max(0, durationMs - elapsed)
   }
   
   isProtectionActive(): boolean {
-    return this.getProtectionTimeRemaining() > 0
-  }
-  
-  checkStatus(): "PROTECTED" | "EXPIRED" | "CONFIRMED" | "INACTIVE" | "UNKNOWN" {
-    const activeProfile = this.profiles?.[this.session?.activeProfileIndex]
-    if (!activeProfile) return "UNKNOWN"
-    
-    const protectionWindow = this.session?.protectionWindow
-    
-    if (protectionWindow?.startTime) {
-      if (this.isProtectionActive()) {
-        if (protectionWindow.confirmedByBusiness) return "CONFIRMED"
-        return "PROTECTED"
-      }
-      return "EXPIRED"
-    }
-    
-    return "INACTIVE"
-  }
-  
-  // Manual "Un-shake" button handler
-  clearProtectionWindow() {
-    this.session.protectionWindow = {
-      startTime: null,
-      durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
-      businessId: null,
-      businessName: null,
-      acknowledged: false,
-      confirmedByBusiness: false
-    }
-    this.saveToStorage()
-  }
-  
-  cleanupExpiredData() {
-    if (this.session?.protectionWindow?.startTime && !this.isProtectionActive()) {
-      this.clearProtectionWindow()
-    }
-  }
-  
-  // Profile Switching & Theme Persistence
-  switchProfile(index: number): FamilyMember | null {
-    if (index >= 0 && index < this.profiles.length) {
-      this.session.activeProfileIndex = index
-      this.saveToStorage()
-      
-      // Update Global CSS variable for theme "Stickiness"
-      const color = this.THEME_COLOR_VALUES[this.profiles[index].themeColor || "purple"]
-      if (typeof window !== "undefined") {
-        document.documentElement.style.setProperty('--profile-theme', color)
-        window.dispatchEvent(new CustomEvent("profileSwitched", { detail: { index } }))
-      }
-      return this.profiles[index]
-    }
-    return null
+    return this.getRemainingProtectionTime() > 0
   }
 
-  private THEME_COLOR_VALUES: Record<ThemeColor, string> = {
-    purple: "#8E55A2", teal: "#0D9488", rose: "#E11D48", amber: "#D97706", sky: "#0284C7"
+  // Auto-wipe logic for the Partner Dashboard
+  checkStatus(): "PROTECTED" | "EXPIRED" | "CONFIRMED" | "INACTIVE" {
+    if (!this.session.protectionWindow.startTime) return "INACTIVE"
+    if (!this.isProtectionActive()) return "EXPIRED"
+    return this.session.protectionWindow.confirmedByBusiness ? "CONFIRMED" : "PROTECTED"
   }
-  
-  // ZEN Spectrum Management
+
+  // --- ZEN SPECTRUM ITEM MANAGEMENT ---
+
   addItem(itemName: string, category: string, dotColor: keyof DotItems) {
     const profile = this.getActiveProfile()
-    if (!profile) return false
+    if (!profile) return
     
-    if (!profile.items) {
-      profile.items = { red: [], amber: [], brown: [], green: [], blue: [] }
-    }
+    if (!profile.items) profile.items = { red: [], amber: [], brown: [], green: [], blue: [] }
     
-    // Remove from all categories first to ensure priority order
-    const colors: (keyof DotItems)[] = ["red", "amber", "brown", "green", "blue"]
-    for (const color of colors) {
-      if (profile.items[color]) {
-        profile.items[color] = profile.items[color].filter(i => i.name !== itemName)
-      }
-    }
-    
-    // Add to specific ZEN Spectrum home
-    profile.items[dotColor].push({
-      name: itemName,
-      category: category,
-      addedAt: new Date().toISOString()
+    // PRIORITY SYNC: Remove from all other tiers first
+    const tiers: (keyof DotItems)[] = ["red", "amber", "brown", "green", "blue"]
+    tiers.forEach(t => {
+      profile.items![t] = profile.items![t].filter(i => i.name !== itemName)
     })
     
-    this.saveToStorage()
-    return true
-  }
-  
-  removeItem(itemName: string, dotColor: keyof DotItems) {
-    const profile = this.getActiveProfile()
-    if (!profile?.items?.[dotColor]) return false
+    profile.items[dotColor].push({ name: itemName, category, addedAt: new Date().toISOString() })
     
-    profile.items[dotColor] = profile.items[dotColor].filter(i => i.name !== itemName)
+    // Sync the flat "allergies" array for quick high-reactivity checks
+    profile.allergies = profile.items.red.map(i => i.name)
+    
     this.saveToStorage()
-    return true
-  }
-  
-  getItemsByDot(dotColor: keyof DotItems): AllergenItem[] {
-    const profile = this.getActiveProfile()
-    if (!profile?.items) return []
-    return profile.items[dotColor] || []
   }
 
-  // Dislike List Synchronization with Spectrum Brown
-  addDislike(itemName: string) {
-    return this.addItem(itemName, "Dislike", "brown")
-  }
-
-  getDislikedItems(): string[] {
-    const profile = this.getActiveProfile()
-    return profile?.items?.brown?.map(i => i.name) || []
+  getProfilePhoto(): string | null {
+    return this.getActiveProfile()?.photoUrl || null
   }
 
   getActiveProfile(): FamilyMember | null {
