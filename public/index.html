@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>allergyZEN v4.3</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root { 
             --primary: #8E55A2; 
             --bg: #F3F4F6; 
             --text: #1F2937; 
             --red: #EF4444;
-            --amber: #F59E0B;
+            --amber: #F59E0B; /* To be changed to brown in script/next update */
             --green: #10B981;
+            --profile-theme: #8E55A2; /* Dynamic profile theme variable */
         }
         
-        /* Forces the app to feel like a mobile app */
         html, body { 
             height: 100%;
             margin: 0;
@@ -24,7 +25,6 @@
             background: var(--bg);
         }
 
-        /* FIXED HEADER - This stays at the absolute top */
         .header { 
             background: white; 
             height: 60px;
@@ -38,11 +38,15 @@
             z-index: 9999;
         }
 
-        /* SCROLLABLE AREA - Everything inside here moves */
+        /* The Logo space update mentioned in notes */
+        .logo-img {
+            height: 40px;
+        }
+
         .content-scroll {
             position: absolute;
-            top: 60px; /* Starts below the header */
-            bottom: 90px; /* Ends above the nav */
+            top: 60px; 
+            bottom: 90px; 
             left: 0;
             right: 0;
             overflow-y: auto;
@@ -50,7 +54,27 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* HORIZONTAL CAROUSEL (Top Box) */
+        /* QR READER CONTAINER - Placed for optimal mobile scanning view */
+        #reader-container {
+            width: 100%;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: none; /* Hidden until Scan is clicked */
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        #qr-reader {
+            width: 100% !important;
+            border: none !important;
+        }
+
+        #qr-reader__dashboard {
+            display: none !important; /* Hide library default UI buttons */
+        }
+
         .top-carousel {
             display: flex;
             overflow-x: auto;
@@ -64,14 +88,13 @@
         .scroll-card {
             flex: 0 0 85%;
             scroll-snap-align: center;
-            background: linear-gradient(135deg, #8E55A2, #6D3B84);
+            background: linear-gradient(135deg, var(--profile-theme), #6D3B84);
             color: white;
             padding: 20px;
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* SEARCH BAR */
         .search-container {
             display: flex;
             align-items: center;
@@ -83,14 +106,12 @@
         }
         .search-input { flex: 1; border: none; outline: none; font-size: 16px; }
 
-        /* SPECTRUM BUTTONS */
         .spectrum-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .spec-btn { padding: 15px 5px; border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 11px; }
         .btn-red { background: var(--red); }
-        .btn-amber { background: var(--amber); }
+        .btn-amber { background: var(--amber); } /* Change to Brown in upcoming CSS update */
         .btn-green { background: var(--green); }
 
-        /* BOTTOM NAV - The circular Home button from your photo */
         .bottom-nav { 
             position: absolute;
             bottom: 0;
@@ -103,9 +124,9 @@
             border-top: 1px solid #eee;
             z-index: 9999;
         }
-        .nav-item { border: none; background: none; color: #6B7280; display: flex; flex-direction: column; align-items: center; font-size: 11px; }
+        .nav-item { border: none; background: none; color: #6B7280; display: flex; flex-direction: column; align-items: center; font-size: 11px; cursor: pointer; }
         .home-circle { 
-            background: var(--primary); 
+            background: var(--profile-theme); 
             color: white !important; 
             width: 60px; 
             height: 60px; 
@@ -119,14 +140,20 @@
 <body>
 
     <header class="header">
-        <strong style="color: var(--primary); font-size: 1.2rem;">allergyZEN</strong>
+        <strong id="app-logo" style="color: var(--profile-theme); font-size: 1.2rem;">allergyZEN</strong>
     </header>
 
     <div class="content-scroll">
+        
+        <div id="reader-container">
+            <div id="qr-reader"></div>
+            <button id="close-scanner" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px;">✕</button>
+        </div>
+
         <div class="top-carousel">
             <div class="scroll-card">
                 <h3>Shield Active</h3>
-                <p>2h 45m protection remaining.</p>
+                <p id="shield-timer">2h 45m protection remaining.</p>
             </div>
             <div class="scroll-card" style="background: #10B981;">
                 <h3>Zen Tip</h3>
@@ -137,12 +164,12 @@
         <div class="search-container">
             <span style="margin-right:10px">🔍</span>
             <input type="text" class="search-input" placeholder="Search or scan...">
-            <span style="margin-left:10px">📷</span>
-            <span style="margin-left:10px">➕</span>
+            <span id="scan-trigger-icon" style="margin-left:10px; cursor: pointer;">📷</span>
+            <span id="add-profile-trigger" style="margin-left:10px; cursor: pointer;">➕</span>
         </div>
 
         <div style="background: white; padding: 20px; border-radius: 18px; margin-bottom: 15px;">
-            <h2>Hey Me,</h2>
+            <h2 id="user-greeting">Hey Me,</h2>
             <p>Breathe easy knowing you're protected.</p>
         </div>
 
@@ -157,13 +184,18 @@
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-item">🔍<span>Scan</span></button>
-        <button class="nav-item">🛡️<span>Safe</span></button>
-        <button class="nav-item home-circle"><span style="font-size: 24px;">🏠</span><span>Home</span></button>
-        <button class="nav-item">🧬<span>ED</span></button>
-        <button class="nav-item">📈<span>ZenHealth</span></button>
-        <button class="nav-item">•••<span>More</span></button>
+        <button id="nav-scan" class="nav-item">🔍<span>Scan</span></button>
+        <button id="nav-safe" class="nav-item">🛡️<span>Safe</span></button>
+        <button id="nav-home" class="nav-item home-circle"><span style="font-size: 24px;">🏠</span><span>Home</span></button>
+        <button id="nav-ed" class="nav-item">🧬<span>ED</span></button>
+        <button id="nav-health" class="nav-item">📈<span>ZenHealth</span></button>
+        <button id="nav-more" class="nav-item">•••<span>More</span></button>
     </nav>
+
+    <div id="modal-overlay" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center;">
+        <div id="modal-content" style="background:white; padding:30px; border-radius:20px; width:80%; text-align:center;">
+            </div>
+    </div>
 
 </body>
 </html>
