@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react"
 import { 
   Search, Home, Heart, ShieldCheck, Activity,
   ChefHat, BookOpen, FileText, User, Settings,
-  MoreHorizontal, X, BarChart3, CreditCard
+  MoreHorizontal, X, BarChart3, CreditCard, ShieldAlert
 } from "lucide-react"
 import { ScanHub } from "./scan-hub"
 import { Dashboard } from "./dashboard"
@@ -24,6 +24,7 @@ import { InsightsPanel } from "./insights-panel"
 import { SubscriptionPanel } from "./subscription-panel"
 import { BusinessTab } from "./business-tab"
 import { cn } from "@/lib/utils"
+import userProfile, { THEME_COLORS, ThemeColor } from "@/lib/profile"
 
 type TabId = "scan" | "safe" | "home" | "boundaries" | "zenhealth" | "blocked" | "meals" | "knowledge" | "notes" | "habits" | "emergency" | "profile" | "settings" | "insights" | "subscription" | "business"
 
@@ -36,31 +37,13 @@ interface TabConfig {
   emoji?: string
 }
 
-console.log("[v0] App Shell module loading...")
-
-// Calm greeting quotes
-const ZEN_GREETINGS = [
-  "Safety and serenity, hand in hand.",
-  "Your wellness journey continues beautifully.",
-  "Every mindful choice brings peace.",
-  "You're doing amazing - one scan at a time.",
-  "Trust your instincts, they're serving you well.",
-  "Small steps lead to big wellness wins.",
-  "Your health matters. You matter.",
-  "Breathe easy knowing you're protected.",
-  "Today is another day of mindful living.",
-  "Your body thanks you for being vigilant."
-]
-
-// 5-Tab Sanctuary: Scan, Safe, HOME (center), Boundaries, ZenHealth
 const TABS: TabConfig[] = [
   { id: "scan", label: "Scan", icon: Search, primary: true },
   { id: "safe", label: "Safe", icon: ShieldCheck, primary: true, color: "text-green-500" },
-  { id: "home", label: "Home", icon: Home, primary: true }, // CENTER (3rd position)
+  { id: "home", label: "Home", icon: Home, primary: true },
   { id: "boundaries", label: "ED", icon: Heart, primary: true, color: "text-blue-500", emoji: "blue_heart" },
   { id: "zenhealth", label: "ZenHealth", icon: Activity, primary: true, color: "text-purple-500", emoji: "purple_heart" },
-  // Secondary tabs in "More" drawer
-  { id: "business", label: "Business Handshake", icon: ShieldCheck, primary: false },
+  { id: "business", label: "Handshake", icon: ShieldCheck, primary: false },
   { id: "blocked", label: "Blocked List", icon: ShieldCheck, primary: false },
   { id: "meals", label: "Meal Generator", icon: ChefHat, primary: false },
   { id: "knowledge", label: "Knowledge Hub", icon: BookOpen, primary: false },
@@ -69,7 +52,6 @@ const TABS: TabConfig[] = [
   { id: "emergency", label: "Emergency Relief", icon: Heart, primary: false },
   { id: "profile", label: "Edit Profile", icon: User, primary: false },
   { id: "settings", label: "Settings", icon: Settings, primary: false },
-  // Moved to bottom of More tab per spec
   { id: "insights", label: "Usage Insights", icon: BarChart3, primary: false },
   { id: "subscription", label: "Subscription", icon: CreditCard, primary: false },
 ]
@@ -81,42 +63,37 @@ export function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>("home")
   const [showMoreDrawer, setShowMoreDrawer] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [userName, setUserName] = useState("Friend")
-  const [sensitivityCount, setSensitivityCount] = useState(0)
-
-  // Stable greeting per session
-  const greeting = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * ZEN_GREETINGS.length)
-    return ZEN_GREETINGS[randomIndex]
-  }, [])
+  const [isShieldActive, setIsShieldActive] = useState(false)
+  const [theme, setTheme] = useState<ThemeColor>("purple")
 
   useEffect(() => {
     setMounted(true)
-    // Load user name from profile
-    try {
-      const stored = localStorage.getItem("allergyzen_user_profile")
-      if (stored) {
-        const profile = JSON.parse(stored)
-        if (profile?.name) {
-          setUserName(profile.name)
-        }
-        // Count actual user-selected sensitivities (not pre-populated)
-        if (profile?.selectedAllergies) {
-          setSensitivityCount(profile.selectedAllergies.length)
-        }
-      }
-      // Also check family profiles
-      const familyStored = localStorage.getItem("allergyzen_family_profiles")
-      if (familyStored) {
-        const familyData = JSON.parse(familyStored)
-        const activeIndex = familyData.session?.activeProfileIndex || 0
-        const activeProfile = familyData.profiles?.[activeIndex]
-        if (activeProfile?.name) {
-          setUserName(activeProfile.name)
-        }
-      }
-    } catch {
-      // Ignore
+    
+    const syncWithProfile = () => {
+      const activeProfile = userProfile.getActiveProfile()
+      const currentTheme = activeProfile?.themeColor || "purple"
+      setTheme(currentTheme)
+      setIsShieldActive(userProfile.isProtectionActive())
+      
+      // Update CSS variables for global theme "stickiness"
+      const colors = THEME_COLORS[currentTheme]
+      document.documentElement.style.setProperty('--profile-theme', colors.primary)
+      document.documentElement.style.setProperty('--profile-accent', colors.accent)
+      document.documentElement.style.setProperty('--profile-bg', colors.bg)
+    }
+
+    syncWithProfile()
+    const interval = setInterval(() => {
+        setIsShieldActive(userProfile.isProtectionActive())
+    }, 2000)
+
+    window.addEventListener("themeChanged", syncWithProfile)
+    window.addEventListener("profileSwitched", syncWithProfile)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener("themeChanged", syncWithProfile)
+      window.removeEventListener("profileSwitched", syncWithProfile)
     }
   }, [])
 
@@ -127,68 +104,55 @@ export function AppShell() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "scan":
-        return <ScanHub />
-      case "safe":
-        return <SafeList />
-      case "home":
-        return <Dashboard onNavigate={handleTabChange} />
-      case "business":
-        return <BusinessTab />
-      case "boundaries":
-        return <BoundariesPanel />
-      case "zenhealth":
-        return <ZenHealth />
-      case "blocked":
-        return <BlockedList />
-      case "meals":
-        return <MealPlanner />
-      case "knowledge":
-        return <KnowledgeHub />
-      case "notes":
-        return <MyNotes />
-      case "habits":
-        return <ZenHabits />
-      case "emergency":
-        return <EmergencyButton />
-      case "profile":
-        return <EditProfile />
-      case "settings":
-        return <SettingsPanel />
-      case "insights":
-        return <InsightsPanel />
-      case "subscription":
-        return <SubscriptionPanel />
-      default:
-        return <Dashboard />
+      case "scan": return <ScanHub />
+      case "safe": return <SafeList />
+      case "home": return <Dashboard onNavigate={handleTabChange} />
+      case "business": return <BusinessTab />
+      case "boundaries": return <BoundariesPanel />
+      case "zenhealth": return <ZenHealth />
+      case "blocked": return <BlockedList />
+      case "meals": return <MealPlanner />
+      case "knowledge": return <KnowledgeHub />
+      case "notes": return <MyNotes />
+      case "habits": return <ZenHabits />
+      case "emergency": return <EmergencyButton />
+      case "profile": return <EditProfile />
+      case "settings": return <SettingsPanel />
+      case "insights": return <InsightsPanel />
+      case "subscription": return <SubscriptionPanel />
+      default: return <Dashboard />
     }
   }
 
-  if (!mounted) {
-    return <div className="min-h-screen bg-white animate-pulse" />
-  }
-
-  const activeTabConfig = TABS.find(t => t.id === activeTab)
-  const isSecondaryTab = activeTabConfig && !activeTabConfig.primary
+  if (!mounted) return <div className="min-h-screen bg-white" />
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header removed - content now renders cleanly without overlap */}
+    <div className="min-h-screen bg-white flex flex-col font-sans">
+      {/* Active Shield Indicator (v0 view.html style) */}
+      {isShieldActive && (
+        <div 
+          onClick={() => handleTabChange("business")}
+          className="fixed top-4 right-4 z-[60] flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-md border border-blue-200 cursor-pointer animate-in fade-in zoom-in"
+        >
+          <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-ping" />
+          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Shield Active</span>
+        </div>
+      )}
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20">
-        <div className="max-w-lg mx-auto p-4">
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div className="max-w-lg mx-auto p-4 sm:p-6">
           {renderContent()}
         </div>
       </main>
 
-      {/* Bottom Navigation - 5 Primary tabs with HOME as CENTER */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t-2 border-gray-200 z-50 shadow-lg">
-        <div className="max-w-lg mx-auto flex items-center justify-around h-16">
+      {/* Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 z-50 pb-safe">
+        <div className="max-w-lg mx-auto flex items-center justify-around h-16 px-2">
           {PRIMARY_TABS.map((tab, index) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
-            const isCenter = index === 2 // Home is center (3rd position, index 2)
+            const isCenter = index === 2
             
             return (
               <button
@@ -196,61 +160,32 @@ export function AppShell() {
                 onClick={() => handleTabChange(tab.id)}
                 className={cn(
                   "flex flex-col items-center justify-center flex-1 h-full transition-all relative",
-                  isActive 
-                    ? tab.color || "text-purple-600"
-                    : "text-gray-500 hover:text-gray-700"
+                  isActive ? (tab.color || "text-[var(--profile-theme)]") : "text-gray-400"
                 )}
               >
                 {isCenter ? (
-                  // Home button - elevated center design
                   <div className={cn(
-                    "absolute -top-4 p-3 rounded-full transition-all shadow-lg",
-                    isActive 
-                      ? "bg-purple-600 text-white scale-110" 
-                      : "bg-white border-2 border-purple-300 text-purple-600"
+                    "absolute -top-5 p-3.5 rounded-full transition-all shadow-xl border-4 border-white",
+                    isActive ? "bg-[var(--profile-theme)] text-white scale-110" : "bg-gray-100 text-gray-400"
                   )}>
                     <Icon className="w-6 h-6" />
                   </div>
                 ) : (
-                  <Icon className={cn(
-                    "w-5 h-5 transition-transform",
-                    isActive && "scale-110",
-                    tab.color && isActive && tab.color
-                  )} />
+                  <Icon className={cn("w-5 h-5", isActive && "scale-110")} />
                 )}
-                <span className={cn(
-                  "text-xs mt-1 font-semibold",
-                  isCenter && "mt-6"
-                )}>
+                <span className={cn("text-[10px] mt-1 font-bold uppercase tracking-tighter", isCenter && "mt-7")}>
                   {tab.label}
                 </span>
-                {isActive && !isCenter && (
-                  <div className={cn(
-                    "absolute bottom-0 w-8 h-1 rounded-t-full",
-                    tab.color === "text-blue-500" ? "bg-blue-500" : 
-                    tab.color === "text-green-500" ? "bg-green-500" :
-                    tab.color === "text-purple-500" ? "bg-purple-500" : "bg-purple-600"
-                  )} />
-                )}
               </button>
             )
           })}
           
-          {/* More Button */}
           <button
             onClick={() => setShowMoreDrawer(true)}
-            className={cn(
-              "flex flex-col items-center justify-center flex-1 h-full transition-all",
-              isSecondaryTab 
-                ? "text-purple-600" 
-                : "text-gray-500 hover:text-gray-700"
-            )}
+            className={cn("flex flex-col items-center justify-center flex-1 h-full text-gray-400")}
           >
             <MoreHorizontal className="w-5 h-5" />
-            <span className="text-xs mt-1 font-semibold">More</span>
-            {isSecondaryTab && (
-              <div className="absolute bottom-0 w-8 h-1 bg-purple-600 rounded-t-full" />
-            )}
+            <span className="text-[10px] mt-1 font-bold uppercase tracking-tighter">More</span>
           </button>
         </div>
       </nav>
@@ -258,46 +193,24 @@ export function AppShell() {
       {/* More Drawer */}
       {showMoreDrawer && (
         <>
-          <div 
-            className="fixed inset-0 bg-black/50 z-50"
-            onClick={() => setShowMoreDrawer(false)}
-          />
-          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 animate-in slide-in-from-bottom duration-300">
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50" onClick={() => setShowMoreDrawer(false)} />
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] z-[51] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
             <div className="max-w-lg mx-auto">
-              <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                <h3 className="font-bold text-gray-800">More Options</h3>
-                <button 
-                  onClick={() => setShowMoreDrawer(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <div className="p-4 grid grid-cols-2 gap-3">
+              <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
+              <div className="grid grid-cols-2 gap-3 mb-8">
                 {SECONDARY_TABS.map(tab => {
                   const Icon = tab.icon
-                  const isActive = activeTab === tab.id
                   return (
                     <button
                       key={tab.id}
                       onClick={() => handleTabChange(tab.id)}
-                      className={cn(
-                        "flex items-center gap-3 p-4 rounded-xl border-2 transition-all",
-                        isActive
-                          ? "border-purple-500 bg-purple-50 text-purple-600"
-                          : "border-gray-200 hover:border-purple-300 hover:bg-gray-50"
-                      )}
+                      className="flex items-center gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-100 transition-colors"
                     >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-semibold text-sm">{tab.label}</span>
+                      <Icon className="w-5 h-5 text-gray-500" />
+                      <span className="font-bold text-sm text-gray-700">{tab.label}</span>
                     </button>
                   )
                 })}
-              </div>
-              <div className="p-4 pt-0">
-                <p className="text-xs text-center text-gray-400">
-                  Tap outside to close
-                </p>
               </div>
             </div>
           </div>
