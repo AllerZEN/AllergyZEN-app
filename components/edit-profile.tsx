@@ -11,15 +11,14 @@ import {
   Users, Plus, Trash2, Search, Timer,
   AlertTriangle, AlertCircle, Heart, ShieldCheck, X, ChevronRight
 } from "lucide-react"
-import userProfile, { FamilyMember } from "@/lib/profile"
-import allergensData from "@/allergens.json"
+// Linked to your master profile logic [cite: 2026-01-23]
+import { getUserProfile, getDetailedTriggerList, getItemsByDot, session, saveToStorage } from "@/lib/user-profile"
 import { cn } from "@/lib/utils"
 
 type TriggerCategory = "red" | "amber" | "brown" | "blue"
 
 export function EditProfile() {
-  const [profiles, setProfiles] = useState<FamilyMember[]>([])
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [profile, setProfile] = useState<any>(null)
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<TriggerCategory>("red")
   const [handshakeDuration, setHandshakeDuration] = useState("3h")
@@ -27,52 +26,57 @@ export function EditProfile() {
 
   useEffect(() => {
     setMounted(true)
-    setProfiles([...userProfile.profiles])
-    setActiveIndex(userProfile.session?.activeProfileIndex || 0)
-    setHandshakeDuration(localStorage.getItem("zen_handshake_duration") || "3h")
+    setProfile(getUserProfile())
+    const savedDuration = localStorage.getItem("zen_handshake_duration") || "3h"
+    setHandshakeDuration(savedDuration)
   }, [])
 
-  // 1,750 Item Search Engine Logic
+  // 1,750 Item Search Engine Logic [cite: 2026-01-16]
   const searchResults = useMemo(() => {
     if (search.length < 2) return []
-    const allItems = [
-      ...allergensData.high_reactivity.map(i => ({ ...i, type: 'red' })),
-      ...allergensData.moderate_reactivity.map(i => ({ ...i, type: 'amber' })),
-      ...allergensData.no_reactivity.map(i => ({ ...i, type: 'green' }))
-    ]
+    const allItems = getDetailedTriggerList()
+    
     return allItems
       .filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
-      .slice(0, 10) // Keep it fast on mobile
+      .slice(0, 10) // Performance optimization for mobile
   }, [search])
-
-  const activeProfile = profiles[activeIndex]
 
   const handleHandshakeChange = (val: string) => {
     setHandshakeDuration(val)
     localStorage.setItem("zen_handshake_duration", val)
-    // Bulletproof sync: Update profile session window
+    
+    // Handshake conversion: 30m, 1h, 3h, 24h [cite: 2026-01-25]
     const mins = val === "30m" ? 30 : val === "1h" ? 60 : val === "3h" ? 180 : 1440
-    userProfile.session.protectionWindow.durationMs = mins * 60 * 1000
-    userProfile.saveToStorage()
+    session.protectionWindow.durationMs = mins * 60 * 1000
+    saveToStorage()
   }
 
   const addTrigger = (name: string, cat: TriggerCategory) => {
-    userProfile.addItem(name, "General", cat)
-    setProfiles([...userProfile.profiles])
+    // Logic to update the master profile list
+    const currentProfile = getUserProfile()
+    if (currentProfile) {
+      currentProfile.customAllergies.push(name)
+      localStorage.setItem("allergyzen_user_profile", JSON.stringify(currentProfile))
+      setProfile({ ...currentProfile })
+    }
     setSearch("")
   }
 
   const removeTrigger = (name: string, cat: TriggerCategory) => {
-    userProfile.removeItem(name, cat)
-    setProfiles([...userProfile.profiles])
+    const currentProfile = getUserProfile()
+    if (currentProfile) {
+      currentProfile.customAllergies = currentProfile.customAllergies.filter(item => item !== name)
+      localStorage.setItem("allergyzen_user_profile", JSON.stringify(currentProfile))
+      setProfile({ ...currentProfile })
+    }
   }
 
   const getStyle = (cat: TriggerCategory) => {
     switch (cat) {
       case "red": return { color: "text-red-600", bg: "bg-red-500", label: "Block", icon: AlertTriangle }
       case "amber": return { color: "text-orange-600", bg: "bg-orange-500", label: "Caution", icon: AlertCircle }
-      case "brown": return { color: "text-[#78350f]", bg: "bg-[#78350f]", label: "Dislike", icon: ShieldCheck }
-      case "blue": return { color: "text-blue-600", bg: "bg-blue-500", label: "Bound", icon: Heart }
+      case "brown": return { color: "text-[#78350f]", bg: "bg-[#78350f]", label: "Reactivity", icon: ShieldCheck }
+      case "blue": return { color: "text-blue-600", bg: "bg-blue-500", label: "Sensory", icon: Heart }
     }
   }
 
@@ -80,7 +84,7 @@ export function EditProfile() {
 
   return (
     <div className="max-w-md mx-auto space-y-6 pb-24 px-4 pt-4">
-      {/* HANDSHAKE SHIELD */}
+      {/* HANDSHAKE SHIELD - [cite: 2026-01-20] */}
       <Card className="rounded-[2rem] border-none shadow-xl shadow-blue-100/40 bg-white">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
@@ -88,7 +92,7 @@ export function EditProfile() {
             <Timer className="w-5 h-5 text-blue-600" />
           </div>
           <CardTitle className="font-black text-2xl uppercase tracking-tighter pt-2">Handshake Protocol</CardTitle>
-          <CardDescription className="font-bold text-slate-400">Data wipes automatically after your stay.</CardDescription>
+          <CardDescription className="font-bold text-slate-400">Privacy First: Data wipes after your stay.</CardDescription>
         </CardHeader>
         <CardContent>
           <RadioGroup value={handshakeDuration} onValueChange={handleHandshakeChange} className="grid grid-cols-4 gap-2">
@@ -104,10 +108,10 @@ export function EditProfile() {
         </CardContent>
       </Card>
 
-      {/* SPECTRUM ENGINE */}
+      {/* SPECTRUM ENGINE - Full Zen Spectrum [cite: 2026-01-29] */}
       <Card className="rounded-[2.5rem] border-none shadow-2xl shadow-slate-200/50 bg-white overflow-hidden">
         <div className="p-8 bg-slate-50 border-b border-slate-100">
-          <h2 className="text-2xl font-black uppercase tracking-tighter mb-6">{activeProfile?.name}'s Spectrum</h2>
+          <h2 className="text-2xl font-black uppercase tracking-tighter mb-6">{profile?.name || 'User'}'s Spectrum</h2>
           <div className="grid grid-cols-4 gap-2">
             {(["red", "amber", "brown", "blue"] as TriggerCategory[]).map(cat => (
               <button 
@@ -135,7 +139,7 @@ export function EditProfile() {
               onChange={(e) => setSearch(e.target.value)}
             />
             
-            {/* SEARCH DROPDOWN */}
+            {/* SEARCH DROPDOWN - Zen Spectrum Search [cite: 2026-01-25] */}
             {searchResults.length > 0 && (
               <div className="absolute top-16 left-0 right-0 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                 {searchResults.map((item, i) => (
@@ -145,7 +149,7 @@ export function EditProfile() {
                     className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-none"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={cn("w-2 h-2 rounded-full", item.type === 'red' ? 'bg-red-500' : item.type === 'amber' ? 'bg-orange-500' : 'bg-green-500')} />
+                      <div className={cn("w-2 h-2 rounded-full", item.severity === 'high' ? 'bg-red-500' : 'bg-orange-500')} />
                       <span className="font-bold text-slate-700">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -154,6 +158,7 @@ export function EditProfile() {
                     </div>
                   </button>
                 ))}
+                {/* SAFE Tab Redirect Button */}
                 <button className="w-full p-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
                   See Safe Alternatives <ChevronRight className="w-3 h-3" />
                 </button>
@@ -161,11 +166,11 @@ export function EditProfile() {
             )}
           </div>
 
-          {/* ACTIVE TRIGGERS */}
+          {/* ACTIVE TRIGGERS - Live Shield View [cite: 2026-01-20] */}
           <div className="space-y-4">
             <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Shield Triggers</Label>
             <div className="flex flex-wrap gap-2">
-              {userProfile.getItemsByDot(selectedCategory).map((item, idx) => (
+              {getItemsByDot(selectedCategory).map((item, idx) => (
                 <Badge key={idx} className={cn("rounded-xl px-4 py-3 border-none font-black text-[11px] uppercase text-white flex gap-2", getStyle(selectedCategory).bg)}>
                   {item.name}
                   <button onClick={() => removeTrigger(item.name, selectedCategory)}><X className="w-3 h-3" strokeWidth={4} /></button>
