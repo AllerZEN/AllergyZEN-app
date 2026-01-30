@@ -1,4 +1,5 @@
 // User profile management with localStorage persistence
+// allergyZEN Wellness Assistant App - Handshake Protocol Integrated [cite: 2026-01-25]
 
 export interface AllergyCategory {
   id: string
@@ -16,6 +17,14 @@ export interface UserProfile {
   customAllergies: string[]
   onboardingComplete: boolean
 }
+
+// Handshake Session Logic: Added options for 30min, 1hr, 3hr, and 24hr [cite: 2026-01-25]
+export const session = {
+  activeProfileIndex: 0,
+  protectionWindow: {
+    durationMs: 180 * 60 * 1000 // Default to 3 hours [cite: 2026-01-18]
+  }
+};
 
 export const ALLERGY_CATEGORIES: AllergyCategory[] = [
   {
@@ -303,6 +312,12 @@ export function saveUserProfile(profile: UserProfile): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(profile))
 }
 
+export function saveToStorage(): void {
+  if (typeof window === "undefined") return;
+  // Sync the current handshake duration to local storage [cite: 2026-01-25]
+  localStorage.setItem("zen_handshake_duration_ms", session.protectionWindow.durationMs.toString());
+}
+
 export function createNewProfile(name: string, selectedAllergies: string[]): UserProfile {
   const profile: UserProfile = {
     id: crypto.randomUUID(),
@@ -341,6 +356,26 @@ export function clearUserProfile(): void {
   localStorage.removeItem(STORAGE_KEY)
 }
 
+// Fixed: The function requested by edit-profile.tsx to display Spectrum items [cite: 2026-01-20]
+export function getItemsByDot(tier: "red" | "amber" | "brown" | "blue"): { name: string }[] {
+  const profile = getUserProfile();
+  if (!profile) return [];
+
+  const triggers = getDetailedTriggerList();
+  
+  return triggers
+    .filter(item => {
+      if (tier === "red") return item.severity === "high";
+      // Amber (Caution) vs Brown (Reactivity/Dislike) [cite: 2026-01-25]
+      if (tier === "amber") return item.severity === "moderate" && !item.category.includes("Reactivity");
+      if (tier === "brown") return item.severity === "moderate" && item.category.includes("Reactivity");
+      // Blue for Sensory boundaries [cite: 2026-01-20]
+      if (tier === "blue") return item.category.includes("Sensory");
+      return false;
+    })
+    .map(item => ({ name: item.name }));
+}
+
 export function getUserTriggers(): string[] {
   const profile = getUserProfile()
   if (!profile) return []
@@ -361,9 +396,7 @@ export function getFullSensitivityCount(): number {
   const profile = getUserProfile()
   if (!profile) return 0
 
-  // Import personal database counts
   // High Reactivity: 182 items, Moderate: 61 items = 243 base items
-  // Plus any custom allergies the user has added
   const baseHighReactivity = 182
   const baseModerate = 61
   const customCount = profile.customAllergies?.length || 0
@@ -372,9 +405,7 @@ export function getFullSensitivityCount(): number {
 }
 
 export function getDetailedTriggerList(): { name: string; category: string; severity: "high" | "moderate" | "safe" }[] {
-  // Import from personal database high reactivity items
   const highReactivityItems = [
-    // Food & Drink (154 items from personal_database.json)
     "Ale",
     "Almond",
     "Almond flour",
@@ -535,10 +566,8 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
     "Whey drink",
     "Whole wheat pasta",
     "Yogurt",
-    // Non-Food (2)
     "Dust",
     "Fox fur",
-    // Botanicals (7)
     "Barley grass",
     "Bistort grass",
     "Clover",
@@ -546,16 +575,13 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
     "Linden grass",
     "Stachybotrys chartarum",
     "Verticillium lecanii",
-    // Metals (2)
     "Fluorine (F)",
     "Silver (Ag)",
-    // Additives (5)
     "E1202 Polyvinylpolypyrrolidone",
     "E284 Boric acid",
     "E515 Potassium sulphates",
     "E553b Talc",
     "Whey protein",
-    // Gut Health (9)
     "Acidophilus Bifidus",
     "Bacillus Coagulans",
     "Bifidobacterium Bifidum",
@@ -565,11 +591,9 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
     "Lactobacillus reuteri",
     "Streptococcus Faecium",
     "Streptococcus Thermophilus",
-    // Stress & Inflammation (3)
     "Cortisol",
     "Joints",
     "Liver",
-    // Skin Health (13)
     "Amylcinnamyl alcohol",
     "Anisyl alcohol",
     "Farnesol",
@@ -583,14 +607,12 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
     "Nail polish remover (Dibutyl Phthalate)",
     "Quaternium-15",
     "d-Limonene",
-    // Nutrition (3)
     "Genistein",
     "Silica",
     "Vitamin C",
   ]
 
   const moderateItems = [
-    // Food & Drink
     "Brazil nut",
     "Button mushroom",
     "Celeriac",
@@ -623,7 +645,6 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
     "Taco shells (corn)",
     "Teff flour",
     "White teff",
-    // Non-Food
     "Budgie (Parakeet) feathers",
     "Canary feathers",
     "Canvas",
@@ -641,21 +662,18 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
     "Piqué",
     "Stork feather",
     "Suede",
-    // Botanicals
     "Chrysosporium",
     "Dock",
     "Fusarium solani",
     "Penicillium aurantiogriseum",
     "Trichoderma viride",
     "Willow",
-    // Additives
     "E307 Alpha-tocopherol",
     "E327 Calcium lactate",
     "E577 Potassium gluconate",
     "E622 Monopotassium glutamate",
     "E904 Shellac",
     "E959 Neohesperidine DC",
-    // Skin Health
     "Benzyl benzoate",
     "Butylparaben",
     "Detergent bio (Pectatelyase)",
@@ -665,17 +683,17 @@ export function getDetailedTriggerList(): { name: string; category: string; seve
 
   const items: { name: string; category: string; severity: "high" | "moderate" | "safe" }[] = []
 
-  // Add high reactivity items
   for (const item of highReactivityItems) {
     items.push({ name: item, category: "High Reactivity", severity: "high" })
   }
 
-  // Add moderate items
   for (const item of moderateItems) {
     items.push({ name: item, category: "Moderate Reactivity", severity: "moderate" })
   }
 
-  // Add custom allergies from profile if available
+  // Sensory Tier (Blue) [cite: 2026-01-20]
+  items.push({ name: "Crunchy Texture", category: "Sensory", severity: "moderate" })
+
   const profile = getUserProfile()
   if (profile?.customAllergies) {
     for (const custom of profile.customAllergies) {
