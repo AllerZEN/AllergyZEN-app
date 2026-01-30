@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { Search, CheckCircle2, Leaf, Apple, ShoppingBag, ArrowRight, Info, Heart } from "lucide-react"
 import { ItemDetailModal } from "./item-detail-modal"
 import { SafeAlternatives } from "./safe-alternatives"
-import userProfile from "@/lib/profile"
+// FIXED: Added missing cn import to resolve runtime error
+import { cn } from "@/lib/utils"
+// FIXED: Updated import to point to your audited master profile [cite: 2026-01-23]
+import { getUserProfile, addCustomAllergy } from "@/lib/user-profile"
 
 export function SafeList() {
   const [search, setSearch] = useState("")
@@ -21,7 +24,7 @@ export function SafeList() {
     if (type === "note") alert(`Saved ${itemName} to your allerZEN notes.`)
   }
 
-  // Categories based on your Bulletproof lists
+  // Categories based on your Bulletproof lists [cite: 2026-01-20]
   const categories = ["Pantry", "Snacks", "Medicinal", "Fresh", "Sustainable"]
 
   return (
@@ -30,10 +33,10 @@ export function SafeList() {
       <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-[2rem] p-6 text-white shadow-lg">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-black tracking-tighter">SAFE HUB</h2>
-            <p className="text-xs font-bold opacity-80 uppercase tracking-widest">Verified Alternatives</p>
+            <h2 className="text-2xl font-black tracking-tighter text-white">SAFE HUB</h2>
+            <p className="text-xs font-bold opacity-80 uppercase tracking-widest text-white">Verified Alternatives</p>
           </div>
-          <CheckCircle2 className="w-10 h-10 opacity-30" />
+          <CheckCircle2 className="w-10 h-10 opacity-30 text-white" />
         </div>
         
         <div className="relative mt-6">
@@ -47,7 +50,7 @@ export function SafeList() {
         </div>
       </div>
 
-      {/* Suggested Swaps (If coming from a red-search) */}
+      {/* Suggested Swaps (If coming from a red-search) [cite: 2026-01-25] */}
       <SafeAlternatives 
         productName="Recent Search"
         onAction={handleAction}
@@ -57,7 +60,7 @@ export function SafeList() {
         ]}
       />
 
-      {/* Category Chips */}
+      {/* Category Chips - Using 🟢 and 🟤 logic [cite: 2026-01-25] */}
       <div className="flex gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
         {categories.map(cat => (
           <Badge
@@ -66,7 +69,7 @@ export function SafeList() {
             className={cn(
               "px-4 py-2 rounded-full cursor-pointer border-2 transition-all",
               selectedCategory === cat 
-                ? "bg-[var(--profile-theme)] text-white border-[var(--profile-theme)]" 
+                ? "bg-green-600 text-white border-green-600 shadow-md" 
                 : "bg-white text-slate-500 border-slate-100"
             )}
           >
@@ -84,7 +87,10 @@ export function SafeList() {
           {["Quinoa", "Avocado Oil", "Coconut Flour", "Lentil Pasta"].map((item, idx) => (
             <button 
               key={idx}
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setSelectedItem({ name: item, category: "General Pantry" })
+                setShowModal(true)
+              }}
               className="w-full flex items-center justify-between p-4 rounded-[1.5rem] bg-white border-2 border-slate-50 hover:border-green-200 transition-all text-left shadow-sm"
             >
               <div className="flex items-center gap-4">
@@ -108,7 +114,10 @@ export function SafeList() {
         item={selectedItem}
         status="green"
         onAddToList={(item, color) => {
-          if (color === "brown") userProfile.addDislike(item.name)
+          // Changed yellow logic to brown (🟤) [cite: 2026-01-25]
+          if (color === "brown") {
+            addCustomAllergy(item.name)
+          }
           setShowModal(false)
         }}
       />
