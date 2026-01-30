@@ -101,15 +101,18 @@ export function checkIngredient(ingredient: string): { safe: boolean; tier: ZenT
   }
 
   // Determine highest tier found
-  let highestTier: ZenTier = "green";
+  let highestTier: ZenTier = "green"; 
   if (matches.some(m => m.tier === "red")) highestTier = "red";
   else if (matches.some(m => m.tier === "amber")) highestTier = "amber";
   else if (matches.some(m => m.tier === "brown")) highestTier = "brown";
   else if (matches.some(m => m.tier === "blue")) highestTier = "blue";
 
   return {
-    safe: matches.length === 0,
+    safe: highestTier === "green" || highestTier === "blue",
     tier: highestTier,
     matches: [...new Set(matches)],
   };
 }
+
+// Temporary bridge to fix the Runtime Error
+export const greenListFoods: Allergen[] = [];
