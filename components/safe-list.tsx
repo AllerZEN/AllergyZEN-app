@@ -14,7 +14,7 @@ import { getUserProfile, addCustomAllergy } from "@/lib/user-profile"
 
 export function SafeList() {
   const [search, setSearch] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
 
