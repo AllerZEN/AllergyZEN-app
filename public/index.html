@@ -6,153 +6,87 @@
     <title>allergyZEN Wellness Assistant App</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        /* v206 Aura Styling */
+        /* RESET & v206 AURA */
         :root { 
             --zen-blue: #3B82F6; 
             --zen-red: #EF4444; 
-            --zen-brown: #78350f; /* Updated from yellow to brown */
+            --zen-brown: #78350f; 
             --zen-green: #10B981;
             --zen-dark: #111827;
-            --bg: #FFFFFF;
         }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+        /* FORCE HIDE OLD v0 CACHED ELEMENTS */
+        .bottom-nav, .top-carousel, .search-container, .scroll-card { display: none !important; }
+        
         body { 
-            margin: 0; padding: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--zen-dark);
+            margin: 0; padding: 0; background: #FFF; 
+            font-family: -apple-system, sans-serif; color: var(--zen-dark);
         }
 
-        /* Header Area */
-        .header {
-            text-align: center;
-            padding: 50px 20px 10px;
-        }
+        /* NEW COMMAND CENTER LAYOUT */
+        #azwaa-app { position: relative; width: 100%; min-height: 100vh; padding-bottom: 50px; }
 
-        .azwaa-logo {
-            font-weight: 900;
-            font-size: 2.2rem;
-            letter-spacing: -1.5px;
-            font-style: italic;
-            margin: 0;
-        }
-
+        .header { text-align: center; padding: 60px 20px 20px; }
+        .azwaa-logo { font-weight: 900; font-size: 2.4rem; font-style: italic; letter-spacing: -2px; margin: 0; }
         .azwaa-logo span { color: var(--zen-blue); }
+        .subtitle { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #9CA3AF; text-transform: uppercase; }
 
-        .subtitle {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: #9CA3AF;
-            margin-top: 5px;
-            text-transform: uppercase;
+        .action-bar { display: flex; gap: 12px; padding: 20px; }
+        .btn-main { 
+            flex: 1; height: 70px; border-radius: 24px; border: none; 
+            font-weight: 900; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.1s;
         }
+        #btn-scan { background: var(--zen-dark); color: white; border: 2px solid var(--zen-blue); }
+        #btn-profile { background: white; color: var(--zen-dark); border: 1px solid #E5E7EB; }
 
-        /* Top Action Buttons */
-        .action-container {
-            display: flex;
-            gap: 12px;
-            padding: 20px;
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 20px; }
+        .tab { 
+            background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 20px;
+            padding: 25px 10px; font-size: 0.8rem; font-weight: 800; text-align: center;
+            text-transform: uppercase; color: #4B5563;
         }
-
-        .btn-action {
-            flex: 1;
-            height: 65px;
-            border-radius: 20px;
-            border: none;
-            font-weight: 900;
-            font-size: 1.1rem;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-            transition: transform 0.1s ease;
-        }
-
-        .btn-action:active { transform: scale(0.96); }
-
-        #scan-main {
-            background: var(--zen-dark);
-            color: white;
-            border: 2px solid var(--zen-blue);
-        }
-
-        #profile-main {
-            background: white;
-            color: var(--zen-dark);
-            border: 1px solid #E5E7EB;
-        }
-
-        /* The 14-Tab Grid */
-        .command-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 0 20px 50px;
-        }
-
-        .tab {
-            background: #F9FAFB;
-            border: 1px solid #F3F4F6;
-            border-radius: 20px;
-            padding: 22px 10px;
-            font-size: 0.8rem;
-            font-weight: 800;
-            text-align: center;
-            text-transform: uppercase;
-            color: #4B5563;
-            cursor: pointer;
-        }
-
-        /* Zen Spectrum Colors */
-        .safe { border-left: 5px solid var(--zen-green); }
-        .blocked { border-left: 5px solid var(--zen-red); }
-        .ed-boundaries { border-left: 5px solid var(--zen-blue); }
-        .dislike { border-left: 5px solid var(--zen-brown); }
-
-        /* Priority Spans */
-        .full-span { grid-column: span 2; padding: 25px; }
         
-        .business-tab { background: #EFF6FF; color: var(--zen-blue); border: 1px solid #DBEAFE; }
-        .emergency-tab { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
-        .emergency-tab small { display: block; font-size: 9px; margin-top: 4px; opacity: 0.7; }
+        /* Spectrum Highlighters */
+        .safe { border-bottom: 4px solid var(--zen-green); }
+        .blocked { border-bottom: 4px solid var(--zen-red); }
+        .boundaries { border-bottom: 4px solid var(--zen-blue); }
+        .dislike { border-bottom: 4px solid var(--zen-brown); }
 
-        /* Scanner Overlay */
-        #scanner-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 9999;
-        }
+        .full { grid-column: span 2; padding: 30px; }
+        .biz { background: #EFF6FF; color: var(--zen-blue); border: 1px solid #DBEAFE; }
+        .emergency { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
 
-        .close-scanner {
-            position: absolute; top: 40px; right: 20px;
-            padding: 10px 25px; background: white; border-radius: 50px;
-            font-weight: 900; border: none; z-index: 10000;
+        /* SCANNER INTERFACE */
+        #scanner-ui {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 10000;
         }
+        .close-x { position: absolute; top: 40px; right: 20px; color: white; font-size: 30px; background: none; border: none; z-index: 10001; }
     </style>
 </head>
 <body>
 
-    <div id="scanner-overlay">
-        <button class="close-scanner" onclick="stopScan()">CLOSE ✕</button>
-        <div id="qr-video-engine" style="width: 100%; height: 100%;"></div>
+<div id="azwaa-app">
+    <div id="scanner-ui">
+        <button class="close-x" onclick="stopScan()">✕</button>
+        <div id="qr-engine" style="width: 100%; height: 100%;"></div>
     </div>
 
-    <div class="header">
+    <header class="header">
         <h1 class="azwaa-logo">allergy<span>ZEN</span></h1>
         <div class="subtitle">Wellness Assistant App</div>
+    </header>
+
+    <div class="action-bar">
+        <button id="btn-scan" class="btn-main" onclick="startScan()">SCAN</button>
+        <button id="btn-profile" class="btn-main">PROFILE</button>
     </div>
 
-    <div class="action-container">
-        <button id="scan-main" class="btn-action" onclick="startScan()">SCAN</button>
-        <button id="profile-main" class="btn-action">PROFILE</button>
-    </div>
-
-    <main class="command-grid">
+    <main class="grid">
         <div class="tab safe">Safe 🟢</div>
         <div class="tab blocked">Blocked 🔴</div>
-        <div class="tab ed-boundaries">ED Boundaries 🔵</div>
+        <div class="tab boundaries">ED Boundaries 🔵</div>
         <div class="tab dislike">Dislike 🟤</div>
         
         <div class="tab">Zen Health</div>
@@ -161,48 +95,34 @@
         <div class="tab">My AllerZen Notes</div>
         <div class="tab">Knowledge is Power</div>
 
-        <div class="tab full-span business-tab">
-            BUSINESS (Handshake/Unshake)
-        </div>
-        
-        <div class="tab full-span emergency-tab">
-            <strong>EMERGENCY RELIEF</strong>
-            <small>Includes Skin Crisis Mode</small>
-        </div>
+        <div class="tab full biz">BUSINESS (Handshake/Unshake)</div>
+        <div class="tab full emergency"><strong>EMERGENCY RELIEF</strong><br><small>Skin Crisis Mode Included</small></div>
 
         <div class="tab">Settings</div>
         <div class="tab">Subscription</div>
     </main>
+</div>
 
-    <script>
-        let scannerEngine = null;
+<script>
+    let scanner = null;
 
-        function startScan() {
-            const overlay = document.getElementById('scanner-overlay');
-            overlay.style.display = 'block';
-            
-            scannerEngine = new Html5Qrcode("qr-video-engine");
-            scannerEngine.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: 250 },
-                (text) => {
-                    alert("Scan Captured: " + text);
-                    stopScan();
-                },
-                (err) => { /* scanning... */ }
-            ).catch(err => {
-                alert("Camera Error: Please ensure permissions are granted.");
-                stopScan();
-            });
-        }
+    function startScan() {
+        document.getElementById('scanner-ui').style.display = 'block';
+        scanner = new Html5Qrcode("qr-engine");
+        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+        (res) => { alert("Scanned: " + res); stopScan(); });
+    }
 
-        function stopScan() {
-            const overlay = document.getElementById('scanner-overlay');
-            overlay.style.display = 'none';
-            if(scannerEngine) {
-                scannerEngine.stop().catch(e => console.log("Stop error", e));
-            }
-        }
-    </script>
+    function stopScan() {
+        document.getElementById('scanner-ui').style.display = 'none';
+        if (scanner) scanner.stop();
+    }
+
+    // Force hide any persistent v0 artifacts
+    window.onload = () => {
+        console.log("AZWAA v208 Command Center Initialized.");
+    };
+</script>
+
 </body>
 </html>
