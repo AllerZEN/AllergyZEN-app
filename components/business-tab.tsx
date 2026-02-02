@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { 
   Building2, Clock, Shield, QrCode, CheckCircle2, 
-  AlertTriangle, Timer, Handshake, MapPin
+  AlertTriangle, Timer, Handshake, MapPin, ArrowLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import userProfile from "@/lib/profile"
@@ -27,7 +27,8 @@ interface RecentBusiness {
   confirmed: boolean
 }
 
-export function BusinessTab() {
+// FIX: Added 'default' and 'onBack' prop
+export default function BusinessTab({ onBack }: { onBack: () => void }) {
   const [businessName, setBusinessName] = useState("")
   const [recentBusinesses, setRecentBusinesses] = useState<RecentBusiness[]>([])
   const [mounted, setMounted] = useState(false)
@@ -99,84 +100,87 @@ export function BusinessTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="min-h-screen bg-white p-4 pb-20 space-y-4">
+       {/* Navigation */}
+       <button 
+        onClick={onBack}
+        className="flex items-center gap-2 text-slate-500 font-bold text-xs uppercase tracking-widest mb-4 active:scale-95 transition-all"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+      </button>
+
       {/* Header */}
       <div className="text-center py-4">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Handshake className="w-6 h-6 text-purple-600" />
-          <h1 className="text-2xl font-bold text-gray-800">Business Handshake</h1>
+          <Handshake className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl font-black text-gray-800 italic uppercase">Handshake</h1>
         </div>
-        <p className="text-gray-500 text-sm">Protection timer for restaurants and venues</p>
+        <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">3-Hour Verification System</p>
       </div>
 
-      {/* Active Protection Timer */}
+      {/* Active Protection Timer component */}
       <ProtectionTimer />
 
       {/* Start New Handshake */}
       {status === "INACTIVE" || status === "EXPIRED" ? (
-        <Card className="border-2 border-purple-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-purple-600" />
-              Start New Handshake
+        <Card className="border-2 border-blue-100 rounded-[32px] overflow-hidden shadow-sm">
+          <CardHeader className="pb-2 bg-blue-50/50">
+            <CardTitle className="text-lg font-black flex items-center gap-2 uppercase italic">
+              <Building2 className="w-5 h-5 text-blue-600" />
+              New Session
             </CardTitle>
-            <CardDescription>Enter venue name and select duration</CardDescription>
+            <CardDescription className="text-[10px] uppercase font-bold text-blue-400">Scan or manually enter venue</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Business Name Input */}
+          <CardContent className="space-y-4 pt-4">
             <div className="space-y-2">
               <Input
                 placeholder="Restaurant or venue name..."
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                className="border-2 border-gray-200 focus:border-purple-500"
+                className="h-14 rounded-2xl border-gray-100 bg-gray-50 focus:bg-white"
               />
             </div>
 
-            {/* Timer Duration Options */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">How long will you be here?</p>
+            <div className="space-y-3">
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">Select Duration</p>
               <div className="grid grid-cols-4 gap-2">
                 {TIMER_OPTIONS.map((option) => (
                   <Button
                     key={option.value}
                     variant="outline"
                     onClick={() => startProtection(option.value, businessName)}
-                    className="flex flex-col items-center p-3 h-auto border-2 hover:border-purple-500 hover:bg-purple-50 bg-transparent"
+                    className="flex flex-col items-center py-6 h-auto border-gray-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50 active:scale-95 transition-all"
                   >
-                    <span className="text-xl font-bold text-gray-800">{option.short}</span>
-                    <span className="text-[10px] text-gray-500">{option.label}</span>
+                    <span className="text-lg font-black text-slate-900">{option.short}</span>
                   </Button>
                 ))}
               </div>
             </div>
 
-            {/* QR Scan Option */}
             <Button 
               variant="outline" 
-              className="w-full border-2 border-dashed border-gray-300 bg-transparent"
+              className="w-full h-14 border-2 border-dashed border-gray-200 rounded-2xl font-black uppercase text-xs tracking-widest"
             >
               <QrCode className="w-4 h-4 mr-2" />
-              Scan Business QR Code
+              Scan QR Code
             </Button>
           </CardContent>
         </Card>
       ) : (
-        /* Confirm Handshake Button (when timer active) */
         status === "PROTECTED" && (
-          <Card className="border-2 border-blue-200 bg-blue-50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-blue-800">Awaiting staff confirmation</span>
+          <Card className="border-2 border-blue-200 bg-blue-50 rounded-[24px]">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <AlertTriangle className="w-8 h-8 text-blue-600 animate-pulse" />
+                <div>
+                    <p className="font-black text-blue-900 uppercase">Handshake Pending</p>
+                    <p className="text-xs text-blue-700 font-bold">Show this screen to staff for verification</p>
                 </div>
                 <Button 
                   onClick={confirmHandshake}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-black uppercase tracking-widest"
                 >
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Confirm
+                  Confirm Verification
                 </Button>
               </div>
             </CardContent>
@@ -186,62 +190,51 @@ export function BusinessTab() {
 
       {/* Recent Businesses */}
       {recentBusinesses.length > 0 && (
-        <Card>
+        <Card className="rounded-[24px] border-gray-100">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2 text-gray-600">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Recent Venues
+              Recent History
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {recentBusinesses.map((business, idx) => (
               <button
                 key={idx}
-                onClick={() => {
-                  setBusinessName(business.name)
-                }}
-                className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                onClick={() => setBusinessName(business.name)}
+                className="w-full flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all text-left border border-transparent hover:border-gray-200"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="font-medium text-sm">{business.name}</span>
+                  <span className="font-black text-sm text-slate-900">{business.name}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {business.confirmed && (
-                    <Badge variant="outline" className="text-xs border-green-300 text-green-600">
-                      Verified
-                    </Badge>
-                  )}
-                  <span className="text-xs text-gray-400">
-                    {new Date(business.lastVisit).toLocaleDateString()}
-                  </span>
-                </div>
+                {business.confirmed && <CheckCircle2 className="w-4 h-4 text-green-500" />}
               </button>
             ))}
           </CardContent>
         </Card>
       )}
 
-      {/* Status Legend */}
-      <Card className="bg-gray-50 border-0">
-        <CardContent className="p-4">
-          <p className="text-xs font-medium text-gray-500 mb-2">Status Guide</p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300" />
-              <span>Inactive</span>
-            </div>
+      {/* Updated Status Legend to Brown */}
+      <Card className="bg-slate-900 text-white border-0 rounded-[24px]">
+        <CardContent className="p-6">
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 text-center">Zen Spectrum Legend</p>
+          <div className="grid grid-cols-2 gap-4 text-[10px] font-black uppercase tracking-tighter">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span>Protected</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span>Confirmed</span>
+              <span>Safe 🟢</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500" />
-              <span>Expired</span>
+              <span>Blocked 🔴</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+              <span>Boundary 🔵</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#78350f]" />
+              <span>Dislike 🟤</span>
             </div>
           </div>
         </CardContent>
