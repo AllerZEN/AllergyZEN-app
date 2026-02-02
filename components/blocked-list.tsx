@@ -16,7 +16,7 @@ interface AllergenItem {
   tier: "red" | "amber" | "brown" | "blue"
 }
 
-export function BlockedList() {
+export function BlockedList({ on back }) {
   const [search, setSearch] = useState("")
   const [activeTab, setActiveTab] = useState<"red" | "amber" | "brown" | "blue">("red")
   const [selectedItem, setSelectedItem] = useState<AllergenItem | null>(null)
