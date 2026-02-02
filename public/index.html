@@ -6,31 +6,29 @@
     <title>allergyZEN Wellness Assistant App</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
+        /* v206 Aura Styling */
         :root { 
             --zen-blue: #3B82F6; 
             --zen-red: #EF4444; 
-            --zen-brown: #78350f; 
+            --zen-brown: #78350f; /* Updated from yellow to brown */
             --zen-green: #10B981;
             --zen-dark: #111827;
-            --bg: #F9FAFB;
+            --bg: #FFFFFF;
         }
         
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
-            margin: 0; 
-            padding: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--zen-dark);
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. Header & Logo Area */
+        /* Header Area */
         .header {
             text-align: center;
-            padding: 40px 20px 20px;
-            background: white;
+            padding: 50px 20px 10px;
         }
 
         .azwaa-logo {
@@ -38,200 +36,172 @@
             font-size: 2.2rem;
             letter-spacing: -1.5px;
             font-style: italic;
-            color: var(--zen-dark);
             margin: 0;
-            text-transform: none;
         }
 
-        .azwaa-logo span {
-            color: var(--zen-blue);
+        .azwaa-logo span { color: var(--zen-blue); }
+
+        .subtitle {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #9CA3AF;
+            margin-top: 5px;
+            text-transform: uppercase;
         }
 
-        /* 2. Primary Action Bar (Scan/Profile) */
-        .primary-actions {
+        /* Top Action Buttons */
+        .action-container {
             display: flex;
             gap: 12px;
-            padding: 0 20px 25px;
-            background: white;
+            padding: 20px;
         }
 
-        .btn-main {
+        .btn-action {
             flex: 1;
-            height: 60px;
-            border-radius: 16px;
+            height: 65px;
+            border-radius: 20px;
             border: none;
-            font-weight: 800;
-            font-size: 1rem;
-            letter-spacing: 1px;
+            font-weight: 900;
+            font-size: 1.1rem;
             cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             transition: transform 0.1s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
-        .btn-main:active { transform: scale(0.97); }
+        .btn-action:active { transform: scale(0.96); }
 
-        #btn-scan {
+        #scan-main {
             background: var(--zen-dark);
             color: white;
             border: 2px solid var(--zen-blue);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
 
-        #btn-profile {
+        #profile-main {
             background: white;
             color: var(--zen-dark);
-            border: 1px solid #e5e7eb;
+            border: 1px solid #E5E7EB;
         }
 
-        /* 3. The Command Center Grid */
+        /* The 14-Tab Grid */
         .command-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            padding: 10px 20px 40px;
+            padding: 0 20px 50px;
         }
 
-        .grid-item {
-            background: white;
-            border: 1px solid #f0f0f0;
-            border-radius: 18px;
-            padding: 20px 10px;
-            font-size: 0.75rem;
+        .tab {
+            background: #F9FAFB;
+            border: 1px solid #F3F4F6;
+            border-radius: 20px;
+            padding: 22px 10px;
+            font-size: 0.8rem;
             font-weight: 800;
             text-align: center;
             text-transform: uppercase;
             color: #4B5563;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
         }
 
-        .grid-item:active { background: #f3f4f6; }
+        /* Zen Spectrum Colors */
+        .safe { border-left: 5px solid var(--zen-green); }
+        .blocked { border-left: 5px solid var(--zen-red); }
+        .ed-boundaries { border-left: 5px solid var(--zen-blue); }
+        .dislike { border-left: 5px solid var(--zen-brown); }
 
-        /* Icon Mimicry */
-        .grid-item::before { font-size: 1.2rem; }
+        /* Priority Spans */
+        .full-span { grid-column: span 2; padding: 25px; }
+        
+        .business-tab { background: #EFF6FF; color: var(--zen-blue); border: 1px solid #DBEAFE; }
+        .emergency-tab { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
+        .emergency-tab small { display: block; font-size: 9px; margin-top: 4px; opacity: 0.7; }
 
-        /* Row 1: Spectrum Colors */
-        .safe { border-bottom: 4px solid var(--zen-green); }
-        .blocked { border-bottom: 4px solid var(--zen-red); }
-        .boundaries { border-bottom: 4px solid var(--zen-blue); }
-        .dislike { border-bottom: 4px solid var(--zen-brown); }
-
-        /* Full Width Items for Importance */
-        .full-width { grid-column: span 2; padding: 25px; }
-
-        .emergency {
-            background: #FEF2F2;
-            border: 1px solid #FEE2E2;
-            color: #DC2626;
-        }
-
-        .emergency strong { font-size: 1rem; display: block; }
-
-        .business {
-            background: #EFF6FF;
-            border: 1px solid #DBEAFE;
-            color: var(--zen-blue);
-        }
-
-        /* Scanner Hidden by Default */
-        #scanner-ui {
+        /* Scanner Overlay */
+        #scanner-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: black;
-            z-index: 1000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 9999;
         }
 
-        #qr-reader { width: 100%; height: 100%; }
-
-        .close-scan {
-            position: absolute; top: 30px; right: 20px;
-            background: white; border: none; padding: 10px 20px;
-            border-radius: 99px; font-weight: 700; z-index: 1001;
+        .close-scanner {
+            position: absolute; top: 40px; right: 20px;
+            padding: 10px 25px; background: white; border-radius: 50px;
+            font-weight: 900; border: none; z-index: 10000;
         }
     </style>
 </head>
 <body>
 
-    <div id="scanner-ui">
-        <button class="close-scan" onclick="toggleScanner()">CLOSE ✕</button>
-        <div id="qr-reader"></div>
+    <div id="scanner-overlay">
+        <button class="close-scanner" onclick="stopScan()">CLOSE ✕</button>
+        <div id="qr-video-engine" style="width: 100%; height: 100%;"></div>
     </div>
 
     <div class="header">
         <h1 class="azwaa-logo">allergy<span>ZEN</span></h1>
-        <p style="font-size: 11px; font-weight: 700; color: #9CA3AF; margin-top: 5px;">WELLNESS ASSISTANT APP</p>
+        <div class="subtitle">Wellness Assistant App</div>
     </div>
 
-    <section class="primary-actions">
-        <button id="btn-scan" class="btn-main" onclick="toggleScanner()">SCAN</button>
-        <button id="btn-profile" class="btn-main">PROFILE</button>
-    </section>
+    <div class="action-container">
+        <button id="scan-main" class="btn-action" onclick="startScan()">SCAN</button>
+        <button id="profile-main" class="btn-action">PROFILE</button>
+    </div>
 
     <main class="command-grid">
-        <div class="grid-item safe">Safe 🟢</div>
-        <div class="grid-item blocked">Blocked 🔴</div>
-        <div class="grid-item boundaries">ED Boundaries 🔵</div>
-        <div class="grid-item dislike">Dislike 🟤</div>
+        <div class="tab safe">Safe 🟢</div>
+        <div class="tab blocked">Blocked 🔴</div>
+        <div class="tab ed-boundaries">ED Boundaries 🔵</div>
+        <div class="tab dislike">Dislike 🟤</div>
         
-        <div class="grid-item">Zen Health</div>
-        <div class="grid-item">Zen Habits</div>
+        <div class="tab">Zen Health</div>
+        <div class="tab">Zen Habits</div>
         
-        <div class="grid-item">My AllerZen Notes</div>
-        <div class="grid-item">Knowledge is Power</div>
+        <div class="tab">My AllerZen Notes</div>
+        <div class="tab">Knowledge is Power</div>
 
-        <div class="grid-item full-width business">
-            Business Handshake (Active Shield)
+        <div class="tab full-span business-tab">
+            BUSINESS (Handshake/Unshake)
         </div>
         
-        <div class="grid-item full-width emergency">
-            <strong>Emergency Relief</strong>
-            <span style="font-size: 10px;">Includes Skin Crisis Mode</span>
+        <div class="tab full-span emergency-tab">
+            <strong>EMERGENCY RELIEF</strong>
+            <small>Includes Skin Crisis Mode</small>
         </div>
 
-        <div class="grid-item">Settings</div>
-        <div class="grid-item">Subscription</div>
+        <div class="tab">Settings</div>
+        <div class="tab">Subscription</div>
     </main>
 
     <script>
-        let html5QrCode;
+        let scannerEngine = null;
 
-        function toggleScanner() {
-            const ui = document.getElementById('scanner-ui');
-            if (ui.style.display === 'block') {
-                ui.style.display = 'none';
-                if(html5QrCode) html5QrCode.stop();
-            } else {
-                ui.style.display = 'block';
-                startScanning();
-            }
+        function startScan() {
+            const overlay = document.getElementById('scanner-overlay');
+            overlay.style.display = 'block';
+            
+            scannerEngine = new Html5Qrcode("qr-video-engine");
+            scannerEngine.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: 250 },
+                (text) => {
+                    alert("Scan Captured: " + text);
+                    stopScan();
+                },
+                (err) => { /* scanning... */ }
+            ).catch(err => {
+                alert("Camera Error: Please ensure permissions are granted.");
+                stopScan();
+            });
         }
 
-        function startScanning() {
-            html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                config,
-                (decodedText) => {
-                    alert("Scan Successful: " + decodedText);
-                    toggleScanner();
-                    // This is where it will link to Zen Health/Habits next
-                },
-                (errorMessage) => {
-                    // console.log("Scanning...");
-                }
-            ).catch((err) => {
-                console.error("Scanner failed", err);
-                alert("Camera access denied or error occurred.");
-            });
+        function stopScan() {
+            const overlay = document.getElementById('scanner-overlay');
+            overlay.style.display = 'none';
+            if(scannerEngine) {
+                scannerEngine.stop().catch(e => console.log("Stop error", e));
+            }
         }
     </script>
 </body>
