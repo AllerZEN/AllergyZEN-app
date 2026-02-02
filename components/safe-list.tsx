@@ -2,33 +2,40 @@
 
 import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, CheckCircle2, Leaf, Apple, ShoppingBag, ArrowRight, Info, Heart } from "lucide-react"
+import { Search, CheckCircle2, Leaf, ArrowRight, ArrowLeft } from "lucide-react"
 import { ItemDetailModal } from "./item-detail-modal"
 import { SafeAlternatives } from "./safe-alternatives"
-// FIXED: Added missing cn import to resolve runtime error
 import { cn } from "@/lib/utils"
-// FIXED: Updated import to point to your audited master profile [cite: 2026-01-23]
+// FIXED: Ensured this matches your existing lib structure
 import { getUserProfile, addCustomAllergy } from "@/lib/user-profile"
 
-export function SafeList() {
+// FIX: Added 'default' and 'onBack' prop to fix the runtime error
+export default function SafeList({ onBack }: { onBack: () => void }) {
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
 
-  // Handlers for interactive actions
   const handleAction = (type: string, itemName: string) => {
     if (type === "meal") alert(`Added ${itemName} to your Meal Planner!`)
     if (type === "note") alert(`Saved ${itemName} to your allerZEN notes.`)
   }
 
-  // Categories based on your Bulletproof lists [cite: 2026-01-20]
   const categories = ["Pantry", "Snacks", "Medicinal", "Fresh", "Sustainable"]
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="min-h-screen bg-white p-4 pb-20 space-y-4">
+      {/* Dashboard Navigation [cite: 2026-01-20] */}
+      <button 
+        onClick={onBack}
+        className="flex items-center gap-2 text-slate-500 font-bold text-xs uppercase tracking-widest mb-4 active:scale-95 transition-all"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+      </button>
+
       {/* Header with Zen Branding */}
       <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-[2rem] p-6 text-white shadow-lg">
         <div className="flex justify-between items-start">
@@ -50,7 +57,6 @@ export function SafeList() {
         </div>
       </div>
 
-      {/* Suggested Swaps (If coming from a red-search) [cite: 2026-01-25] */}
       <SafeAlternatives 
         productName="Recent Search"
         onAction={handleAction}
@@ -60,14 +66,13 @@ export function SafeList() {
         ]}
       />
 
-      {/* Category Chips - Using 🟢 and 🟤 logic [cite: 2026-01-25] */}
       <div className="flex gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
         {categories.map(cat => (
           <Badge
             key={cat}
             onClick={() => setSelectedCategory(cat)}
             className={cn(
-              "px-4 py-2 rounded-full cursor-pointer border-2 transition-all",
+              "px-4 py-2 rounded-full cursor-pointer border-2 transition-all whitespace-nowrap",
               selectedCategory === cat 
                 ? "bg-green-600 text-white border-green-600 shadow-md" 
                 : "bg-white text-slate-500 border-slate-100"
@@ -78,10 +83,9 @@ export function SafeList() {
         ))}
       </div>
 
-      {/* Master Safe Item List */}
       <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="px-1">
-          <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-400">Library of Safety</CardTitle>
+          <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-400">Library of Safety</CardTitle>
         </CardHeader>
         <CardContent className="px-0 space-y-3">
           {["Quinoa", "Avocado Oil", "Coconut Flour", "Lentil Pasta"].map((item, idx) => (
@@ -114,7 +118,7 @@ export function SafeList() {
         item={selectedItem}
         status="green"
         onAddToList={(item, color) => {
-          // Changed yellow logic to brown (🟤) [cite: 2026-01-25]
+          // Yellow to brown (🟤) logic [cite: 2026-01-25]
           if (color === "brown") {
             addCustomAllergy(item.name)
           }
