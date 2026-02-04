@@ -150,3 +150,57 @@ const userProfile = {
 };
 
 userProfile.init();
+
+// --- AZWAA v0 CUSTOM NAVIGATION LOGIC ---
+document.addEventListener('click', (e) => {
+    // 1. Detect if a button or menu block was clicked
+    const btn = e.target.closest('button, .menu-item, [role="button"], .tab-button');
+    if (!btn) return;
+
+    // 2. Get the text inside the button to know where to go
+    const label = btn.innerText.toUpperCase().trim();
+    console.log("Button Clicked:", label);
+
+    // 3. Navigation Routing
+    if (label.includes('SCAN')) {
+        // This triggers the actual camera instead of just the loading screen
+        if (typeof startCamera === "function") startCamera();
+        navigateTo('scan-screen');
+    } 
+    else if (label.includes('BOUNDARIES') || label.includes('ED')) {
+        // Opens the 10-item sensory rule list + additional notes
+        navigateTo('ed-tab'); 
+    } 
+    else if (label.includes('SAFE')) {
+        // Opens the Safe 🟢 spectrum and enables search
+        navigateTo('safe-tab');
+    } 
+    else if (label.includes('BLOCKED')) {
+        // Opens the Zen Blocked (🔴🟠🟤🔵) spectrum
+        navigateTo('blocked-tab');
+    } 
+    else if (label.includes('KNOWLEDGE') || label.includes('ZEN HEALTH')) {
+        navigateTo('knowledge-hub');
+    } 
+    else if (label.includes('BUSINESS') || label.includes('HANDSHAKE')) {
+        // Opens the handshake timer (30m, 1hr, 3hr, 24hr)
+        navigateTo('handshake-screen');
+    }
+});
+
+// 4. The "Engine" that swaps the screens
+function navigateTo(screenId) {
+    // Hide everything that is a "page" or "section"
+    // Note: Make sure your HTML sections have the class 'app-screen'
+    const screens = document.querySelectorAll('.app-screen, section');
+    screens.forEach(s => s.style.display = 'none');
+
+    // Show the one we want
+    const target = document.getElementById(screenId);
+    if (target) {
+        target.style.display = 'block';
+        window.scrollTo(0,0); // Reset scroll to top
+    } else {
+        console.error("Screen ID not found:", screenId);
+    }
+}
