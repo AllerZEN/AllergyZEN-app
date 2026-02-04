@@ -68,10 +68,15 @@
 <body>
 
 <div id="azwaa-app">
-    <div id="scanner-ui">
-        <button class="close-x" onclick="stopScan()">✕</button>
-        <div id="qr-engine" style="width: 100%; height: 100%;"></div>
+<div id="scanner-ui" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999;">
+    <button class="close-x" onclick="stopScan()" style="position:absolute; top:20px; right:20px; color:white; font-size:24px; background:none; border:none; cursor:pointer;">✕</button>
+    <div id="qr-engine" style="width: 100%; height: 80%;"></div>
+    <div style="color:white; text-align:center; padding:20px;">
+        <p>Scanning for Business QR Code...</p>
+        <small>Handshake details will wipe after 3 hours [cite: 2026-01-20]</small>
     </div>
+</div>
+
 
     <header class="header">
         <h1 class="azwaa-logo">allergy<span>ZEN</span></h1>
@@ -84,25 +89,63 @@
     </div>
 
     <main class="grid">
-        <div class="tab safe">Safe 🟢</div>
-        <div class="tab blocked">Blocked 🔴</div>
-        <div class="tab boundaries">ED Boundaries 🔵</div>
-        <div class="tab dislike">Dislike 🟤</div>
-        
-        <div class="tab">Zen Health</div>
-        <div class="tab">Zen Habits</div>
-        
-        <div class="tab">My AllerZen Notes</div>
-        <div class="tab">Knowledge is Power</div>
+    <div id="safe-tab-btn" class="tab safe">Safe 🟢</div>
+    <div id="blocked-tab-btn" class="tab blocked">Blocked 🔴</div>
+    <div id="ed-tab-btn" class="tab boundaries">ED Boundaries 🔵</div>
+    <div id="dislike-tab-btn" class="tab dislike">Dislike 🟤</div>
+    
+    <div id="zenhealth-tab-btn" class="tab">Zen Health</div>
+    <div id="zenhabits-tab-btn" class="tab">Zen Habits</div>
+    
+    <div id="notes-tab-btn" class="tab">My AllerZen Notes</div>
+    <div id="knowledge-tab-btn" class="tab">Knowledge is Power</div>
+    
+    <div id="business-tab-btn" class="tab full biz">BUSINESS (Handshake/Unshake)</div>
+    <div id="emergency-tab-btn" class="tab full emergency"><strong>EMERGENCY RELIEF</strong></div>
+</main>
 
-        <div class="tab full biz">BUSINESS (Handshake/Unshake)</div>
-        <div class="tab full emergency"><strong>EMERGENCY RELIEF</strong><br><small>Skin Crisis Mode Included</small></div>
+<section id="ed-tab" class="app-screen" style="display:none; padding: 20px;">
+    <div style="background: #2196F3; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <h3>💙 ED Boundaries</h3>
+        <p>Sensory preferences for your Trusted Kitchen Ticket</p>
+    </div>
 
-        <div class="tab">Settings</div>
-        <div class="tab">Subscription</div>
-    </main>
+    <div class="ed-list">
+    <div class="menu-item"><label><input type="checkbox"> <span>Soft Textures Only</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>No Mixed Textures</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>No Sauce/Gravy</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>No Added Salt</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>Deconstructed Meals</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>Temperature Sensitive</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>Single-Color Meals</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>No Visible Bits</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>Specific Brands Only</span></label></div>
+    <div class="menu-item"><label><input type="checkbox"> <span>Specific Portions</span></label></div>
 </div>
 
+    <div style="margin-top: 20px;">
+        <label>📝 Additional Instructions</label>
+        <textarea id="ed-notes" placeholder="e.g., 'No food touching on plate' or 'Room temperature only'" style="width: 100%; height: 80px; margin-top: 10px;"></textarea>
+    </div>
+</section>
+
+<section id="handshake" class="app-screen" style="display:none; padding: 20px;">
+    <div style="background: #673AB7; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <h3>🤝 Business Handshake</h3>
+        <p>Set your protection duration for this location.</p>
+    </div>
+
+    <div class="timer-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="menu-item" onclick="setHandshake(0.5)">30 Min</button>
+        <button class="menu-item" onclick="setHandshake(1)">1 Hour</button>
+        <button class="menu-item" onclick="setHandshake(3)">3 Hours</button>
+        <button class="menu-item" onclick="setHandshake(24)">24 Hours</button>
+    </div>
+    
+    <p style="margin-top: 20px; font-size: 0.8em; color: #666;">
+        *Note: Your details wipe after this time for your privacy [cite: 2026-01-20].
+    </p>
+</section>
 <script>
     let scanner = null;
 
