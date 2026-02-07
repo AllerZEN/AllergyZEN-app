@@ -14,207 +14,215 @@
             --zen-dark: #111827;
         }
 
-        .bottom-nav, .top-carousel, .search-container, .scroll-card { display: none !important; }
-        
         body { 
-            margin: 0; padding: 0; background: #FFF; 
-            font-family: -apple-system, sans-serif; color: var(--zen-dark);
-            padding-bottom: 120px; /* Space for the shield dot and nav overlap */
+            margin: 0; padding: 0; background: #F8FAFC; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--zen-dark); padding-bottom: 110px;
         }
 
-        #azwaa-app { position: relative; width: 100%; min-height: 100vh; }
-
-        .header { text-align: center; padding: 60px 20px 20px; }
-        .azwaa-logo { font-weight: 900; font-size: 2.4rem; font-style: italic; letter-spacing: -2px; margin: 0; }
+        /* LOGO SECTION */
+        .header { text-align: center; padding: 45px 20px 10px; }
+        .azwaa-logo { font-weight: 900; font-size: 2.5rem; font-style: italic; letter-spacing: -2px; margin: 0; }
         .azwaa-logo span { color: var(--zen-blue); }
-        .subtitle { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #9CA3AF; text-transform: uppercase; }
+        .version-tag { font-size: 9px; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; }
 
-        .action-bar { display: flex; gap: 12px; padding: 20px; background: white; position: sticky; top: 0; z-index: 1000; }
-        .btn-main { 
-            flex: 1; height: 70px; border-radius: 24px; border: none; 
-            font-weight: 900; font-size: 1.1rem; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.1s;
+        /* SEARCH HERO */
+        .search-hero { 
+            padding: 40px 20px; text-align: center; background: white; 
+            border-radius: 35px; margin: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); 
+            border: 1px solid #f1f5f9;
         }
-        #btn-scan { background: var(--zen-dark); color: white; border: 2px solid var(--zen-blue); }
-        #btn-profile { background: white; color: var(--zen-dark); border: 1px solid #E5E7EB; }
+        .search-hero h2 { font-size: 1.6rem; margin: 15px 0 5px; color: #1e293b; font-weight: 900; }
+        .search-hero p { font-size: 13px; color: #64748b; line-height: 1.5; margin: 0; }
 
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 20px; }
+        /* MY SPECTRUM BAR */
+        .spectrum-row { 
+            display: flex; justify-content: space-around; padding: 22px; 
+            background: white; border-radius: 28px; margin: 0 20px 25px; 
+            border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .spec-item { text-align: center; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; cursor: pointer; }
+        .spec-icon { 
+            width: 48px; height: 48px; border-radius: 16px; border: 1px solid #e2e8f0; 
+            display: flex; align-items: center; justify-content: center; 
+            margin-bottom: 8px; font-size: 22px; transition: 0.2s; 
+        }
+        .active-red { border: 2.5px solid var(--zen-red); color: var(--zen-red); background: #fff1f2; }
+
+        /* APP GRID */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
         .tab { 
-            background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 20px;
-            padding: 25px 10px; font-size: 0.8rem; font-weight: 800; text-align: center;
-            text-transform: uppercase; color: #4B5563; cursor: pointer;
+            background: white; border: 1px solid #e2e8f0; border-radius: 26px;
+            padding: 35px 10px; font-size: 0.85rem; font-weight: 900; text-align: center;
+            text-transform: uppercase; color: #475569; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
         }
+        .tab:active { transform: scale(0.95); }
+        .safe { border-bottom: 6px solid var(--zen-green); }
+        .blocked { border-bottom: 6px solid var(--zen-red); }
+        .boundaries { border-bottom: 6px solid var(--zen-blue); }
+        .dislike { border-bottom: 6px solid var(--zen-brown); }
+        .full-tab { grid-column: span 2; background: #eff6ff; color: var(--zen-blue); border: 1px solid #dbeafe; }
+
+        /* SCREEN STYLES */
+        .app-screen { display: none; padding: 30px 20px; min-height: 100vh; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .safe { border-bottom: 4px solid var(--zen-green); }
-        .blocked { border-bottom: 4px solid var(--zen-red); }
-        .boundaries { border-bottom: 4px solid var(--zen-blue); }
-        .dislike { border-bottom: 4px solid var(--zen-brown); }
+        .screen-header { margin-bottom: 30px; }
+        .screen-header h1 { font-size: 2rem; font-weight: 900; margin: 0; }
+        .screen-header p { color: #64748b; font-size: 14px; margin-top: 5px; }
 
-        .full { grid-column: span 2; padding: 30px; }
-        .biz { background: #EFF6FF; color: var(--zen-blue); border: 1px solid #DBEAFE; }
-        .emergency { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; }
-
-        /* THE PULSING BLUE SHIELD */
-        .shield-indicator {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2000;
-            text-align: center;
-        }
-        .blue-dot {
-            width: 18px;
-            height: 18px;
-            background: var(--zen-blue);
-            border-radius: 50%;
-            margin: 0 auto 4px;
-            box-shadow: 0 0 10px var(--zen-blue);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        /* CHECKLIST SYSTEM */
+        .card-list { background: white; padding: 25px; border-radius: 32px; border: 1px solid #f1f5f9; box-shadow: 0 10px 20px rgba(0,0,0,0.02); }
+        .check-item { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #f8fafc; font-weight: 700; color: #334155; }
+        .check-item:last-child { border-bottom: none; }
+        .check-item input { width: 22px; height: 22px; accent-color: var(--zen-blue); border-radius: 6px; }
+        
+        .zen-textarea { 
+            width: 100%; height: 130px; border-radius: 20px; border: 1px solid #e2e8f0; 
+            padding: 18px; margin-top: 20px; font-family: inherit; font-size: 14px; 
+            background: #f8fafc; box-sizing: border-box; resize: none;
         }
 
-        #scanner-ui {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 10000;
+        /* HANDSHAKE BUTTONS */
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
+        .btn-action { 
+            width: 100%; padding: 24px; border-radius: 22px; border: none; 
+            font-weight: 900; font-size: 17px; cursor: pointer; transition: 0.2s;
         }
-        .close-x { position: absolute; top: 40px; right: 20px; color: white; font-size: 30px; background: none; border: none; z-index: 10001; cursor: pointer;}
+        .btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
+        .btn-blue { background: var(--zen-blue); color: white; }
+
+        /* SCANNER OVERLAY */
+        #scanner-ui { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 84vh; 
+            background: #000; z-index: 10000; border-bottom-left-radius: 50px; 
+            border-bottom-right-radius: 50px; overflow: hidden; 
+        }
+        .scanner-close { 
+            position: absolute; top: 45px; right: 30px; color: white; 
+            font-size: 45px; background: none; border: none; z-index: 10001; font-weight: 200;
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; height: 95px; 
+            background: white; display: flex; justify-content: space-around; 
+            align-items: center; border-top: 1px solid #f1f5f9; z-index: 9999; 
+        }
+        .nav-item { text-align: center; font-size: 11px; font-weight: 900; color: #cbd5e1; cursor: pointer; flex: 1; }
+        .nav-active { color: var(--zen-blue); }
+        .nav-item span { font-size: 26px; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-<div id="azwaa-app">
-    <div id="scanner-ui">
-        <button class="close-x" onclick="stopScan()">✕</button>
-        <div id="qr-engine" style="width: 100%; height: 70%;"></div>
-        <div style="color:white; text-align:center; padding:20px;">
-            <p id="scan-instruction">Point camera at QR code or Ingredient Label</p>
-            <small>Zen Spectrum Cross-Reference Active</small>
-        </div>
-    </div>
-
+<section id="azwaa-app" style="display:block;">
     <header class="header">
         <h1 class="azwaa-logo">allergy<span>ZEN</span></h1>
-        <div class="subtitle">Wellness Assistant App</div>
+        <div class="version-tag">Bulletproof Build 2026</div>
     </header>
 
-    <div class="action-bar">
-        <button id="btn-scan" class="btn-main" onclick="startScan()">SCAN</button>
-        <button id="btn-profile" class="btn-main">PROFILE</button>
+    <div class="search-hero">
+        <div style="font-size: 50px;">🛡️</div>
+        <h2>Search 1,750+ items</h2>
+        <p>Full Zen Spectrum: Medicinal Excipients, Exotic Woods, Terpenes, Lab Chemicals, and Textiles.</p>
+    </div>
+
+    <div style="padding: 0 25px;"><h4 style="margin:0 0 12px 5px; color:#94a3b8; font-weight: 800; font-size: 11px; letter-spacing: 1px;">MY SPECTRUM</h4></div>
+    <div class="spectrum-row">
+        <div class="spec-item"><div class="spec-icon active-red">⚠️</div>BLOCK</div>
+        <div class="spec-item"><div class="spec-icon">!</div>CAUTION</div>
+        <div class="spec-item"><div class="spec-icon" style="color:var(--zen-brown);">🟤</div>DISLIKE</div>
+        <div class="spec-item"><div class="spec-icon" style="color:var(--zen-blue);">💙</div>SENSORY</div>
     </div>
 
     <main class="grid">
-        <div id="safe-tab-btn" class="tab safe">Safe 🟢</div>
-        <div id="blocked-tab-btn" class="tab blocked">Blocked 🔴</div>
-        <div id="ed-tab-btn" class="tab boundaries">ED Boundaries 🔵</div>
-        <div id="dislike-tab-btn" class="tab dislike">Dislike 🟤</div>
-        <div id="zenhealth-tab-btn" class="tab">Zen Health</div>
-        <div id="zenhabits-tab-btn" class="tab">Zen Habits</div>
-        <div id="notes-tab-btn" class="tab">My AllerZen Notes</div>
-        <div id="knowledge-tab-btn" class="tab">Knowledge Power</div>
-        <div id="business-tab-btn" class="tab full biz">BUSINESS (Handshake)</div>
-        <div id="emergency-tab-btn" class="tab full emergency"><strong>EMERGENCY RELIEF</strong></div>
+        <div class="tab safe">Safe Hub 🟢</div>
+        <div class="tab blocked">Zen Blocked 🔴</div>
+        <div class="tab boundaries">ED Boundaries 🔵</div>
+        <div class="tab dislike">Dislike 🟤</div>
+        <div class="tab full-tab">BUSINESS HANDSHAKE</div>
     </main>
+</section>
 
-    <div class="shield-indicator" id="active-shield" style="display:none;">
-        <div class="blue-dot"></div>
-        <span style="font-size: 9px; font-weight: 900; color: var(--zen-blue); text-transform: uppercase;">Shield Active</span>
+<section id="ed-screen" class="app-screen">
+    <div class="screen-header">
+        <h1 style="color:var(--zen-blue);">💙 ED Boundaries</h1>
+        <p>Sensory preferences for your Trusted Kitchen Ticket.</p>
     </div>
+    <div class="card-list">
+        <label class="check-item"><input type="checkbox"> Soft Textures Only</label>
+        <label class="check-item"><input type="checkbox"> No Mixed Textures</label>
+        <label class="check-item"><input type="checkbox"> No Sauce/Gravy</label>
+        <label class="check-item"><input type="checkbox"> No Added Salt</label>
+        <label class="check-item"><input type="checkbox"> Deconstructed Meals</label>
+        <label class="check-item"><input type="checkbox"> Temperature Sensitive</label>
+        <label class="check-item"><input type="checkbox"> Single-Color Meals</label>
+        <label class="check-item"><input type="checkbox"> No Visible Bits</label>
+        <label class="check-item"><input type="checkbox"> Specific Brands Only</label>
+        <label class="check-item"><input type="checkbox"> Specific Portions</label>
+        <textarea class="zen-textarea" placeholder="Add specific sensory details (e.g., 'No food touching', 'No smell from kitchen')..."></textarea>
+    </div>
+</section>
+
+<section id="handshake-screen" class="app-screen">
+    <div class="screen-header">
+        <h1>🤝 Handshake</h1>
+        <p>Set a timer for this business interaction.</p>
+    </div>
+    <div class="btn-group">
+        <button class="btn-action btn-outline" onclick="userProfile.activateHandshake('Business', 30)">30 Minutes</button>
+        <button class="btn-action btn-outline" onclick="userProfile.activateHandshake('Business', 60)">1 Hour</button>
+        <button class="btn-action btn-blue" onclick="userProfile.activateHandshake('Business', 180)">3 Hours (Standard)</button>
+        <button class="btn-action" style="background:var(--zen-dark); color:white;" onclick="userProfile.activateHandshake('Business', 1440)">24 Hours</button>
+    </div>
+    <p style="text-align:center; font-size:12px; color:#94a3b8; margin-top:30px;">Data wipes automatically for your privacy.</p>
+</section>
+
+<section id="safe-hub" class="app-screen">
+    <div class="screen-header">
+        <h1 style="color:var(--zen-green);">🟢 Safe Hub</h1>
+        <p>Immediate Spectrum Results & Alternatives.</p>
+    </div>
+    <div class="card-list" style="text-align:center; padding: 50px 20px;">
+        <div style="font-size: 70px; margin-bottom: 25px;">🔴 🟠 🟢</div>
+        <button class="btn-action btn-blue" style="background:var(--zen-green);">SEE SAFE ALTERNATIVES</button>
+    </div>
+</section>
+
+<div id="scanner-ui">
+    <button class="scanner-close" onclick="stopScan()">×</button>
+    <div id="qr-engine" style="width: 100%; height: 85%;"></div>
+    <div style="color:white; text-align:center; padding:20px; font-weight:900; letter-spacing:2px; font-size:11px;">SCANNING ZEN SPECTRUM...</div>
 </div>
 
-<section id="ed-tab" class="app-screen" style="display:none; padding: 20px;">
-    <div style="background: var(--zen-blue); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-        <h3>💙 ED Boundaries</h3>
-        <p>Sensory preferences for your Trusted Kitchen Ticket</p>
-    </div>
-    <div class="ed-list">
-        <div class="menu-item"><label><input type="checkbox"> <span>Soft Textures Only</span></label></div>
-        <div class="menu-item"><label><input type="checkbox"> <span>No Mixed Textures</span></label></div>
-        <div class="menu-item"><label><input type="checkbox"> <span>No Sauce/Gravy</span></label></div>
-        <div class="menu-item"><label><input type="checkbox"> <span>No Added Salt</span></label></div>
-        <div class="menu-item"><label><input type="checkbox"> <span>Deconstructed Meals</span></label></div>
-    </div>
-</section>
-
-<section id="handshake" class="app-screen" style="display:none; padding: 20px;">
-    <div style="background: #673AB7; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-        <h3>🤝 Business Handshake</h3>
-        <p>Set protection duration for this location.</p>
-    </div>
-    <div class="timer-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn-main" onclick="setHandshake(30)">30 Min</button>
-        <button class="btn-main" onclick="setHandshake(60)">1 Hour</button>
-        <button class="btn-main" onclick="setHandshake(180)">3 Hours</button>
-        <button class="btn-main" onclick="setHandshake(1440)">24 Hours</button>
-    </div>
-</section>
+<nav class="bottom-nav">
+    <div class="nav-item"><span>🔍</span>SCAN</div>
+    <div class="nav-item"><span>🛡️</span>SAFE</div>
+    <div class="nav-item nav-active"><span>🏠</span>HOME</div>
+    <div class="nav-item"><span>💙</span>ED</div>
+    <div class="nav-item"><span>⚡</span>MORE</div>
+</nav>
 
 <script>
     let scanner = null;
-
     function startScan() {
         document.getElementById('scanner-ui').style.display = 'block';
         scanner = new Html5Qrcode("qr-engine");
-        scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 280 }, 
-        (res) => { processResult(res); });
+        scanner.start(
+            { facingMode: "environment" }, 
+            { fps: 24, qrbox: { width: 300, height: 300 } }, 
+            (decodedText) => { console.log("Found:", decodedText); stopScan(); },
+            (errorMessage) => { /* scanning */ }
+        ).catch(err => { console.error("Scanner Error", err); });
     }
-
-    function processResult(text) {
-        // 1. Check if it's a Business URL
-        if (text.includes("http")) {
-            navigateTo('handshake');
-            stopScan();
-            return;
-        }
-
-        // 2. Ingredient Logic: Cross-ref against Zen Spectrum
-        const profile = userProfile.getActiveProfile();
-        const input = text.toLowerCase();
-        
-        // Check Red (Allergy)
-        let redMatch = profile.items.red.find(i => input.includes(i.name.toLowerCase()));
-        if (redMatch) {
-            alert("🔴 HIGH RISK: " + redMatch.name + " detected!");
-            stopScan(); return;
-        }
-
-        // Check Brown (Dislike/ED)
-        let brownMatch = profile.items.brown.find(i => input.includes(i.name.toLowerCase()));
-        if (brownMatch) {
-            alert("🟢 Safe, but contains a Dislike/ED boundary: " + brownMatch.name);
-            stopScan(); return;
-        }
-
-        alert("🟢 Result: No triggers found in Zen Spectrum.");
-        stopScan();
-    }
-
     function stopScan() {
         document.getElementById('scanner-ui').style.display = 'none';
-        if (scanner) scanner.stop().catch(() => {});
-    }
-
-    function setHandshake(min) {
-        userProfile.activateHandshake("Current Location", min);
-        document.getElementById('active-shield').style.display = 'block';
-        alert("Handshake active for " + min + " minutes.");
-        navigateTo('azwaa-app');
-    }
-
-    window.addEventListener('handshakeExpired', () => {
-        document.getElementById('active-shield').style.display = 'none';
-        alert("Privacy Wipe: Shield Expired.");
-    });
-
-    window.onload = () => {
-        if (userProfile.session.protectionWindow.active) {
-            document.getElementById('active-shield').style.display = 'block';
+        if (scanner) {
+            scanner.stop().then(() => { scanner = null; }).catch(e => console.error(e));
         }
-    };
+    }
 </script>
 
 </body>
