@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Scan, QrCode, Package, Building2, Camera, Pill, Droplets, TreeDeciduous, Apple } from "lucide-react"
+import { Scan, Package, Building2, Pill, Droplets, TreeDeciduous, Apple, Keyboard } from "lucide-react"
 import { QRScanner } from "./qr-scanner"
 import { BrandSearch } from "./brand-search"
+import { CameraScanner } from "./camera-scanner"
 import { cn } from "@/lib/utils"
 
 // Universal scan categories
@@ -17,17 +17,21 @@ const SCAN_CATEGORIES = [
   { id: "wood", label: "Woods", icon: TreeDeciduous, color: "bg-amber-700", description: "Furniture, dust, construction" },
 ]
 
-export function ScanHub() {
-  const [activeTab, setActiveTab] = useState<"product" | "business">("product")
+interface ScanHubProps {
+  onNavigateToSafe?: () => void
+}
+
+export function ScanHub({ onNavigateToSafe }: ScanHubProps) {
+  const [activeTab, setActiveTab] = useState<"camera" | "text" | "business">("camera")
   const [selectedCategory, setSelectedCategory] = useState<string>("food")
 
   return (
     <div className="space-y-4">
       {/* Header Card */}
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+      <Card className="border-[#673AB7]/20 bg-gradient-to-br from-[#EDE7F6] to-white">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-[#673AB7] flex items-center justify-center">
               <Scan className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -38,35 +42,47 @@ export function ScanHub() {
         </CardHeader>
         <CardContent>
           {/* Main Tab Toggle */}
-          <div className="flex gap-2 p-1 bg-muted rounded-lg mb-4">
+          <div className="flex gap-1 p-1 bg-muted rounded-lg mb-4">
             <button
-              onClick={() => setActiveTab("product")}
+              onClick={() => setActiveTab("camera")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md text-sm font-medium transition-all",
-                activeTab === "product"
-                  ? "bg-purple-600 text-white shadow-sm"
+                "flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-md text-sm font-medium transition-all",
+                activeTab === "camera"
+                  ? "bg-[#673AB7] text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Package className="w-4 h-4" />
-              Product Scan
+              Camera
+            </button>
+            <button
+              onClick={() => setActiveTab("text")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-md text-sm font-medium transition-all",
+                activeTab === "text"
+                  ? "bg-[#673AB7] text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Keyboard className="w-4 h-4" />
+              Text Search
             </button>
             <button
               onClick={() => setActiveTab("business")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md text-sm font-medium transition-all",
+                "flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-md text-sm font-medium transition-all",
                 activeTab === "business"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-[#673AB7] text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Building2 className="w-4 h-4" />
-              Business QR
+              Business
             </button>
           </div>
           
-          {/* Category Selection (Product mode only) */}
-          {activeTab === "product" && (
+          {/* Category Selection (Camera/Text modes) */}
+          {(activeTab === "camera" || activeTab === "text") && (
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-500">What are you scanning?</p>
               <div className="grid grid-cols-2 gap-2">
@@ -80,8 +96,8 @@ export function ScanHub() {
                       className={cn(
                         "flex items-center gap-2 p-3 rounded-lg border-2 transition-all text-left",
                         isActive
-                          ? "border-purple-500 bg-purple-50"
-                          : "border-gray-200 hover:border-purple-300"
+                          ? "border-[#673AB7] bg-[#EDE7F6]"
+                          : "border-gray-200 hover:border-[#9575CD]"
                       )}
                     >
                       <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", cat.color)}>
@@ -101,15 +117,15 @@ export function ScanHub() {
       </Card>
 
       {/* Quick Add Action Flow Info */}
-      {activeTab === "product" && (
-        <Card className="bg-gray-50 border-0">
+      {(activeTab === "camera" || activeTab === "text") && (
+        <Card className="bg-[#EDE7F6]/50 border-[#673AB7]/10">
           <CardContent className="p-3">
             <p className="text-xs text-gray-600 text-center">
-              <span className="font-semibold">Action Flow:</span> Scan result will offer Quick Add to route item to the correct tab
+              <span className="font-semibold">Action Flow:</span> Scan result offers Quick Add to route items
             </p>
-            <div className="flex justify-center gap-3 mt-2 text-[10px]">
-              <Badge variant="outline" className="border-green-300 text-green-700">Food to Safe List + Diabetes</Badge>
-              <Badge variant="outline" className="border-red-300 text-red-700">Meds/Chem to Shield</Badge>
+            <div className="flex justify-center gap-2 mt-2 text-[10px] flex-wrap">
+              <Badge variant="outline" className="border-green-300 text-green-700">Food to Safe + Diabetes</Badge>
+              <Badge variant="outline" className="border-red-300 text-red-700">Allergens to Shield</Badge>
               <Badge variant="outline" className="border-blue-300 text-blue-700">Sensory to ED</Badge>
             </div>
           </CardContent>
@@ -117,9 +133,15 @@ export function ScanHub() {
       )}
 
       {/* Scanner Content */}
-      {activeTab === "product" ? (
+      {activeTab === "camera" && (
+        <CameraScanner onNavigateToSafe={onNavigateToSafe} />
+      )}
+      
+      {activeTab === "text" && (
         <BrandSearch />
-      ) : (
+      )}
+      
+      {activeTab === "business" && (
         <QRScanner />
       )}
     </div>

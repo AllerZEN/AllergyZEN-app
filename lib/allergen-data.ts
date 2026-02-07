@@ -116,3 +116,38 @@ export function checkIngredient(ingredient: string): { safe: boolean; tier: ZenT
 
 // Temporary bridge to fix the Runtime Error
 export const greenListFoods: Allergen[] = [];
+
+// Safe Alternatives Database
+export const safeAlternatives: { id: string; name: string; replaces: string; category: string }[] = [
+  { id: "oat-milk", name: "Oat Milk", replaces: "dairy", category: "beverages" },
+  { id: "almond-milk", name: "Almond Milk", replaces: "dairy", category: "beverages" },
+  { id: "coconut-milk", name: "Coconut Milk", replaces: "dairy", category: "beverages" },
+  { id: "hemp-milk", name: "Hemp Milk", replaces: "dairy", category: "beverages" },
+  { id: "rice-milk", name: "Rice Milk", replaces: "dairy", category: "beverages" },
+  { id: "olive-oil", name: "Olive Oil", replaces: "butter", category: "fats" },
+  { id: "avocado-oil", name: "Avocado Oil", replaces: "butter", category: "fats" },
+  { id: "coconut-oil", name: "Coconut Oil", replaces: "butter", category: "fats" },
+  { id: "gluten-free-flour", name: "Gluten-Free Flour", replaces: "wheat", category: "baking" },
+  { id: "rice-flour", name: "Rice Flour", replaces: "wheat", category: "baking" },
+  { id: "almond-flour", name: "Almond Flour", replaces: "wheat", category: "baking" },
+  { id: "coconut-aminos", name: "Coconut Aminos", replaces: "soy-sauce", category: "condiments" },
+  { id: "sunflower-butter", name: "Sunflower Butter", replaces: "peanut-butter", category: "spreads" },
+  { id: "tahini", name: "Tahini", replaces: "peanut-butter", category: "spreads" },
+];
+
+/**
+ * Get safe alternatives for a specific allergen ID
+ */
+export function getSafeAlternativesFor(allergenId: string): string[] {
+  const alternativeMap: Record<string, string[]> = {
+    "dairy": ["Oat Milk", "Almond Milk", "Coconut Milk", "Hemp Milk", "Rice Milk", "Cashew Milk"],
+    "sds": ["SLS-free shampoo", "Castile soap", "Natural cleansers", "Sulfate-free products"],
+    "croscarmellose": ["Gelatin capsules", "Liquid medications", "Compounded formulas"],
+    "fragrance": ["Fragrance-free products", "Essential oils (patch tested)", "Unscented alternatives"],
+    "wenge": ["Oak", "Maple", "Bamboo", "Pine"],
+    "pla": ["Glass containers", "Stainless steel", "Natural fiber materials"],
+    "crunchy-texture": ["Soft foods", "Pureed options", "Smooth textures"],
+  };
+  
+  return alternativeMap[allergenId] || ["Contact your healthcare provider for alternatives"];
+}

@@ -2,16 +2,17 @@
 
 /**
  * allergyZEN Profile & Handshake Engine
- * Manages the Family Shield, Zen Spectrum items, and Bulletproof 3-hour handshakes.
- * 2026 SPEC: Includes 🟤 Brown tier (Dislikes) and 💙 Blue tier (Sensory).
+ * Manages the Family Shield, Zen Spectrum items, and Bulletproof handshakes.
+ * 2026 SPEC: Includes Brown tier (Dislikes) and Blue tier (Sensory/ED).
+ * PRIMARY BRAND COLOR: #673AB7 (Purple Master Theme)
  */
 
 export interface DotItems {
-  red: AllergenItem[] // High Reactivity / Strict Avoidance
-  amber: AllergenItem[] // Moderate Sensitivity
-  brown: AllergenItem[] // Dislike / Personal Preference (🟤)
-  green: AllergenItem[] // Verified Safe
-  blue: AllergenItem[] // ED/Sensory Boundaries (💙)
+  red: AllergenItem[]    // High Reactivity / Strict Avoidance
+  amber: AllergenItem[]  // Moderate Sensitivity
+  brown: AllergenItem[]  // Dislike / Personal Preference
+  green: AllergenItem[]  // Verified Safe
+  blue: AllergenItem[]   // ED/Sensory Boundaries
 }
 
 export interface AllergenItem {
@@ -23,16 +24,16 @@ export interface AllergenItem {
 export type ThemeColor = "purple" | "teal" | "rose" | "amber" | "sky"
 
 export const THEME_COLORS: Record<ThemeColor, { primary: string; accent: string; bg: string }> = {
-  purple: { primary: "#8E55A2", accent: "#C084FC", bg: "#FAF5FF" },
-  teal: { primary: "#0D9488", accent: "#5EEAD4", bg: "#F0FDFA" },
-  rose: { primary: "#E11D48", accent: "#FDA4AF", bg: "#FFF1F2" },
-  amber: { primary: "#D97706", accent: "#FCD34D", bg: "#FFFBEB" },
-  sky: { primary: "#0284C7", accent: "#7DD3FC", bg: "#F0F9FF" },
+  purple: { primary: "#673AB7", accent: "#9575CD", bg: "#EDE7F6" },
+  teal: { primary: "#009688", accent: "#4DB6AC", bg: "#E0F2F1" },
+  rose: { primary: "#E91E63", accent: "#F48FB1", bg: "#FCE4EC" },
+  amber: { primary: "#FF9800", accent: "#FFCC80", bg: "#FFF3E0" },
+  sky: { primary: "#03A9F4", accent: "#81D4FA", bg: "#E1F5FE" },
 }
 
 export interface FamilyMember {
   name: string
-  allergies: string[] // Combined high-reactivity names for easy access
+  allergies: string[]
   items?: DotItems
   themeColor?: ThemeColor
   photoUrl?: string 
@@ -56,6 +57,7 @@ export interface BoundaryPreferences {
 }
 
 export interface ProtectionSession {
+  active: boolean
   startTime: string | null
   durationMs: number 
   businessId: string | null
@@ -69,7 +71,7 @@ export interface ProfileSession {
   protectionWindow: ProtectionSession
 }
 
-// 2026 BULLETPROOF HANDSHAKE OPTIONS
+// HANDSHAKE OPTIONS: 30min, 1hr, 3hr, 24hr
 export const HANDSHAKE_DURATIONS = {
   THIRTY_MIN: 30 * 60 * 1000,
   ONE_HOUR: 60 * 60 * 1000,
@@ -82,6 +84,7 @@ class UserProfileManager {
   session: ProfileSession = { 
     activeProfileIndex: 0,
     protectionWindow: {
+      active: false,
       startTime: null,
       durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
       businessId: null,
@@ -143,33 +146,65 @@ class UserProfileManager {
 
   // --- HANDSHAKE LOGIC ---
 
-  startProtectionWindow(businessId: string, businessName: string, durationMinutes: number = 180) {
+  activateHandshake(businessName: string, durationMinutes: number = 180) {
     this.session.protectionWindow = {
+      active: true,
       startTime: new Date().toISOString(),
       durationMs: durationMinutes * 60 * 1000,
-      businessId,
+      businessId: `biz_${Date.now()}`,
       businessName,
       acknowledged: true,
       confirmedByBusiness: false
     }
     this.saveToStorage()
-    window.dispatchEvent(new CustomEvent("handshakeStarted", { detail: { durationMinutes, businessName } }))
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("handshakeStarted", { detail: { durationMinutes, businessName } }))
+    }
+  }
+
+  startProtectionWindow(businessId: string, businessName: string, durationMinutes: number = 180) {
+    this.activateHandshake(businessName, durationMinutes)
   }
   
   getRemainingProtectionTime(): number {
-    const { startTime, durationMs } = this.session.protectionWindow
-    if (!startTime) return 0
+    const { startTime, durationMs, active } = this.session.protectionWindow
+    if (!startTime || !active) return 0
     const elapsed = Date.now() - new Date(startTime).getTime()
     return Math.max(0, durationMs - elapsed)
   }
   
+  getProtectionTimeRemaining(): number {
+    return this.getRemainingProtectionTime()
+  }
+  
   isProtectionActive(): boolean {
-    return this.getRemainingProtectionTime() > 0
+    return this.session.protectionWindow.active && this.getRemainingProtectionTime() > 0
   }
 
-  // Auto-wipe logic for the Partner Dashboard
+  clearProtectionWindow() {
+    this.session.protectionWindow = {
+      active: false,
+      startTime: null,
+      durationMs: HANDSHAKE_DURATIONS.THREE_HOURS,
+      businessId: null,
+      businessName: null,
+      acknowledged: false,
+      confirmedByBusiness: false
+    }
+    this.saveToStorage()
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("handshakeCleared"))
+    }
+  }
+
+  cleanupExpiredData() {
+    if (this.session.protectionWindow.active && this.getRemainingProtectionTime() <= 0) {
+      this.clearProtectionWindow()
+    }
+  }
+
   checkStatus(): "PROTECTED" | "EXPIRED" | "CONFIRMED" | "INACTIVE" {
-    if (!this.session.protectionWindow.startTime) return "INACTIVE"
+    if (!this.session.protectionWindow.active) return "INACTIVE"
     if (!this.isProtectionActive()) return "EXPIRED"
     return this.session.protectionWindow.confirmedByBusiness ? "CONFIRMED" : "PROTECTED"
   }
@@ -182,18 +217,31 @@ class UserProfileManager {
     
     if (!profile.items) profile.items = { red: [], amber: [], brown: [], green: [], blue: [] }
     
-    // PRIORITY SYNC: Remove from all other tiers first
     const tiers: (keyof DotItems)[] = ["red", "amber", "brown", "green", "blue"]
     tiers.forEach(t => {
       profile.items![t] = profile.items![t].filter(i => i.name !== itemName)
     })
     
     profile.items[dotColor].push({ name: itemName, category, addedAt: new Date().toISOString() })
-    
-    // Sync the flat "allergies" array for quick high-reactivity checks
     profile.allergies = profile.items.red.map(i => i.name)
     
     this.saveToStorage()
+  }
+
+  removeItem(itemName: string) {
+    const profile = this.getActiveProfile()
+    if (!profile || !profile.items) return
+    
+    const tiers: (keyof DotItems)[] = ["red", "amber", "brown", "green", "blue"]
+    tiers.forEach(t => {
+      profile.items![t] = profile.items![t].filter(i => i.name !== itemName)
+    })
+    profile.allergies = profile.items.red.map(i => i.name)
+    this.saveToStorage()
+  }
+
+  addDislike(itemName: string) {
+    this.addItem(itemName, "dislike", "brown")
   }
 
   getProfilePhoto(): string | null {
@@ -202,6 +250,33 @@ class UserProfileManager {
 
   getActiveProfile(): FamilyMember | null {
     return this.profiles[this.session.activeProfileIndex] || null
+  }
+
+  setActiveProfile(index: number) {
+    if (index >= 0 && index < this.profiles.length) {
+      this.session.activeProfileIndex = index
+      this.saveToStorage()
+    }
+  }
+
+  getTheme(): ThemeColor {
+    return this.getActiveProfile()?.themeColor || "purple"
+  }
+
+  setTheme(color: ThemeColor) {
+    const profile = this.getActiveProfile()
+    if (profile) {
+      profile.themeColor = color
+      this.saveToStorage()
+    }
+  }
+
+  updateBoundaries(boundaries: Partial<BoundaryPreferences>) {
+    const profile = this.getActiveProfile()
+    if (profile) {
+      profile.boundaries = { ...profile.boundaries!, ...boundaries }
+      this.saveToStorage()
+    }
   }
 }
 

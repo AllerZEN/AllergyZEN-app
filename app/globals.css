@@ -3,12 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Updated to allergyZEN purple brand theme with exact logo colors */
+/* allergyZEN Purple Master Theme - #673AB7 */
 :root {
-  /* Brand colors from logo */
-  --brand-purple: #8e55a2;
-  --brand-purple-light: #a872b8;
-  --brand-purple-dark: #6b3f7a;
+  /* Brand colors - Primary Purple #673AB7 */
+  --brand-purple: #673AB7;
+  --brand-purple-light: #9575CD;
+  --brand-purple-dark: #512DA8;
+  --brand-purple-50: #EDE7F6;
+  --brand-purple-100: #D1C4E9;
+  --brand-purple-200: #B39DDB;
+  
+  /* Dynamic theme support - changes per profile */
+  --theme-primary: var(--brand-purple);
+  --theme-primary-light: var(--brand-purple-light);
+  --theme-primary-dark: var(--brand-purple-dark);
+  --theme-bg: var(--brand-purple-50);
 
   /* Traffic light colors from logo dots */
   --traffic-green: #22c55e;
@@ -241,3 +250,50 @@
 .logo-pulse {
   animation: logo-pulse 0.3s ease-in-out;
 }
+
+/* Dynamic Profile Theme Classes - For Whole App Experience switching */
+.theme-purple {
+  --theme-primary: #673AB7;
+  --theme-primary-light: #9575CD;
+  --theme-primary-dark: #512DA8;
+  --theme-bg: #EDE7F6;
+}
+
+.theme-teal {
+  --theme-primary: #009688;
+  --theme-primary-light: #4DB6AC;
+  --theme-primary-dark: #00796B;
+  --theme-bg: #E0F2F1;
+}
+
+.theme-rose {
+  --theme-primary: #E91E63;
+  --theme-primary-light: #F48FB1;
+  --theme-primary-dark: #C2185B;
+  --theme-bg: #FCE4EC;
+}
+
+.theme-amber {
+  --theme-primary: #FF9800;
+  --theme-primary-light: #FFCC80;
+  --theme-primary-dark: #F57C00;
+  --theme-bg: #FFF3E0;
+}
+
+.theme-sky {
+  --theme-primary: #03A9F4;
+  --theme-primary-light: #81D4FA;
+  --theme-primary-dark: #0288D1;
+  --theme-bg: #E1F5FE;
+}
+
+/* Utility classes for theme-aware elements */
+.bg-theme-primary { background-color: var(--theme-primary); }
+.bg-theme-light { background-color: var(--theme-primary-light); }
+.bg-theme-dark { background-color: var(--theme-primary-dark); }
+.bg-theme-bg { background-color: var(--theme-bg); }
+.text-theme-primary { color: var(--theme-primary); }
+.text-theme-light { color: var(--theme-primary-light); }
+.text-theme-dark { color: var(--theme-primary-dark); }
+.border-theme-primary { border-color: var(--theme-primary); }
+.border-theme-light { border-color: var(--theme-primary-light); }

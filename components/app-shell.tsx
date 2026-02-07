@@ -9,20 +9,20 @@ import {
 import { ScanHub } from "./scan-hub"
 import { Dashboard } from "./dashboard"
 import { BoundariesPanel } from "./boundaries-panel"
-import { SafeList } from "./safe-list"
-import { BlockedList } from "./blocked-list"
+import SafeList from "./safe-list"
+import BlockedList from "./blocked-list"
 import { MealPlanner } from "./meal-planner"
 import { KnowledgeHub } from "./knowledge-hub"
 import { MyNotes } from "./my-notes"
 import { EditProfile } from "./edit-profile"
 import { SettingsPanel } from "./settings-panel"
-import { ZenHealth } from "./zen-health"
+import ZenHealth from "./zen-health"
 import { BrandLogo } from "./brand-logo"
-import { ZenHabits } from "./zen-habits"
-import { EmergencyButton } from "./emergency-button"
+import ZenHabits from "./zen-habits"
+import EmergencyButton from "./emergency-button"
 import { InsightsPanel } from "./insights-panel"
 import { SubscriptionPanel } from "./subscription-panel"
-import { BusinessTab } from "./business-tab"
+import BusinessTab from "./business-tab"
 import { cn } from "@/lib/utils"
 import userProfile, { THEME_COLORS, ThemeColor } from "@/lib/profile"
 
@@ -102,25 +102,28 @@ export function AppShell() {
     setShowMoreDrawer(false)
   }
 
+  const goHome = () => handleTabChange("home")
+  const goToSafe = () => handleTabChange("safe")
+  
   const renderContent = () => {
     switch (activeTab) {
-      case "scan": return <ScanHub />
-      case "safe": return <SafeList />
+      case "scan": return <ScanHub onNavigateToSafe={goToSafe} />
+      case "safe": return <SafeList onBack={goHome} />
       case "home": return <Dashboard onNavigate={handleTabChange} />
-      case "business": return <BusinessTab />
+      case "business": return <BusinessTab onBack={goHome} />
       case "boundaries": return <BoundariesPanel />
-      case "zenhealth": return <ZenHealth />
-      case "blocked": return <BlockedList />
+      case "zenhealth": return <ZenHealth onBack={goHome} />
+      case "blocked": return <BlockedList onBack={goHome} />
       case "meals": return <MealPlanner />
       case "knowledge": return <KnowledgeHub />
       case "notes": return <MyNotes />
-      case "habits": return <ZenHabits />
-      case "emergency": return <EmergencyButton />
+      case "habits": return <ZenHabits onBack={goHome} />
+      case "emergency": return <EmergencyButton onBack={goHome} />
       case "profile": return <EditProfile />
       case "settings": return <SettingsPanel />
       case "insights": return <InsightsPanel />
       case "subscription": return <SubscriptionPanel />
-      default: return <Dashboard />
+      default: return <Dashboard onNavigate={handleTabChange} />
     }
   }
 

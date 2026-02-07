@@ -65,8 +65,7 @@ const HAPPINESS_INSIGHTS = [
   "Habit Hook: Tie your gratitude practice to your morning shield-check."
 ]
 
-// FIXED: Export default and Prop injection for Navigation
-export default function ZenHabits({ onBack }: { onBack: () => void }) {
+export default function ZenHabits({ onBack }: { onBack?: () => void }) {
   // --- STATE MANAGEMENT ---
   const [habits, setHabits] = useState<Habit[]>([])
   const [trackers, setTrackers] = useState<CustomTracker[]>([])

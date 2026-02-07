@@ -3,6 +3,7 @@
 
 const STORAGE_KEY = "allergyzen_family_profiles";
 const SETTINGS_KEY = "allergyzen_app_settings";
+const APP_VERSION = "2.0.8_CLEAN"; // Incrementing this forces a wipe of old dev data
 
 const userProfile = {
   profiles: [],
@@ -18,11 +19,21 @@ const userProfile = {
   },
 
   init() {
+    this.checkVersionReset(); // Ensures the 243 items are wiped for a fresh user
     this.loadFromStorage();
     this.cleanupExpiredData();
     this.applyGlobalTheme();
-    this.startGlobalTimer(); // Constant check for Handshake expiry
+    this.startGlobalTimer(); 
     return this;
+  },
+
+  checkVersionReset() {
+    const savedVersion = localStorage.getItem("az_app_version");
+    if (savedVersion !== APP_VERSION) {
+      localStorage.clear(); 
+      localStorage.setItem("az_app_version", APP_VERSION);
+      console.log("🛡️ allergyZEN: System Reset executed. Clean slate active.");
+    }
   },
 
   loadFromStorage() {
@@ -37,12 +48,11 @@ const userProfile = {
       if (this.profiles.length === 0) {
         this.profiles.push({
           name: "Primary User",
-          color: "#3B82F6", // Default Zen Blue
-          // FULL ZEN SPECTRUM INITIALIZATION
+          color: "#3B82F6", 
           items: { 
             red: [], // 🔴 Anaphylaxis
             amber: [], // 🟠 Sensitivity
-            brown: [], // 🟤 Dislike/Intolerance
+            brown: [], // 🟤 Dislike/Intolerance (Updated from Yellow)
             blue: [], // 💙 Sensory Boundary
             green: [] // 🟢 Safe Alternatives
           },
@@ -62,7 +72,6 @@ const userProfile = {
     }));
   },
 
-  // HANDSHAKE DURATION LOGIC (30m, 1h, 3h, 24h)
   activateHandshake(bizName, minutes) {
     const durationMs = minutes * 60 * 1000;
     this.session.protectionWindow = {
@@ -85,7 +94,6 @@ const userProfile = {
     return min + "m";
   },
 
-  // THE BULLETPROOF WIPE
   cleanupExpiredData() {
     const window = this.session.protectionWindow;
     if (window.active && window.startTime) {
@@ -105,17 +113,13 @@ const userProfile = {
     };
     this.saveToStorage();
     console.log("🛡️ Zen Shield: Privacy Wipe Executed. Business access revoked.");
-    
-    // Notify UI if on the Shield Page
     window.dispatchEvent(new CustomEvent("handshakeExpired"));
   },
 
-  // SPECTRUM ENGINE: Ensures items go to the right bucket
   addItemToSpectrum(name, tier) {
     const profile = this.getActiveProfile();
     if (!profile || !profile.items[tier]) return;
 
-    // Clean duplicates from other tiers first
     Object.keys(profile.items).forEach(t => {
       profile.items[t] = profile.items[t].filter(i => i.name !== name);
     });
@@ -140,67 +144,49 @@ const userProfile = {
   },
 
   startGlobalTimer() {
-    setInterval(() => this.cleanupExpiredData(), 10000); // Check every 10s
+    setInterval(() => this.cleanupExpiredData(), 10000); 
   },
 
   triggerShieldPulse() {
-    // Communication with index.html and view.html
     window.dispatchEvent(new CustomEvent("shieldActivated"));
   }
 };
 
 userProfile.init();
 
-// --- AZWAA v0 CUSTOM NAVIGATION LOGIC ---
 document.addEventListener('click', (e) => {
-    // 1. Detect if a button or menu block was clicked
-    const btn = e.target.closest('button, .menu-item, [role="button"], .tab-button');
+    const btn = e.target.closest('button, .menu-item, [role="button"], .tab-button, .tab');
     if (!btn) return;
 
-    // 2. Get the text inside the button to know where to go
     const label = btn.innerText.toUpperCase().trim();
-    console.log("Button Clicked:", label);
-
-    // 3. Navigation Routing
+    
     if (label.includes('SCAN')) {
-        // This triggers the actual camera instead of just the loading screen
-        if (typeof startCamera === "function") startCamera();
-        navigateTo('scan-screen');
+        if (typeof startScan === "function") startScan();
     } 
     else if (label.includes('BOUNDARIES') || label.includes('ED')) {
-        // Opens the 10-item sensory rule list + additional notes
         navigateTo('ed-tab'); 
     } 
     else if (label.includes('SAFE')) {
-        // Opens the Safe 🟢 spectrum and enables search
         navigateTo('safe-tab');
     } 
     else if (label.includes('BLOCKED')) {
-        // Opens the Zen Blocked (🔴🟠🟤🔵) spectrum
         navigateTo('blocked-tab');
     } 
-    else if (label.includes('KNOWLEDGE') || label.includes('ZEN HEALTH')) {
-        navigateTo('knowledge-hub');
-    } 
-    else if (label.includes('BUSINESS') || label.includes('HANDSHAKE')) {
-        // Opens the handshake timer (30m, 1hr, 3hr, 24hr)
-        navigateTo('handshake-screen');
+    else if (label.includes('DISLIKE')) {
+        navigateTo('dislike-tab');
+    }
+    else if (label.includes('BUSINESS')) {
+        navigateTo('handshake');
     }
 });
 
-// 4. The "Engine" that swaps the screens
 function navigateTo(screenId) {
-    // Hide everything that is a "page" or "section"
-    // Note: Make sure your HTML sections have the class 'app-screen'
     const screens = document.querySelectorAll('.app-screen, section');
     screens.forEach(s => s.style.display = 'none');
 
-    // Show the one we want
     const target = document.getElementById(screenId);
     if (target) {
         target.style.display = 'block';
-        window.scrollTo(0,0); // Reset scroll to top
-    } else {
-        console.error("Screen ID not found:", screenId);
+        window.scrollTo(0,0);
     }
 }
