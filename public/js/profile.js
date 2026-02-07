@@ -1,9 +1,9 @@
-// AllergyZEN Profile Management - Master Script v5.0 (2026 Bulletproof Build)
+// allergyZEN Wellness Assistant App - Master Script v5.3
 // Focus: Variable Handshakes, Zen Spectrum Integrity, and Business Privacy Wipe
 
 const STORAGE_KEY = "allergyzen_family_profiles";
 const SETTINGS_KEY = "allergyzen_app_settings";
-const APP_VERSION = "2.0.8_CLEAN"; // Incrementing this forces a wipe of old dev data
+const APP_VERSION = "2.1.1_LABEL_FIX"; // Incrementing this forces a wipe of old dev data [cite: 2026-01-29]
 
 const userProfile = {
   profiles: [],
@@ -11,7 +11,7 @@ const userProfile = {
     activeProfileIndex: 0,
     protectionWindow: {
       startTime: null,
-      durationMs: 180 * 60 * 1000, // Default 3 hours
+      durationMs: 180 * 60 * 1000, // Default 3 hours [cite: 2026-01-18]
       businessName: null,
       handshakeType: "3h", 
       active: false
@@ -19,7 +19,7 @@ const userProfile = {
   },
 
   init() {
-    this.checkVersionReset(); // Ensures the 243 items are wiped for a fresh user
+    this.checkVersionReset(); // Ensures the 243 items are wiped for a fresh user [cite: 2026-01-28]
     this.loadFromStorage();
     this.cleanupExpiredData();
     this.applyGlobalTheme();
@@ -28,8 +28,7 @@ const userProfile = {
   },
 
   checkVersionReset() {
-    const savedVersion = localStorage.getItem("az_app_version");
-    if (savedVersion !== APP_VERSION) {
+    if (localStorage.getItem("az_app_version") !== APP_VERSION) {
       localStorage.clear(); 
       localStorage.setItem("az_app_version", APP_VERSION);
       console.log("🛡️ allergyZEN: System Reset executed. Clean slate active.");
@@ -52,9 +51,9 @@ const userProfile = {
           items: { 
             red: [], // 🔴 Anaphylaxis
             amber: [], // 🟠 Sensitivity
-            brown: [], // 🟤 Dislike/Intolerance (Updated from Yellow)
-            blue: [], // 💙 Sensory Boundary
-            green: [] // 🟢 Safe Alternatives
+            brown: [], // 🟤 Dislike (Updated from Reactivity) [cite: 2026-01-25]
+            blue: [], // 💙 Sensory Boundary [cite: 2026-01-20]
+            green: [] // 🟢 Safe Alternatives [cite: 2026-01-25]
           },
           createdAt: new Date().toISOString()
         });
@@ -72,6 +71,7 @@ const userProfile = {
     }));
   },
 
+  // HANDSHAKE DURATION LOGIC (30m, 1h, 3h, 24h) [cite: 2026-01-25]
   activateHandshake(bizName, minutes) {
     const durationMs = minutes * 60 * 1000;
     this.session.protectionWindow = {
@@ -112,24 +112,8 @@ const userProfile = {
       active: false
     };
     this.saveToStorage();
-    console.log("🛡️ Zen Shield: Privacy Wipe Executed. Business access revoked.");
+    console.log("🛡️ Zen Shield: Privacy Wipe Executed. Business access revoked. [cite: 2026-01-18]");
     window.dispatchEvent(new CustomEvent("handshakeExpired"));
-  },
-
-  addItemToSpectrum(name, tier) {
-    const profile = this.getActiveProfile();
-    if (!profile || !profile.items[tier]) return;
-
-    Object.keys(profile.items).forEach(t => {
-      profile.items[t] = profile.items[t].filter(i => i.name !== name);
-    });
-
-    profile.items[tier].push({
-      name: name,
-      timestamp: Date.now()
-    });
-
-    this.saveToStorage();
   },
 
   getActiveProfile() {
@@ -154,8 +138,9 @@ const userProfile = {
 
 userProfile.init();
 
+// UNIVERSAL CLICK HANDLER FOR INTERACTIVITY
 document.addEventListener('click', (e) => {
-    const btn = e.target.closest('button, .menu-item, [role="button"], .tab-button, .tab');
+    const btn = e.target.closest('.tab, .nav-item, .btn-main, .menu-item');
     if (!btn) return;
 
     const label = btn.innerText.toUpperCase().trim();
@@ -174,6 +159,9 @@ document.addEventListener('click', (e) => {
     } 
     else if (label.includes('DISLIKE')) {
         navigateTo('dislike-tab');
+    }
+    else if (label.includes('HOME')) {
+        navigateTo('azwaa-app');
     }
     else if (label.includes('BUSINESS')) {
         navigateTo('handshake');
