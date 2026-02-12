@@ -1,180 +1,274 @@
-// allergyZEN Wellness Assistant App - Master Script v5.3
-// Focus: Variable Handshakes, Zen Spectrum Integrity, and Business Privacy Wipe
+/**
+ * allergyZEN Wellness Assistant - Profile.js
+ * Version: 1.0 (Zen Spectrum Audit Build)
+ * Purpose: Manages user risk profile, generates the Zen Spectrum data, 
+ * handles the Bulletproof Handshake (30m/1h/3h/24h), and secures privacy.
+ */
 
-const STORAGE_KEY = "allergyzen_family_profiles";
-const SETTINGS_KEY = "allergyzen_app_settings";
-const APP_VERSION = "2.1.1_LABEL_FIX"; // Incrementing this forces a wipe of old dev data [cite: 2026-01-29]
+/* =========================================
+   SECTION 1: DATA & STATE MANAGEMENT
+   ========================================= */
 
-const userProfile = {
-  profiles: [],
-  session: {
-    activeProfileIndex: 0,
-    protectionWindow: {
-      startTime: null,
-      durationMs: 180 * 60 * 1000, // Default 3 hours [cite: 2026-01-18]
-      businessName: null,
-      handshakeType: "3h", 
-      active: false
-    }
-  },
+   const ProfileManager = {
+    // State to be saved to localStorage
+    state: {
+        userName: "User", // Default, anonymous until set
+        selectedRisks: [], // Array of strings (e.g., "Peanuts", "SDS", "Vicuna")
+        handshakeDuration: 180, // Default: 3 hours (in minutes)
+        sessionActive: false,
+        startTime: null,
+        shieldStatus: 'green' // 🟢 (Safe), 🟠 (Caution), 🔴 (Danger)
+    },
 
-  init() {
-    this.checkVersionReset(); // Ensures the 243 items are wiped for a fresh user [cite: 2026-01-28]
-    this.loadFromStorage();
-    this.cleanupExpiredData();
-    this.applyGlobalTheme();
-    this.startGlobalTimer(); 
-    return this;
-  },
+    // THE FULL ZEN SPECTRUM DATABASE
+    // Updated [2026-01-16] with Batch Highlights
+    zenSpectrumCategories: {
+        "Common Food Triggers": [
+            "Peanuts", "Tree Nuts", "Dairy", "Egg", "Wheat", "Soy", "Fish", "Shellfish"
+        ],
+        "Medicinal Excipients": [
+            "Croscarmellose Sodium", "Magnesium Stearate", "Lactose Monohydrate", 
+            "Titanium Dioxide", "Microcrystalline Cellulose", "Gelatin (Bovine)", "Gelatin (Porcine)"
+        ],
+        "Photographic & Industrial Chemicals": [
+            "Hydroquinone", "Metol", "Glacial Acetic Acid", "Ammonium Thiosulfate"
+        ],
+        "Exotic Wood Dusts": [
+            "Wenge", "Padauk", "Cocobolo", "Ebony", "Rosewood", "Mahogany", "Teak"
+        ],
+        "Fermented Basics (Biogenic Amines)": [
+            "Natto (Bacillus subtilis)", "Kimchi (Lactobacillus)", "Kombucha", 
+            "Aged Cheese", "Sauerkraut", "Miso"
+        ],
+        "The Lab Set (Science/Medical Pro)": [
+            "SDS (Sodium Dodecyl Sulfate)", "EDTA", "DMSO (Dimethyl Sulfoxide)", 
+            "Formaldehyde", "Latex", "Nitrile Accelerators"
+        ],
+        "Terpene Profile (Plant Compounds)": [
+            "Pinene (Pine/Conifer)", "Myrcene (Hops/Mango)", "Limonene (Citrus)", 
+            "Linalool (Lavender)", "Caryophyllene (Pepper)", "Eucalyptol"
+        ],
+        "Modern Materials (Sustainable Textiles)": [
+            "Mushroom Leather (Mycelium)", "PLA (Polylactic Acid)", "Bamboo Rayon", 
+            "Hemp Composite", "Recycled PET"
+        ],
+        "Luxury Fibers": [
+            "Vicuna", "Qiviut (Muskox)", "Cashmere", "Angora", "Mohair", "Alpaca"
+        ]
+    },
 
-  checkVersionReset() {
-    if (localStorage.getItem("az_app_version") !== APP_VERSION) {
-      localStorage.clear(); 
-      localStorage.setItem("az_app_version", APP_VERSION);
-      console.log("🛡️ allergyZEN: System Reset executed. Clean slate active.");
-    }
-  },
-
-  loadFromStorage() {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        this.profiles = data.profiles || [];
-        this.session = data.session || this.session;
-      }
-
-      if (this.profiles.length === 0) {
-        this.profiles.push({
-          name: "Primary User",
-          color: "#3B82F6", 
-          items: { 
-            red: [], // 🔴 Anaphylaxis
-            amber: [], // 🟠 Sensitivity
-            brown: [], // 🟤 Dislike (Updated from Reactivity) [cite: 2026-01-25]
-            blue: [], // 💙 Sensory Boundary [cite: 2026-01-20]
-            green: [] // 🟢 Safe Alternatives [cite: 2026-01-25]
-          },
-          createdAt: new Date().toISOString()
-        });
-        this.saveToStorage();
-      }
-    } catch (e) {
-      console.error("Profile Load Error:", e);
-    }
-  },
-
-  saveToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      profiles: this.profiles,
-      session: this.session
-    }));
-  },
-
-  // HANDSHAKE DURATION LOGIC (30m, 1h, 3h, 24h) [cite: 2026-01-25]
-  activateHandshake(bizName, minutes) {
-    const durationMs = minutes * 60 * 1000;
-    this.session.protectionWindow = {
-      startTime: new Date().toISOString(),
-      durationMs: durationMs,
-      businessName: bizName || "Partner Business",
-      handshakeType: this.formatDurationLabel(minutes),
-      active: true
-    };
+    /* =========================================
+       SECTION 2: INITIALIZATION & AUDIT
+       ========================================= */
     
-    this.saveToStorage();
-    this.triggerShieldPulse();
-  },
+    // UPGRADE PROMPT: Check for existing 'allergyZEN_Profile' in localStorage.
+    // If corruption is found (invalid JSON), force a reset to prevent app crash.
+    init: function() {
+        console.log("Initializing allergyZEN Profile Manager...");
+        this.loadProfile();
+        this.renderRiskCategories();
+        this.setupEventListeners();
+        this.updateHandshakeUI(); // Ensure UI matches saved state
+    },
 
-  formatDurationLabel(min) {
-    if (min === 30) return "30m";
-    if (min === 60) return "1h";
-    if (min === 180) return "3h";
-    if (min === 1440) return "24h";
-    return min + "m";
-  },
+    /* =========================================
+       SECTION 3: DOM RENDERING (ZEN SPECTRUM)
+       ========================================= */
 
-  cleanupExpiredData() {
-    const window = this.session.protectionWindow;
-    if (window.active && window.startTime) {
-      const elapsed = Date.now() - new Date(window.startTime).getTime();
-      if (elapsed >= window.durationMs) {
-        this.forcePrivacyWipe();
-      }
+    renderRiskCategories: function() {
+        const container = document.getElementById('risk-categories-container');
+        if (!container) return; // Guard clause if running on a page without the container
+
+        container.innerHTML = ''; // Clear current
+
+        // Loop through the Zen Spectrum Categories
+        for (const [category, items] of Object.entries(this.zenSpectrumCategories)) {
+            // Create Category Header
+            const section = document.createElement('div');
+            section.className = 'spectrum-section mb-6';
+            
+            const title = document.createElement('h3');
+            title.className = 'text-lg font-bold text-gray-700 mb-2 border-b border-gray-200 pb-1';
+            title.innerText = category;
+            section.appendChild(title);
+
+            // Create Grid for Items
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-2 gap-2';
+
+            items.forEach(item => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center space-x-2 cursor-pointer p-2 bg-white rounded shadow-sm hover:bg-blue-50 transition';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = item;
+                checkbox.className = 'form-checkbox h-5 w-5 text-blue-600';
+                
+                // Check if user already selected this risk
+                if (this.state.selectedRisks.includes(item)) {
+                    checkbox.checked = true;
+                }
+
+                // Event Listener for Toggling
+                checkbox.addEventListener('change', (e) => {
+                    this.toggleRisk(item, e.target.checked);
+                });
+
+                const span = document.createElement('span');
+                span.innerText = item;
+                span.className = 'text-sm text-gray-800';
+
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                grid.appendChild(label);
+            });
+
+            section.appendChild(grid);
+            container.appendChild(section);
+        }
+    },
+
+    /* =========================================
+       SECTION 4: LOGIC & STATE UPDATES
+       ========================================= */
+
+    toggleRisk: function(riskItem, isChecked) {
+        if (isChecked) {
+            if (!this.state.selectedRisks.includes(riskItem)) {
+                this.state.selectedRisks.push(riskItem);
+            }
+        } else {
+            this.state.selectedRisks = this.state.selectedRisks.filter(r => r !== riskItem);
+        }
+        // UPGRADE PROMPT: Auto-save on every toggle to prevent data loss if browser closes unexpectedly.
+        this.saveProfile(); 
+        console.log(`Risk Updated: ${riskItem} is now ${isChecked ? 'Active' : 'Inactive'}`);
+    },
+
+    // Handshake Duration Setter (30m, 1hr, 3hr, 24hr)
+    setHandshakeDuration: function(minutes) {
+        const allowedDurations = [30, 60, 180, 1440];
+        
+        if (allowedDurations.includes(parseInt(minutes))) {
+            this.state.handshakeDuration = parseInt(minutes);
+            this.saveProfile();
+            this.updateHandshakeUI();
+            console.log(`Handshake duration set to ${minutes} minutes.`);
+        } else {
+            // ERROR FIX PROMPT: If an invalid duration is injected, default to 3 hours (180) for safety.
+            console.error("Invalid duration attempt. Reverting to 180 mins.");
+            this.state.handshakeDuration = 180;
+            this.saveProfile();
+        }
+    },
+
+    updateHandshakeUI: function() {
+        // Visual feedback for which timer button is active
+        const buttons = document.querySelectorAll('.handshake-btn');
+        buttons.forEach(btn => {
+            if (parseInt(btn.dataset.duration) === this.state.handshakeDuration) {
+                btn.classList.add('bg-blue-600', 'text-white');
+                btn.classList.remove('bg-gray-200', 'text-gray-700');
+            } else {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            }
+        });
+    },
+
+    /* =========================================
+       SECTION 5: ACTIVATION & STORAGE (Bulletproof)
+       ========================================= */
+
+    activateShield: function() {
+        if (this.state.selectedRisks.length === 0) {
+            alert("Please select at least one risk factor before activating your Shield.");
+            return;
+        }
+
+        // 1. Set Active Timestamp
+        this.state.sessionActive = true;
+        this.state.startTime = Date.now();
+        this.saveProfile();
+
+        // 2. Schedule the Wipe (In memory fallback)
+        // Note: Main wipe logic handles in view.html via timestamp check, 
+        // but this adds redundancy.
+        setTimeout(() => {
+            this.wipeSensitiveData();
+        }, this.state.handshakeDuration * 60 * 1000);
+
+        // 3. Redirect to The Shield
+        window.location.href = 'view.html';
+    },
+
+    saveProfile: function() {
+        try {
+            const serialized = JSON.stringify(this.state);
+            localStorage.setItem('allergyZEN_Profile', serialized);
+        } catch (e) {
+            // ERROR FIX PROMPT: Catch QuotaExceededError in localStorage (rare but possible with massive lists).
+            // Solution: Alert user to clear cache or switch browsers.
+            console.error("Storage Save Failed", e);
+            alert("Storage Error: Your profile could not be saved. Please clear browser cache.");
+        }
+    },
+
+    loadProfile: function() {
+        const saved = localStorage.getItem('allergyZEN_Profile');
+        if (saved) {
+            try {
+                this.state = JSON.parse(saved);
+                // UPGRADE PROMPT: If we add new keys to 'state' in future versions, 
+                // merge them here using Object.assign to avoid overwriting defaults with nulls.
+            } catch (e) {
+                console.error("Corrupt profile data found. Resetting.");
+                localStorage.removeItem('allergyZEN_Profile');
+            }
+        }
+    },
+
+    wipeSensitiveData: function() {
+        console.warn("Handshake expired. Wiping session data.");
+        this.state.sessionActive = false;
+        this.state.startTime = null;
+        this.saveProfile();
+        // Redirect if currently on the view page
+        if (window.location.href.includes('view.html')) {
+            window.location.href = 'index.html';
+        }
+    },
+
+    /* =========================================
+       SECTION 6: EVENT LISTENERS
+       ========================================= */
+
+    setupEventListeners: function() {
+        // Handshake Buttons
+        const timerButtons = document.querySelectorAll('.handshake-btn');
+        timerButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.setHandshakeDuration(e.target.dataset.duration);
+            });
+        });
+
+        // Activate Button
+        const activateBtn = document.getElementById('activate-shield-btn');
+        if (activateBtn) {
+            activateBtn.addEventListener('click', () => {
+                this.activateShield();
+            });
+        }
+        
+        // Brown/Yellow Color Logic Prompt
+        // ERROR FIX PROMPT: Ensure that anywhere 'yellow' status was used 
+        // for "Caution", it is now rendered as 'brown' (🟤) #8B4513
+        // This is primarily CSS, but if JS sets inline styles, override here.
     }
-  },
-
-  forcePrivacyWipe() {
-    this.session.protectionWindow = {
-      startTime: null,
-      durationMs: 0,
-      businessName: null,
-      active: false
-    };
-    this.saveToStorage();
-    console.log("🛡️ Zen Shield: Privacy Wipe Executed. Business access revoked. [cite: 2026-01-18]");
-    window.dispatchEvent(new CustomEvent("handshakeExpired"));
-  },
-
-  getActiveProfile() {
-    return this.profiles[this.session.activeProfileIndex];
-  },
-
-  applyGlobalTheme() {
-    const profile = this.getActiveProfile();
-    if (profile) {
-      document.documentElement.style.setProperty('--profile-theme', profile.color);
-    }
-  },
-
-  startGlobalTimer() {
-    setInterval(() => this.cleanupExpiredData(), 10000); 
-  },
-
-  triggerShieldPulse() {
-    window.dispatchEvent(new CustomEvent("shieldActivated"));
-  }
 };
 
-userProfile.init();
-
-// UNIVERSAL CLICK HANDLER FOR INTERACTIVITY
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.tab, .nav-item, .btn-main, .menu-item');
-    if (!btn) return;
-
-    const label = btn.innerText.toUpperCase().trim();
-    
-    if (label.includes('SCAN')) {
-        if (typeof startScan === "function") startScan();
-    } 
-    else if (label.includes('BOUNDARIES') || label.includes('ED')) {
-        navigateTo('ed-tab'); 
-    } 
-    else if (label.includes('SAFE')) {
-        navigateTo('safe-tab');
-    } 
-    else if (label.includes('BLOCKED')) {
-        navigateTo('blocked-tab');
-    } 
-    else if (label.includes('DISLIKE')) {
-        navigateTo('dislike-tab');
-    }
-    else if (label.includes('HOME')) {
-        navigateTo('azwaa-app');
-    }
-    else if (label.includes('BUSINESS')) {
-        navigateTo('handshake');
-    }
+// Boot the system when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    ProfileManager.init();
 });
-
-function navigateTo(screenId) {
-    const screens = document.querySelectorAll('.app-screen, section');
-    screens.forEach(s => s.style.display = 'none');
-
-    const target = document.getElementById(screenId);
-    if (target) {
-        target.style.display = 'block';
-        window.scrollTo(0,0);
-    }
-}
