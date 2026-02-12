@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>allergyZEN - Profile Setup</title>
+    <style>
+        :root {
+            --zen-blue: #007bff;
+            --zen-bg: #0d0d0d;
+            --zen-card: #1a1a1a;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --brown: #8B4513; /* Updated per instructions: Brown replaces Yellow */
+        }
+
+        body {
+            background-color: var(--zen-bg);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding-bottom: 120px; /* Space for sticky footer */
+        }
+
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+        header { text-align: center; padding: 30px 0; }
+        .logo { font-size: 2rem; font-weight: bold; color: var(--zen-blue); }
+
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--zen-blue);
+            margin: 25px 0 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        /* Handshake Timing Options */
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .timer-btn {
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            padding: 15px 5px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .timer-btn.active {
+            background: var(--zen-blue);
+            border-color: var(--zen-blue);
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+        }
+
+        /* Zen Spectrum Grid */
+        .risk-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .risk-item {
+            background: var(--zen-card);
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .risk-item input { margin-right: 12px; transform: scale(1.2); }
+        .risk-item:hover { border-color: var(--zen-blue); }
+
+        .footer-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #333;
+            z-index: 100;
+        }
+
+        .btn-activate {
+            background: var(--zen-blue);
+            color: white;
+            border: none;
+            padding: 18px 0;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Error Message UI */
+        #error-log { color: var(--brown); font-size: 0.8rem; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo">allergyZEN</div>
+        <p style="color: var(--text-dim);">Profile Architect v0</p>
+    </header>
+
+    <div class="section-title">1. Choose Handshake Duration</div>
+    <div class="timer-grid" id="timer-options">
+        <button class="timer-btn" onclick="setTimer(30, this)">30min</button>
+        <button class="timer-btn" onclick="setTimer(60, this)">1hr</button>
+        <button class="timer-btn active" onclick="setTimer(180, this)">3hr</button>
+        <button class="timer-btn" onclick="setTimer(1440, this)">24hr</button>
+    </div>
+
+    <div class="section-title">2. Medicinal Excipients & Lab</div>
+    <div class="risk-grid">
+        <label class="risk-item"><input type="checkbox" value="Croscarmellose Sodium"> Croscarmellose</label>
+        <label class="risk-item"><input type="checkbox" value="SDS"> SDS / EDTA</label>
+        <label class="risk-item"><input type="checkbox" value="Hydroquinone"> Photographic</label>
+        <label class="risk-item"><input type="checkbox" value="DMSO"> DMSO</label>
+    </div>
+
+    <div class="section-title">3. Luxury Fibers & Woods</div>
+    <div class="risk-grid">
+        <label class="risk-item"><input type="checkbox" value="Vicuna"> Vicuna / Qiviut</label>
+        <label class="risk-item"><input type="checkbox" value="Wenge Wood"> Wenge / Padauk</label>
+        <label class="risk-item"><input type="checkbox" value="Mushroom Leather"> Mycelium</label>
+        <label class="risk-item"><input type="checkbox" value="PLA"> PLA Plastics</label>
+    </div>
+
+    <div class="section-title">4. Terpenes & Fermented</div>
+    <div class="risk-grid">
+        <label class="risk-item"><input type="checkbox" value="Pinene"> Pinene / Myrcene</label>
+        <label class="risk-item"><input type="checkbox" value="Limonene"> Limonene / Terps</label>
+        <label class="risk-item"><input type="checkbox" value="Natto"> Natto / Kimchi</label>
+    </div>
+
+    <div id="error-log">Please select at least one trigger for the handshake.</div>
+</div>
+
+<div class="footer-action">
+    <button class="btn-activate" onclick="saveAndActivate()">ACTIVATE SHIELD</button>
+</div>
+
+<script src="profile.js"></script>
+<script>
+    /**
+     * UI Logic for Profile Construction
+     * Connects with the Master ProfileManager in profile.js
+     */
+    let selectedMinutes = 180;
+
+    function setTimer(mins, btn) {
+        selectedMinutes = mins;
+        document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // If ProfileManager exists in profile.js, sync it
+        if(typeof ProfileManager !== 'undefined') {
+            ProfileManager.setHandshakeDuration(mins);
+        }
+    }
+
+    function saveAndActivate() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const risks = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (risks.length === 0) {
+            document.getElementById('error-log').style.display = 'block';
+            return;
+        }
+
+        const profile = {
+            risks: risks,
+            handshakeDuration: selectedMinutes,
+            isActive: true,
+            startTime: Date.now()
+        };
+
+        // SAVE: Mirroring data for the Shield (view.html) and Launchpad (index.html)
+        localStorage.setItem('allergyZEN_Profile', JSON.stringify(profile));
+        
+        // REDIRECT: Start the pulsing blue dot system
+        window.location.href = 'view.html';
+    }
+
+    // ERROR FIX HOOK: [LOAD_EXISTING_PROFILE]
+    window.onload = () => {
+        const saved = localStorage.getItem('allergyZEN_Profile');
+        if (saved) {
+            const data = JSON.parse(saved);
+            // Pre-check boxes and set timer if user is returning
+        }
+    };
+</script>
+
+</body>
+</html>
