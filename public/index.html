@@ -2,227 +2,239 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>allergyZEN Wellness Assistant App</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>allergyZEN Wellness Assistant App - Launchpad</title>
     <style>
-        :root { 
-            --zen-blue: #3B82F6; 
-            --zen-red: #EF4444; 
-            --zen-brown: #78350f; 
-            --zen-green: #10B981;
-            --zen-dark: #111827;
+        :root {
+            --zen-blue: #007bff;
+            --zen-dark: #0a0a0a;
+            --zen-card: #161616;
+            --danger: #ff4444;    /* 🔴 */
+            --warning: #8B4513;   /* 🟤 Updated from Yellow */
+            --safe: #00c851;      /* 🟢 */
+            --text-main: #e0e0e0;
+            --text-dim: #888;
         }
 
-        body { 
-            margin: 0; padding: 0; background: #F8FAFC; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--zen-dark); padding-bottom: 110px;
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            background-color: var(--zen-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* LOGO SECTION */
-        .header { text-align: center; padding: 45px 20px 10px; }
-        .azwaa-logo { font-weight: 900; font-size: 2.5rem; font-style: italic; letter-spacing: -2px; margin: 0; }
-        .azwaa-logo span { color: var(--zen-blue); }
-        .version-tag { font-size: 9px; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* SEARCH HERO */
-        .search-hero { 
-            padding: 40px 20px; text-align: center; background: white; 
-            border-radius: 35px; margin: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); 
-            border: 1px solid #f1f5f9;
-        }
-        .search-hero h2 { font-size: 1.6rem; margin: 15px 0 5px; color: #1e293b; font-weight: 900; }
-        .search-hero p { font-size: 13px; color: #64748b; line-height: 1.5; margin: 0; }
-
-        /* MY SPECTRUM BAR */
-        .spectrum-row { 
-            display: flex; justify-content: space-around; padding: 22px; 
-            background: white; border-radius: 28px; margin: 0 20px 25px; 
-            border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        .spec-item { text-align: center; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; cursor: pointer; }
-        .spec-icon { 
-            width: 48px; height: 48px; border-radius: 16px; border: 1px solid #e2e8f0; 
-            display: flex; align-items: center; justify-content: center; 
-            margin-bottom: 8px; font-size: 22px; transition: 0.2s; 
-        }
-        .active-red { border: 2.5px solid var(--zen-red); color: var(--zen-red); background: #fff1f2; }
-
-        /* APP GRID */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
-        .tab { 
-            background: white; border: 1px solid #e2e8f0; border-radius: 26px;
-            padding: 35px 10px; font-size: 0.85rem; font-weight: 900; text-align: center;
-            text-transform: uppercase; color: #475569; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
-        }
-        .tab:active { transform: scale(0.95); }
-        .safe { border-bottom: 6px solid var(--zen-green); }
-        .blocked { border-bottom: 6px solid var(--zen-red); }
-        .boundaries { border-bottom: 6px solid var(--zen-blue); }
-        .dislike { border-bottom: 6px solid var(--zen-brown); }
-        .full-tab { grid-column: span 2; background: #eff6ff; color: var(--zen-blue); border: 1px solid #dbeafe; }
-
-        /* SCREEN STYLES */
-        .app-screen { display: none; padding: 30px 20px; min-height: 100vh; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .screen-header { margin-bottom: 30px; }
-        .screen-header h1 { font-size: 2rem; font-weight: 900; margin: 0; }
-        .screen-header p { color: #64748b; font-size: 14px; margin-top: 5px; }
-
-        /* CHECKLIST SYSTEM */
-        .card-list { background: white; padding: 25px; border-radius: 32px; border: 1px solid #f1f5f9; box-shadow: 0 10px 20px rgba(0,0,0,0.02); }
-        .check-item { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #f8fafc; font-weight: 700; color: #334155; }
-        .check-item:last-child { border-bottom: none; }
-        .check-item input { width: 22px; height: 22px; accent-color: var(--zen-blue); border-radius: 6px; }
-        
-        .zen-textarea { 
-            width: 100%; height: 130px; border-radius: 20px; border: 1px solid #e2e8f0; 
-            padding: 18px; margin-top: 20px; font-family: inherit; font-size: 14px; 
-            background: #f8fafc; box-sizing: border-box; resize: none;
+        .launchpad-wrapper {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            text-align: center;
         }
 
-        /* HANDSHAKE BUTTONS */
-        .btn-group { display: flex; flex-direction: column; gap: 15px; }
-        .btn-action { 
-            width: 100%; padding: 24px; border-radius: 22px; border: none; 
-            font-weight: 900; font-size: 17px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
-        .btn-blue { background: var(--zen-blue); color: white; }
-
-        /* SCANNER OVERLAY */
-        #scanner-ui { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 84vh; 
-            background: #000; z-index: 10000; border-bottom-left-radius: 50px; 
-            border-bottom-right-radius: 50px; overflow: hidden; 
-        }
-        .scanner-close { 
-            position: absolute; top: 45px; right: 30px; color: white; 
-            font-size: 45px; background: none; border: none; z-index: 10001; font-weight: 200;
+        .main-card {
+            background: var(--zen-card);
+            border-radius: 28px;
+            padding: 40px 20px;
+            border: 1px solid #222;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            position: relative;
         }
 
-        /* BOTTOM NAV */
-        .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; height: 95px; 
-            background: white; display: flex; justify-content: space-around; 
-            align-items: center; border-top: 1px solid #f1f5f9; z-index: 9999; 
+        /* The 3-Hour Handshake Visualizer */
+        .status-ring {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 4px solid #333;
+            background: rgba(255,255,255,0.02);
         }
-        .nav-item { text-align: center; font-size: 11px; font-weight: 900; color: #cbd5e1; cursor: pointer; flex: 1; }
-        .nav-active { color: var(--zen-blue); }
-        .nav-item span { font-size: 26px; display: block; margin-bottom: 5px; }
+
+        .status-ring.active { border-color: var(--zen-blue); box-shadow: 0 0 20px rgba(0, 123, 255, 0.4); }
+        .status-ring.danger { border-color: var(--danger); }
+        .status-ring.warning { border-color: var(--warning); }
+        .status-ring.safe { border-color: var(--safe); }
+
+        h1 { font-size: 1.8rem; margin: 10px 0; letter-spacing: 1px; }
+        .tagline { color: var(--text-dim); margin-bottom: 30px; font-size: 0.9rem; }
+
+        /* Results Logic UI */
+        #results-display { margin: 20px 0; padding: 15px; border-radius: 12px; display: none; }
+        .result-item { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 15px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary { background: var(--zen-blue); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #444; color: var(--text-main); }
+        .btn-safe-tab { background: rgba(0, 200, 81, 0.1); color: var(--safe); border: 1px solid var(--safe); }
+
+        /* Knowledge Hub Section */
+        .knowledge-hub {
+            margin-top: 30px;
+            text-align: left;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            border-left: 4px solid var(--zen-blue);
+        }
+
+        .knowledge-hub b { color: var(--zen-blue); display: block; margin-bottom: 5px; }
+
+        /* Handshake Options (30m, 1h, 3h, 24h) Visuals */
+        .timer-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .timer-chip { font-size: 0.7rem; padding: 5px; background: #222; border-radius: 5px; color: var(--text-dim); }
+
+        .footer-note { font-size: 0.75rem; color: #555; margin-top: 25px; }
     </style>
 </head>
 <body>
 
-<section id="azwaa-app" style="display:block;">
-    <header class="header">
-        <h1 class="azwaa-logo">allergy<span>ZEN</span></h1>
-        <div class="version-tag">Bulletproof Build 2026</div>
-    </header>
+<div class="launchpad-wrapper">
+    <div class="main-card">
+        <div id="status-ring" class="status-ring">⚪</div>
+        
+        <h1 id="brand-name">allergyZEN</h1>
+        <p class="tagline">Bulletproof Wellness Assistant</p>
 
-    <div class="search-hero">
-        <div style="font-size: 50px;">🛡️</div>
-        <h2>Search 1,750+ items</h2>
-        <p>Full Zen Spectrum: Medicinal Excipients, Exotic Woods, Terpenes, Lab Chemicals, and Textiles.</p>
-    </div>
+        <div id="results-display">
+            </div>
 
-    <div style="padding: 0 25px;"><h4 style="margin:0 0 12px 5px; color:#94a3b8; font-weight: 800; font-size: 11px; letter-spacing: 1px;">MY SPECTRUM</h4></div>
-    <div class="spectrum-row">
-        <div class="spec-item"><div class="spec-icon active-red">⚠️</div>BLOCK</div>
-        <div class="spec-item"><div class="spec-icon">!</div>CAUTION</div>
-        <div class="spec-item"><div class="spec-icon" style="color:var(--zen-brown);">🟤</div>DISLIKE</div>
-        <div class="spec-item"><div class="spec-icon" style="color:var(--zen-blue);">💙</div>SENSORY</div>
-    </div>
+        <div id="main-actions">
+            </div>
 
-    <main class="grid">
-        <div class="tab safe">Safe Hub 🟢</div>
-        <div class="tab blocked">Zen Blocked 🔴</div>
-        <div class="tab boundaries">ED Boundaries 🔵</div>
-        <div class="tab dislike">Dislike 🟤</div>
-        <div class="tab full-tab">BUSINESS HANDSHAKE</div>
-    </main>
-</section>
+        <div id="safe-tab-container" style="display: none;">
+            <button class="btn btn-safe-tab" onclick="location.href='view.html#safe'">See Safe Alternatives</button>
+        </div>
 
-<section id="ed-screen" class="app-screen">
-    <div class="screen-header">
-        <h1 style="color:var(--zen-blue);">💙 ED Boundaries</h1>
-        <p>Sensory preferences for your Trusted Kitchen Ticket.</p>
-    </div>
-    <div class="card-list">
-        <label class="check-item"><input type="checkbox"> Soft Textures Only</label>
-        <label class="check-item"><input type="checkbox"> No Mixed Textures</label>
-        <label class="check-item"><input type="checkbox"> No Sauce/Gravy</label>
-        <label class="check-item"><input type="checkbox"> No Added Salt</label>
-        <label class="check-item"><input type="checkbox"> Deconstructed Meals</label>
-        <label class="check-item"><input type="checkbox"> Temperature Sensitive</label>
-        <label class="check-item"><input type="checkbox"> Single-Color Meals</label>
-        <label class="check-item"><input type="checkbox"> No Visible Bits</label>
-        <label class="check-item"><input type="checkbox"> Specific Brands Only</label>
-        <label class="check-item"><input type="checkbox"> Specific Portions</label>
-        <textarea class="zen-textarea" placeholder="Add specific sensory details (e.g., 'No food touching', 'No smell from kitchen')..."></textarea>
-    </div>
-</section>
+        <div class="knowledge-hub" id="hub-content">
+            <b>Zen Knowledge Hub</b>
+            <span id="tip-text">Scanning for potential triggers in medicinal excipients...</span>
+        </div>
 
-<section id="handshake-screen" class="app-screen">
-    <div class="screen-header">
-        <h1>🤝 Handshake</h1>
-        <p>Set a timer for this business interaction.</p>
+        <div class="footer-note">
+            Handshake duration monitored. All data wipes after expiration to ensure zero data leakage.
+        </div>
     </div>
-    <div class="btn-group">
-        <button class="btn-action btn-outline" onclick="userProfile.activateHandshake('Business', 30)">30 Minutes</button>
-        <button class="btn-action btn-outline" onclick="userProfile.activateHandshake('Business', 60)">1 Hour</button>
-        <button class="btn-action btn-blue" onclick="userProfile.activateHandshake('Business', 180)">3 Hours (Standard)</button>
-        <button class="btn-action" style="background:var(--zen-dark); color:white;" onclick="userProfile.activateHandshake('Business', 1440)">24 Hours</button>
-    </div>
-    <p style="text-align:center; font-size:12px; color:#94a3b8; margin-top:30px;">Data wipes automatically for your privacy.</p>
-</section>
-
-<section id="safe-hub" class="app-screen">
-    <div class="screen-header">
-        <h1 style="color:var(--zen-green);">🟢 Safe Hub</h1>
-        <p>Immediate Spectrum Results & Alternatives.</p>
-    </div>
-    <div class="card-list" style="text-align:center; padding: 50px 20px;">
-        <div style="font-size: 70px; margin-bottom: 25px;">🔴 🟠 🟢</div>
-        <button class="btn-action btn-blue" style="background:var(--zen-green);">SEE SAFE ALTERNATIVES</button>
-    </div>
-</section>
-
-<div id="scanner-ui">
-    <button class="scanner-close" onclick="stopScan()">×</button>
-    <div id="qr-engine" style="width: 100%; height: 85%;"></div>
-    <div style="color:white; text-align:center; padding:20px; font-weight:900; letter-spacing:2px; font-size:11px;">SCANNING ZEN SPECTRUM...</div>
 </div>
 
-<nav class="bottom-nav">
-    <div class="nav-item"><span>🔍</span>SCAN</div>
-    <div class="nav-item"><span>🛡️</span>SAFE</div>
-    <div class="nav-item nav-active"><span>🏠</span>HOME</div>
-    <div class="nav-item"><span>💙</span>ED</div>
-    <div class="nav-item"><span>⚡</span>MORE</div>
-</nav>
-
 <script>
-    let scanner = null;
-    function startScan() {
-        document.getElementById('scanner-ui').style.display = 'block';
-        scanner = new Html5Qrcode("qr-engine");
-        scanner.start(
-            { facingMode: "environment" }, 
-            { fps: 24, qrbox: { width: 300, height: 300 } }, 
-            (decodedText) => { console.log("Found:", decodedText); stopScan(); },
-            (errorMessage) => { /* scanning */ }
-        ).catch(err => { console.error("Scanner Error", err); });
-    }
-    function stopScan() {
-        document.getElementById('scanner-ui').style.display = 'none';
-        if (scanner) {
-            scanner.stop().then(() => { scanner = null; }).catch(e => console.error(e));
+    /**
+     * MASTER APP CONTROLLER
+     * Handles: Handshake validation, State switching, and UI mirroring
+     */
+    const App = {
+        state: {
+            handshakeActive: false,
+            timeRemaining: 0,
+            handshakeOptions: ['30min', '1hr', '3hr', '24hr']
+        },
+
+        init: function() {
+            this.checkSession();
+            this.loadKnowledgeTip();
+            this.renderUI();
+        },
+
+        checkSession: function() {
+            const profile = JSON.parse(localStorage.getItem('allergyZEN_Profile'));
+            if (profile && profile.isActive) {
+                const now = Date.now();
+                const elapsed = (now - profile.startTime) / 60000; // minutes
+                
+                if (elapsed < profile.handshakeDuration) {
+                    this.state.handshakeActive = true;
+                    this.state.timeRemaining = Math.round(profile.handshakeDuration - elapsed);
+                } else {
+                    this.forceWipe();
+                }
+            }
+        },
+
+        renderUI: function() {
+            const ring = document.getElementById('status-ring');
+            const actions = document.getElementById('main-actions');
+            const safeTab = document.getElementById('safe-tab-container');
+            const results = document.getElementById('results-display');
+
+            if (this.state.handshakeActive) {
+                ring.textContent = "🔵";
+                ring.className = "status-ring active";
+                actions.innerHTML = `
+                    <a href="view.html" class="btn btn-primary">View My Active Shield</a>
+                    <div class="timer-options">
+                        <div class="timer-chip">30m</div><div class="timer-chip">1h</div>
+                        <div class="timer-chip" style="color:var(--zen-blue)">3h</div><div class="timer-chip">24h</div>
+                    </div>
+                    <button class="btn btn-outline" onclick="App.extendHandshake()">Update Handshake</button>
+                `;
+                // Show immediate result example (🟢 for safe demo)
+                results.style.display = "block";
+                results.innerHTML = `<div class="result-item">🟢 Safe for Current Profile</div>`;
+                safeTab.style.display = "block";
+            } else {
+                ring.textContent = "🟤";
+                ring.className = "status-ring warning";
+                actions.innerHTML = `
+                    <a href="profile.html" class="btn btn-primary">Activate Shield</a>
+                    <p style="font-size:0.8rem; color:#888;">No active handshake found.</p>
+                `;
+            }
+        },
+
+        loadKnowledgeTip: function() {
+            const tips = [
+                "Medicinal Excipients: Fillers like Croscarmellose Sodium are hidden triggers.",
+                "Modern Materials: PLA and Mushroom Leather are common in 'sustainable' gear.",
+                "Terpene Profile: Pinene and Myrcene can explain botanical sensitivities.",
+                "Luxury Fibers: Vicuna and Qiviut are distinct from sheep wool.",
+                "Fermented Basics: Specific bacteria/fungi in Kimchi can be triggers."
+            ];
+            document.getElementById('tip-text').textContent = tips[Math.floor(Math.random() * tips.length)];
+        },
+
+        forceWipe: function() {
+            console.log("Handshake Expired. Mirroring wipe across system.");
+            localStorage.removeItem('allergyZEN_active_session');
+            const profile = JSON.parse(localStorage.getItem('allergyZEN_Profile'));
+            if(profile) {
+                profile.isActive = false;
+                localStorage.setItem('allergyZEN_Profile', JSON.stringify(profile));
+            }
+            this.state.handshakeActive = false;
+            this.renderUI();
+        },
+
+        extendHandshake: function() {
+            window.location.href = 'profile.html';
         }
-    }
+    };
+
+    // UPGRADE HOOK: [INSERT_V0_MIRROR_VALIDATION]
+    // Ensures GitHub Pages or Vercel production matches this local master state.
+    
+    document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 
 </body>
