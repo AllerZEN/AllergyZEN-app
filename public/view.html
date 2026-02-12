@@ -59,7 +59,7 @@
     <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
       <div class="flex justify-between items-center mb-6">
           <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Active Spectrum</h3>
-          <button onclick="window.location.href='/edit-profile.tsx'" class="text-[10px] font-black uppercase text-blue-600">Edit Triggers</button>
+          <button onclick="window.location.href='/profile.html'" class="text-[10px] font-black uppercase text-blue-600">Edit Triggers</button>
       </div>
 
       <div class="space-y-3" id="items-list">
@@ -73,16 +73,37 @@
 
   </main>
 
-  <script type="module">
-    import userProfile from '/lib/profile.ts';
+  <script>
+    // Profile loaded from localStorage (matching index.html and profile.html pattern)
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem('allergyZEN_Profile');
+        return raw ? JSON.parse(raw) : null;
+      } catch(e) { return null; }
+    }
 
-    async function loadSwaps() {
-        const response = await fetch('/safe-alternatives.json');
-        return await response.json();
+    function saveProfile(profile) {
+      localStorage.setItem('allergyZEN_Profile', JSON.stringify(profile));
+    }
+
+    function getProtectionStatus() {
+      const profile = getProfile();
+      if (!profile || !profile.isActive || !profile.startTime) return 'INACTIVE';
+      const elapsed = (Date.now() - profile.startTime) / 60000;
+      if (elapsed < profile.handshakeDuration) return 'PROTECTED';
+      return 'EXPIRED';
+    }
+
+    function getRemainingMinutes() {
+      const profile = getProfile();
+      if (!profile || !profile.startTime) return 0;
+      const elapsed = (Date.now() - profile.startTime) / 60000;
+      return Math.max(0, Math.round(profile.handshakeDuration - elapsed));
     }
 
     function updateUI() {
-      const status = userProfile.checkStatus();
+      const status = getProtectionStatus();
+      const profile = getProfile();
       const card = document.getElementById('shield-card');
       const text = document.getElementById('shield-status');
       const timer = document.getElementById('shield-timer');
@@ -92,71 +113,107 @@
         card.classList.add('bg-blue-600', 'text-white', 'active-shield');
         card.classList.remove('bg-slate-200', 'text-slate-400');
         text.textContent = 'Shield Active';
-        
-        const remaining = userProfile.getRemainingProtectionTime();
-        const total = userProfile.session.protectionWindow.durationMs;
+
+        const remaining = getRemainingMinutes();
+        const total = profile.handshakeDuration;
         const percent = (remaining / total) * 100;
-        
-        timer.textContent = `${Math.ceil(remaining / 60000)}m Remaining`;
-        progress.style.width = `${percent}%`;
+
+        timer.textContent = remaining + 'm Remaining';
+        progress.style.width = percent + '%';
       } else {
         card.classList.remove('bg-blue-600', 'text-white', 'active-shield');
         card.classList.add('bg-slate-200', 'text-slate-400');
         text.textContent = 'Shield Inactive';
-        timer.textContent = 'Scan QR to Protect';
+        timer.textContent = 'Activate via Profile';
         progress.style.width = '0%';
-        // Bulletproof Wipe: Clear items from view if shield expires
-        if (status === 'EXPIRED') renderEmpty();
+        if (status === 'EXPIRED') {
+          // Bulletproof Wipe
+          if (profile) {
+            profile.isActive = false;
+            profile.startTime = null;
+            saveProfile(profile);
+          }
+          document.getElementById('items-list').innerHTML = '<p class="text-center font-bold text-slate-300 py-4">Session Expired. Data Wiped.</p>';
+        }
       }
     }
 
-    window.showAlternatives = async (triggerName) => {
-        const data = await loadSwaps();
-        const swap = data.alternatives.find(a => a.trigger.toLowerCase() === triggerName.toLowerCase());
-        const box = document.getElementById('safe-swap-box');
-        const content = document.getElementById('swap-content');
-        
-        if (swap) {
-            box.classList.remove('hidden');
-            content.innerHTML = `Instead of ${triggerName}, try: <span class="underline">${swap.swaps.join(', ')}</span>`;
-        } else {
-            content.innerHTML = "No specific swaps found. Consult the Knowledge Hub.";
-            box.classList.remove('hidden');
-        }
-    };
+    function showAlternatives(triggerName) {
+      const box = document.getElementById('safe-swap-box');
+      const content = document.getElementById('swap-content');
+      const swaps = {
+        'Croscarmellose Sodium': 'Gelatin capsules, Liquid medications',
+        'SDS': 'SLS-free shampoo, Castile soap',
+        'Wenge': 'Oak, Maple, Bamboo',
+        'Vicuna': 'Organic cotton, Tencel',
+        'PLA': 'Glass containers, Stainless steel',
+        'Pinene': 'Low-terpene extracts',
+        'Natto (Bacillus subtilis)': 'Tempeh (different culture), Tofu',
+        'Peanuts': 'Sunflower butter, Tahini',
+        'Dairy': 'Oat Milk, Coconut Milk, Almond Milk',
+        'Wheat': 'Rice flour, Almond flour, Buckwheat',
+      };
+      const match = swaps[triggerName];
+      if (match) {
+        content.innerHTML = 'Instead of ' + triggerName + ', try: <span class="underline">' + match + '</span>';
+      } else {
+        content.innerHTML = 'No specific swaps found for ' + triggerName + '. Consult the Knowledge Hub.';
+      }
+      box.classList.remove('hidden');
+    }
 
     function renderItems() {
       const list = document.getElementById('items-list');
-      const profile = userProfile.getActiveProfile();
-      if (!profile) return;
+      const profile = getProfile();
+      if (!profile || !profile.risks) {
+        list.innerHTML = '<p class="text-center font-bold text-slate-300 py-4">No triggers set. Visit Profile to configure.</p>';
+        return;
+      }
+
+      // Map risks to color tiers based on category
+      const redKeywords = ['Peanuts', 'Tree Nuts', 'Shellfish', 'SDS', 'Hydroquinone', 'Formaldehyde', 'Latex', 'DMSO'];
+      const brownKeywords = ['Wenge', 'Padauk', 'Mushroom Leather', 'PLA'];
+      // Everything else is blue (ED/Sensory boundary)
 
       let html = '';
-      ['red', 'brown', 'blue'].forEach(tier => {
-        profile.items[tier]?.forEach(item => {
-          html += `
-            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div class="flex items-center gap-3">
-                <div class="dot dot-${tier}"></div>
-                <span class="text-xs font-black uppercase text-slate-700">${item.name}</span>
-              </div>
-              <button onclick="showAlternatives('${item.name}')" class="bg-white p-2 rounded-lg shadow-sm border border-slate-100">
-                <span class="text-[9px] font-black text-blue-600 uppercase">Swaps</span>
-              </button>
-            </div>`;
-        });
+      profile.risks.forEach(function(risk) {
+        let tier = 'blue';
+        if (redKeywords.some(function(k) { return risk.includes(k); })) tier = 'red';
+        else if (brownKeywords.some(function(k) { return risk.includes(k); })) tier = 'brown';
+
+        html += '<div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">' +
+          '<div class="flex items-center gap-3">' +
+            '<div class="dot dot-' + tier + '"></div>' +
+            '<span class="text-xs font-black uppercase text-slate-700">' + risk + '</span>' +
+          '</div>' +
+          '<button onclick="showAlternatives(\'' + risk.replace(/'/g, "\\'") + '\')" class="bg-white p-2 rounded-lg shadow-sm border border-slate-100">' +
+            '<span class="text-[9px] font-black text-blue-600 uppercase">Swaps</span>' +
+          '</button>' +
+        '</div>';
       });
-      list.innerHTML = html || '<p class="text-center font-bold text-slate-300 py-4">Shield is Empty</p>';
+      list.innerHTML = html;
     }
 
-    window.updateHandshakeDuration = (mins) => {
-        userProfile.session.protectionWindow.durationMs = mins * 60 * 1000;
-        userProfile.saveToStorage();
+    window.updateHandshakeDuration = function(mins) {
+      const profile = getProfile();
+      if (profile) {
+        profile.handshakeDuration = parseInt(mins);
+        saveProfile(profile);
         updateUI();
+      }
+    };
+
+    // Set saved duration in dropdown
+    window.onload = function() {
+      const profile = getProfile();
+      if (profile && profile.handshakeDuration) {
+        document.getElementById('duration-select').value = profile.handshakeDuration;
+      }
+      renderItems();
+      updateUI();
     };
 
     setInterval(updateUI, 1000);
-    renderItems();
-    updateUI();
   </script>
 </body>
 </html>
