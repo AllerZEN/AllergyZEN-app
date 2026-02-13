@@ -80,8 +80,18 @@ export default function PrivacyPage() {
               </ul>
             </section>
 
-            <section className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-              <h3 className="text-lg font-semibold mb-2">2. How Your Data is Stored</h3>
+            <section className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <h3 className="text-lg font-semibold mb-2">2. Handshake Session Data & Auto-Wipe</h3>
+              <p className="text-sm leading-relaxed">
+                <strong>Automatic Data Deletion:</strong> When you activate a Business Handshake protection window, all associated data is automatically deleted from your device once the timer expires (30 minutes, 1 hour, 3 hours, or 24 hours).
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+                This automatic wipe cannot be reversed. We recommend keeping a backup record of critical allergen information if needed.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-2">3. How Your Data is Stored</h3>
               <p className="text-sm leading-relaxed">
                 <strong>All your allergy and sensitivity data is stored locally in your browser's localStorage.</strong>
                 This means your health data never leaves your device.
@@ -89,7 +99,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">3. Third-Party Services</h3>
+              <h3 className="text-lg font-semibold mb-2">4. Third-Party Services</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 We use Stripe for secure payment processing, Open Food Facts API for product lookups, and Vercel
                 Analytics for anonymous usage statistics.
@@ -97,7 +107,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">4. Contact Us</h3>
+              <h3 className="text-lg font-semibold mb-2">5. Contact Us</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 If you have questions about this Privacy Policy, please contact us at privacy@allergyzen.app
               </p>

@@ -179,9 +179,63 @@
       }
     }
 
-    window.updateHandshakeDuration = function(mins) {
-      var p = getProfile();
-      if (p) { p.handshakeDuration = parseInt(mins); saveProfile(p); updateUI(); }
+    /* =============================================
+       TRACKER SYNC - Write to localStorage for Health Hub
+       ============================================= */
+    window.syncToTracker = function(name, tier) {
+      var trackers = JSON.parse(localStorage.getItem('allergyZEN_Trackers') || '{}');
+      if (!trackers[tier]) trackers[tier] = [];
+      trackers[tier].push({
+        item: name,
+        timestamp: new Date().toISOString(),
+        logged: true
+      });
+      localStorage.setItem('allergyZEN_Trackers', JSON.stringify(trackers));
+      showToast('Synced to Tracker: ' + name);
+    };
+
+    window.syncToHabits = function(name) {
+      var habits = JSON.parse(localStorage.getItem('allergyZEN_Habits') || '[]');
+      habits.push({
+        habit: 'Avoided: ' + name,
+        timestamp: new Date().toISOString(),
+        value: 1,
+        category: 'avoidance'
+      });
+      localStorage.setItem('allergyZEN_Habits', JSON.stringify(habits));
+      showToast('Logged to Zen Habits');
+    };
+
+    function showToast(msg) {
+      var toast = document.getElementById('sync-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 3000);
+    }
+
+    /* =============================================
+       KNOWLEDGE HUB MODAL
+       ============================================= */
+    window.openHub = function(name) {
+      var hub = KNOWLEDGE[name];
+      if (!hub) return;
+      var tagClass = 'hub-tag-' + hub.tag;
+      var html = '<button onclick="closeHub()" style="float:right; background:none; border:none; font-size:20px; cursor:pointer;">✕</button>' +
+        '<div style="clear:both;"></div>' +
+        '<h2 style="font-size:1.2rem; font-weight:900; margin:0 0 8px; color:#1F2937;">' + name + '</h2>' +
+        '<div class="hub-tag ' + tagClass + '" style="margin-bottom:16px;">' + hub.cat + ' (' + hub.tag.toUpperCase() + ')</div>' +
+        '<div style="font-size:0.9rem; line-height:1.6;">' +
+          '<div style="margin-bottom:12px;"><strong>Symptoms:</strong> ' + hub.symptoms + '</div>' +
+          '<div style="margin-bottom:12px;"><strong>Hidden Names & E-Numbers:</strong> ' + hub.hidden + '</div>' +
+          '<div style="margin-bottom:12px;"><strong>Cross-Contamination:</strong> ' + hub.cross + '</div>' +
+          '<div style="background:#F3F4F6; padding:12px; border-radius:8px; border-left:3px solid var(--primary);"><strong>💡 Tip:</strong> ' + hub.tip + '</div>' +
+        '</div>';
+      document.getElementById('hub-card').innerHTML = html;
+      document.getElementById('hub-overlay').classList.add('open');
+    };
+
+    window.closeHub = function() {
+      document.getElementById('hub-overlay').classList.remove('open');
     };
 
     /* =============================================

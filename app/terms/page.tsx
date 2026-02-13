@@ -70,8 +70,21 @@ export default function TermsPage() {
               </p>
             </section>
 
+            <section className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <h3 className="text-lg font-semibold mb-2">4. Business Handshake & Protection Window</h3>
+              <p className="text-sm leading-relaxed">
+                <strong>The 3-Hour Handshake Feature:</strong> allergyZEN offers a Business Handshake protection window (30 minutes, 1 hour, 3 hours, or 24 hours) designed for temporary data sharing between users and business partners (restaurants, healthcare providers, labs).
+              </p>
+              <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc pl-4">
+                <li><strong>Data Wipe Policy:</strong> All data is automatically deleted from the local store once the handshake timer expires.</li>
+                <li><strong>Business Liability:</strong> Businesses using the Handshake feature acknowledge that they are responsible for interpreting allergen data and cannot rely solely on allergyZEN for legal compliance.</li>
+                <li><strong>User Responsibility:</strong> Users acknowledge that allergyZEN is not responsible for data accuracy after the handshake period ends or for any actions taken by business partners.</li>
+                <li><strong>No Liability for Expired Sessions:</strong> allergyZEN assumes no liability for allergic reactions or adverse health outcomes resulting from expired handshake sessions or data loss.</li>
+              </ul>
+            </section>
+
             <section className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <h3 className="text-lg font-semibold mb-2">4. Limitation of Liability</h3>
+              <h3 className="text-lg font-semibold mb-2">5. Limitation of Liability</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL ALLERGYZEN, ITS DEVELOPERS,
                 AFFILIATES, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
@@ -83,7 +96,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">5. Subscription and Payments</h3>
+              <h3 className="text-lg font-semibold mb-2">6. Subscription and Payments</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 proZEN subscriptions are billed monthly at £6.99. A 7-day free trial is provided for new subscribers.
                 You may cancel your subscription at any time through the Stripe Customer Portal.
@@ -91,7 +104,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">6. Contact</h3>
+              <h3 className="text-lg font-semibold mb-2">7. Contact</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 For questions about these Terms of Service, please contact us at support@allergyzen.app
               </p>

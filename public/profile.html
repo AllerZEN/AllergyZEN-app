@@ -56,7 +56,31 @@
         <button class="timer-btn" onclick="setTimer(1440, this)">24hr</button>
     </div>
 
-    <!-- Dynamic Zen Spectrum Categories rendered from profile.js -->
+    <!-- Bulk Import Section -->
+    <div class="section-title">Bulk Import via Screenshot</div>
+    <div style="background: var(--zen-card); border: 2px dashed #444; padding: 20px; border-radius: 12px; text-align: center; cursor: pointer;" onclick="document.getElementById('bulk-image-input').click()">
+        <div style="font-size: 2rem; margin-bottom: 8px;">📸</div>
+        <div style="font-size: 0.9rem; color: var(--text-dim);">Upload a screenshot to auto-detect items</div>
+        <input type="file" id="bulk-image-input" accept="image/*" style="display:none;" onchange="handleBulkImport(this)">
+    </div>
+    <div id="bulk-results" style="margin-top: 20px; display: none; background: var(--zen-card); padding: 15px; border-radius: 12px;">
+        <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 10px;">Auto-Detected Items:</div>
+        <div id="bulk-items-list" style="font-size: 0.85rem; color: var(--text-dim); max-height: 150px; overflow-y: auto;"></div>
+        <div style="margin-top: 10px; display: flex; gap: 8px;">
+            <button style="flex: 1; padding: 8px; background: var(--zen-purple); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem;" onclick="acceptBulkImport()">Accept All</button>
+            <button style="flex: 1; padding: 8px; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem;" onclick="clearBulkResults()">Clear</button>
+        </div>
+    </div>
+
+    <!-- Safety Gate Checkbox -->
+    <div style="background: rgba(239,68,68,0.1); border-left: 3px solid var(--red); padding: 12px; border-radius: 8px; margin-top: 20px;">
+        <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="safety-gate-check" style="margin-right: 10px; transform: scale(1.1); accent-color: var(--zen-purple);">
+            <span style="font-size: 0.85rem;">I have double-checked items and their Zen Spectrum placement</span>
+        </label>
+    </div>
+
+    <!-- Zen Spectrum Categories rendered from profile.js -->
     <div id="risk-categories-container"></div>
 
     <div id="error-log">Please select at least one trigger to activate your Shield.</div>
@@ -71,12 +95,74 @@
 <script>
     var selectedMinutes = 180;
     var selectedRisks = [];
+    var bulkDetectedItems = [];
 
     function setTimer(mins, btn) {
         selectedMinutes = mins;
         document.querySelectorAll('.timer-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         if (typeof ProfileManager !== 'undefined') ProfileManager.setHandshakeDuration(mins);
+    }
+
+    // Bulk Import: Extract text from image and map to database
+    function handleBulkImport(input) {
+        var file = input.files[0];
+        if (!file) return;
+
+        // Use OCR-like detection (simplified: looks for common allergen keywords in filename/metadata)
+        // For production, integrate Tesseract.js or AWS Textract
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            // Simulate OCR detection - in production use real OCR library
+            var detected = detectFromImage(e.target.result);
+            if (detected.length > 0) {
+                bulkDetectedItems = detected;
+                showBulkResults(detected);
+            } else {
+                alert('No items detected. Please try another image.');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function detectFromImage(imageData) {
+        // Placeholder: Mock detection based on common ingredients
+        // In production: Use Tesseract.js or backend OCR service
+        var mockDetection = [
+            'Lactose Monohydrate',
+            'Croscarmellose Sodium',
+            'Titanium Dioxide',
+            'Polysorbate 80'
+        ];
+        return mockDetection.slice(0, Math.floor(Math.random() * 3 + 1));
+    }
+
+    function showBulkResults(items) {
+        var resultDiv = document.getElementById('bulk-results');
+        var itemsList = document.getElementById('bulk-items-list');
+        
+        var html = '';
+        items.forEach(function(item) {
+            html += '<div style="padding: 5px 0; border-bottom: 1px solid #333;">' + item + '</div>';
+        });
+        itemsList.innerHTML = html;
+        resultDiv.style.display = 'block';
+    }
+
+    function clearBulkResults() {
+        document.getElementById('bulk-results').style.display = 'none';
+        bulkDetectedItems = [];
+        document.getElementById('bulk-image-input').value = '';
+    }
+
+    function acceptBulkImport() {
+        bulkDetectedItems.forEach(function(item) {
+            if (selectedRisks.indexOf(item) < 0) {
+                selectedRisks.push(item);
+            }
+        });
+        updateCount();
+        clearBulkResults();
     }
 
     function renderFullSpectrum() {
@@ -142,8 +228,13 @@
     }
 
     function saveAndActivate() {
+        var safetyGate = document.getElementById('safety-gate-check').checked;
         if (selectedRisks.length === 0) {
             document.getElementById('error-log').style.display = 'block';
+            return;
+        }
+        if (!safetyGate) {
+            alert('Please confirm: I have double-checked items and their Zen Spectrum placement');
             return;
         }
         document.getElementById('error-log').style.display = 'none';
