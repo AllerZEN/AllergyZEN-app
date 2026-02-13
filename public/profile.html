@@ -3,113 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#673AB7">
     <title>allergyZEN - Profile Setup</title>
     <style>
         :root {
-            --zen-blue: #007bff;
+            --zen-purple: #673AB7;
             --zen-bg: #0d0d0d;
             --zen-card: #1a1a1a;
             --text-main: #ffffff;
             --text-dim: #a0a0a0;
-            --brown: #8B4513; /* Updated per instructions: Brown replaces Yellow */
+            --brown: #8B4513;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --green: #22C55E;
+            --blue: #3B82F6;
         }
-
-        body {
-            background-color: var(--zen-bg);
-            color: var(--text-main);
-            font-family: 'Inter', -apple-system, sans-serif;
-            margin: 0;
-            padding-bottom: 120px; /* Space for sticky footer */
-        }
-
+        body { background-color: var(--zen-bg); color: var(--text-main); font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding-bottom: 120px; }
         .container { max-width: 500px; margin: 0 auto; padding: 20px; }
-
         header { text-align: center; padding: 30px 0; }
-        .logo { font-size: 2rem; font-weight: bold; color: var(--zen-blue); }
-
-        .section-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--zen-blue);
-            margin: 25px 0 15px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-        }
-
-        /* Handshake Timing Options */
-        .timer-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .timer-btn {
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 15px 5px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
-        }
-
-        .timer-btn.active {
-            background: var(--zen-blue);
-            border-color: var(--zen-blue);
-            box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
-        }
-
-        /* Zen Spectrum Grid */
-        .risk-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .risk-item {
-            background: var(--zen-card);
-            border: 1px solid #333;
-            padding: 15px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .risk-item input { margin-right: 12px; transform: scale(1.2); }
-        .risk-item:hover { border-color: var(--zen-blue); }
-
-        .footer-action {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(13, 13, 13, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid #333;
-            z-index: 100;
-        }
-
-        .btn-activate {
-            background: var(--zen-blue);
-            color: white;
-            border: none;
-            padding: 18px 0;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        /* Error Message UI */
-        #error-log { color: var(--brown); font-size: 0.8rem; margin-top: 10px; display: none; }
+        .logo { font-size: 2rem; font-weight: bold; color: var(--zen-purple); }
+        .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--zen-purple); margin: 25px 0 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .tier-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .timer-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 5px; border-radius: 12px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+        .timer-btn.active { background: var(--zen-purple); border-color: var(--zen-purple); box-shadow: 0 0 15px rgba(103,58,183,0.4); }
+        .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .risk-item { background: var(--zen-card); border: 1px solid #333; padding: 12px; border-radius: 12px; display: flex; align-items: center; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+        .risk-item input { margin-right: 10px; transform: scale(1.2); accent-color: var(--zen-purple); }
+        .risk-item:hover { border-color: var(--zen-purple); }
+        .risk-item.checked { border-color: var(--zen-purple); background: rgba(103,58,183,0.1); }
+        .footer-action { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13,13,13,0.95); backdrop-filter: blur(10px); padding: 20px; text-align: center; border-top: 1px solid #333; z-index: 100; }
+        .btn-activate { background: var(--zen-purple); color: white; border: none; padding: 18px 0; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; max-width: 400px; transition: 0.2s; }
+        .btn-activate:hover { background: #7C4DCC; }
+        #error-log { color: var(--red); font-size: 0.8rem; margin-top: 10px; display: none; text-align: center; }
+        .count-badge { background: var(--zen-purple); color: white; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
     </style>
 </head>
 <body>
@@ -117,9 +44,10 @@
 <div class="container">
     <header>
         <div class="logo">allergyZEN</div>
-        <p style="color: var(--text-dim);">Profile Architect v0</p>
+        <p style="color: var(--text-dim);">Profile Architect</p>
     </header>
 
+    <!-- Handshake Duration -->
     <div class="section-title">1. Choose Handshake Duration</div>
     <div class="timer-grid" id="timer-options">
         <button class="timer-btn" onclick="setTimer(30, this)">30min</button>
@@ -128,86 +56,134 @@
         <button class="timer-btn" onclick="setTimer(1440, this)">24hr</button>
     </div>
 
-    <div class="section-title">2. Medicinal Excipients & Lab</div>
-    <div class="risk-grid">
-        <label class="risk-item"><input type="checkbox" value="Croscarmellose Sodium"> Croscarmellose</label>
-        <label class="risk-item"><input type="checkbox" value="SDS"> SDS / EDTA</label>
-        <label class="risk-item"><input type="checkbox" value="Hydroquinone"> Photographic</label>
-        <label class="risk-item"><input type="checkbox" value="DMSO"> DMSO</label>
-    </div>
+    <!-- Dynamic Zen Spectrum Categories rendered from profile.js -->
+    <div id="risk-categories-container"></div>
 
-    <div class="section-title">3. Luxury Fibers & Woods</div>
-    <div class="risk-grid">
-        <label class="risk-item"><input type="checkbox" value="Vicuna"> Vicuna / Qiviut</label>
-        <label class="risk-item"><input type="checkbox" value="Wenge Wood"> Wenge / Padauk</label>
-        <label class="risk-item"><input type="checkbox" value="Mushroom Leather"> Mycelium</label>
-        <label class="risk-item"><input type="checkbox" value="PLA"> PLA Plastics</label>
-    </div>
-
-    <div class="section-title">4. Terpenes & Fermented</div>
-    <div class="risk-grid">
-        <label class="risk-item"><input type="checkbox" value="Pinene"> Pinene / Myrcene</label>
-        <label class="risk-item"><input type="checkbox" value="Limonene"> Limonene / Terps</label>
-        <label class="risk-item"><input type="checkbox" value="Natto"> Natto / Kimchi</label>
-    </div>
-
-    <div id="error-log">Please select at least one trigger for the handshake.</div>
+    <div id="error-log">Please select at least one trigger to activate your Shield.</div>
+    <p id="selected-count" style="text-align:center; color: var(--text-dim); font-size: 0.8rem; margin-top: 20px;"></p>
 </div>
 
 <div class="footer-action">
-    <button class="btn-activate" onclick="saveAndActivate()">ACTIVATE SHIELD</button>
+    <button class="btn-activate" id="activate-shield-btn" onclick="saveAndActivate()">ACTIVATE SHIELD <span id="count-badge" class="count-badge" style="display:none">0</span></button>
 </div>
 
 <script src="/js/profile.js"></script>
 <script>
-    /**
-     * UI Logic for Profile Construction
-     * Connects with the Master ProfileManager in profile.js
-     */
-    let selectedMinutes = 180;
+    var selectedMinutes = 180;
+    var selectedRisks = [];
 
     function setTimer(mins, btn) {
         selectedMinutes = mins;
-        document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.timer-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
-        // If ProfileManager exists in profile.js, sync it
-        if(typeof ProfileManager !== 'undefined') {
-            ProfileManager.setHandshakeDuration(mins);
+        if (typeof ProfileManager !== 'undefined') ProfileManager.setHandshakeDuration(mins);
+    }
+
+    function renderFullSpectrum() {
+        var container = document.getElementById('risk-categories-container');
+        if (!container || typeof ProfileManager === 'undefined') return;
+
+        var cats = ProfileManager.zenSpectrumCategories;
+        // Tier color for each section
+        var tierColors = {
+            'Common Food Triggers': { dot: '#EF4444', label: 'red/amber' },
+            'Medicinal Excipients': { dot: '#F59E0B', label: 'amber' },
+            'Photographic & Industrial Chemicals': { dot: '#EF4444', label: 'red' },
+            'Exotic Wood Dusts': { dot: '#78350F', label: 'brown' },
+            'Fermented Basics (Biogenic Amines)': { dot: '#F59E0B', label: 'amber' },
+            'The Lab Set (Science/Medical Pro)': { dot: '#EF4444', label: 'red' },
+            'Terpene Profile (Plant Compounds)': { dot: '#F59E0B', label: 'amber' },
+            'Modern Materials (Sustainable Textiles)': { dot: '#78350F', label: 'brown' },
+            'Luxury Fibers': { dot: '#78350F', label: 'brown' }
+        };
+
+        var html = '';
+        var sectionNum = 2;
+        for (var cat in cats) {
+            var color = tierColors[cat] || { dot: '#3B82F6', label: 'blue' };
+            html += '<div class="section-title"><span class="tier-dot" style="background:' + color.dot + '"></span> ' + sectionNum + '. ' + cat + '</div>';
+            html += '<div class="risk-grid">';
+            cats[cat].forEach(function(item) {
+                var isChecked = selectedRisks.indexOf(item) >= 0;
+                html += '<label class="risk-item' + (isChecked ? ' checked' : '') + '">' +
+                    '<input type="checkbox" value="' + item + '"' + (isChecked ? ' checked' : '') + ' onchange="toggleRisk(this)"> ' +
+                    '<span>' + item + '</span></label>';
+            });
+            html += '</div>';
+            sectionNum++;
+        }
+        container.innerHTML = html;
+    }
+
+    function toggleRisk(cb) {
+        var val = cb.value;
+        var label = cb.parentElement;
+        if (cb.checked) {
+            if (selectedRisks.indexOf(val) < 0) selectedRisks.push(val);
+            label.classList.add('checked');
+        } else {
+            selectedRisks = selectedRisks.filter(function(r) { return r !== val; });
+            label.classList.remove('checked');
+        }
+        updateCount();
+    }
+
+    function updateCount() {
+        var badge = document.getElementById('count-badge');
+        var countText = document.getElementById('selected-count');
+        if (selectedRisks.length > 0) {
+            badge.style.display = 'inline';
+            badge.textContent = selectedRisks.length;
+            countText.textContent = selectedRisks.length + ' trigger(s) selected';
+        } else {
+            badge.style.display = 'none';
+            countText.textContent = '';
         }
     }
 
     function saveAndActivate() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        const risks = Array.from(checkboxes).map(cb => cb.value);
-        
-        if (risks.length === 0) {
+        if (selectedRisks.length === 0) {
             document.getElementById('error-log').style.display = 'block';
             return;
         }
+        document.getElementById('error-log').style.display = 'none';
 
-        const profile = {
-            risks: risks,
+        var profile = {
+            selectedRisks: selectedRisks,
+            risks: selectedRisks,
             handshakeDuration: selectedMinutes,
             isActive: true,
+            sessionActive: true,
             startTime: Date.now()
         };
-
-        // SAVE: Mirroring data for the Shield (view.html) and Launchpad (index.html)
         localStorage.setItem('allergyZEN_Profile', JSON.stringify(profile));
-        
-        // REDIRECT: Start the pulsing blue dot system
         window.location.href = 'view.html';
     }
 
-    // ERROR FIX HOOK: [LOAD_EXISTING_PROFILE]
-    window.onload = () => {
-        const saved = localStorage.getItem('allergyZEN_Profile');
+    // Load existing profile on return
+    window.onload = function() {
+        var saved = localStorage.getItem('allergyZEN_Profile');
         if (saved) {
-            const data = JSON.parse(saved);
-            // Pre-check boxes and set timer if user is returning
+            try {
+                var data = JSON.parse(saved);
+                selectedRisks = data.selectedRisks || data.risks || [];
+                if (data.handshakeDuration) {
+                    selectedMinutes = data.handshakeDuration;
+                    document.querySelectorAll('.timer-btn').forEach(function(b) {
+                        b.classList.remove('active');
+                    });
+                    document.querySelectorAll('.timer-btn').forEach(function(b) {
+                        if (b.textContent.trim() === '30min' && selectedMinutes === 30) b.classList.add('active');
+                        if (b.textContent.trim() === '1hr' && selectedMinutes === 60) b.classList.add('active');
+                        if (b.textContent.trim() === '3hr' && selectedMinutes === 180) b.classList.add('active');
+                        if (b.textContent.trim() === '24hr' && selectedMinutes === 1440) b.classList.add('active');
+                    });
+                }
+            } catch(e) {}
         }
+        renderFullSpectrum();
+        updateCount();
     };
 </script>
-
 </body>
 </html>
