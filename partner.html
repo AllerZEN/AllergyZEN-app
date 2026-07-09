@@ -1,98 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Partner Portal | allerZEN</title>
-    <style>
-        :root { --primary: #8e44ad; --safe: #2ecc71; --alert: #e74c3c; --blue: #007bff; --bg: #fdfbff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2c3e50; }
-        
-        .card { background: white; border-radius: 25px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 15px; border: 2px solid #eee; }
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .logo { width: 80px; }
-        
-        .status-badge { background: var(--safe); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; }
-        
-        .blue-dot { width: 10px; height: 10px; background: white; border-radius: 50%; margin-right: 8px; }
-        .pulse { animation: pulse-white 2s infinite; }
-        @keyframes pulse-white { 
-            0% { transform: scale(0.9); opacity: 1; }
-            70% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(0.9); opacity: 1; }
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>allergyZEN | Partner Kitchen Portal</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root {
+      --primary: #8E55A2;
+      --safe-green: #22C55E;
+      --caution-amber: #F97316;
+      --danger-red: #EF4444;
+      --dislike-brown: #8B4513;
+      --boundary-blue: #3B82F6;
+      --background: #F3F4F6;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --border: #E5E7EB;
+    }
 
-        .timer-container { text-align: center; background: #2c3e50; color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        #timer { font-size: 2rem; font-family: monospace; color: #f1c40f; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--background); color: var(--text); padding: 16px; }
 
-        .trigger-list { margin-top: 10px; }
-        .trigger-item { display: flex; align-items: center; background: #fffafa; border: 1px solid #ffeded; padding: 15px; border-radius: 15px; margin-bottom: 10px; }
-        .trigger-icon { font-size: 1.5rem; margin-right: 15px; }
-        .trigger-info b { font-size: 1.1rem; color: var(--alert); display: block; }
-        .trigger-info span { font-size: 0.75rem; color: #7f8c8d; text-transform: uppercase; }
+    .portal-container { max-width: 600px; margin: 0 auto; }
 
-        .action-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; }
-        .btn-clear { background: #ecf0f1; color: #95a5a6; }
-        .btn-clear:hover { background: var(--alert); color: white; }
-    </style>
+    /* Header */
+    .partner-header { background: #1E1B4B; color: white; padding: 16px 20px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .partner-brand { display: flex; align-items: center; gap: 10px; }
+    .partner-title { font-size: 1.1rem; font-weight: 700; }
+    .venue-badge { background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; }
+
+    /* Live Ticket Card */
+    .ticket-card { background: var(--card); padding: 20px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid var(--border); border-top: none; margin-bottom: 20px; }
+
+    .status-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .timer-badge { background: #EEF2FF; color: var(--boundary-blue); padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+    
+    .blue-dot { width: 12px; height: 12px; background: #9CA3AF; border-radius: 50%; display: inline-block; }
+    .blue-dot.pulse { background: var(--boundary-blue); animation: pulse-blue 2s infinite; }
+    @keyframes pulse-blue {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    /* Spectrum Blocks for Kitchen */
+    .spectrum-block { border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 6px solid; background: #FAFAFA; }
+    .spectrum-block.red { border-left-color: var(--danger-red); background: #FEF2F2; }
+    .spectrum-block.amber { border-left-color: var(--caution-amber); background: #FFF7ED; }
+    .spectrum-block.brown { border-left-color: var(--dislike-brown); background: #FDF8F6; }
+    .spectrum-block.green { border-left-color: var(--safe-green); background: #F0FDF4; }
+    .spectrum-block.blue { border-left-color: var(--boundary-blue); background: #EFF6FF; }
+
+    .block-header { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .tag-container { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; background: white; border: 1px solid rgba(0,0,0,0.1); }
+
+    /* Action Buttons */
+    .btn-group { display: flex; gap: 10px; margin-top: 16px; }
+    .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; text-align: center; }
+    .btn-confirm { background: var(--safe-green); color: white; }
+    .btn-print { background: #374151; color: white; }
+
+    /* Inactive / Wiped Banner */
+    .wiped-banner { text-align: center; padding: 40px 20px; background: white; border-radius: 16px; border: 1px solid var(--border); }
+  </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="header">
-            <img src="logo.png" alt="allerZEN" class="logo">
-            <div id="statusBadge" class="status-badge">SHIELD ACTIVE</div>
-        </div>
-        
-        <div class="timer-container">
-            <span style="font-size: 0.7rem; letter-spacing: 1px;">AUTO-WIPE IN:</span>
-            <div id="timer">03:00:00</div>
-        </div>
-
-        <h3 style="margin-bottom: 10px;">Customer Safety Profile:</h3>
-        <div id="customerProfile" class="trigger-list">
-            </div>
-
-        <p style="font-size: 0.8rem; color: #7f8c8d; text-align: center; margin-top: 20px;">
-            Verify ingredients for Table. Data clears automatically after 3 hours. [cite: 2026-01-18]
-        </p>
+  <div class="portal-container">
+    
+    <!-- Header -->
+    <div class="partner-header">
+      <div class="partner-brand">
+        <img src="/logo.png" height="28" alt="allergyZEN" onerror="this.src='/images/allergyzen-logo.png'">
+        <span class="partner-title">Kitchen Ticket Portal</span>
+      </div>
+      <span class="venue-badge" id="venueName">AZ Partner Kitchen</span>
     </div>
 
-    <button class="action-btn btn-clear" onclick="clearData()">MANUAL WIPE & RESET</button>
+    <!-- Active Customer Ticket View -->
+    <div class="ticket-card" id="ticketView">
+      <div class="status-bar">
+        <div>
+          <span id="statusDot" class="blue-dot"></span>
+          <strong id="ticketTitle" style="margin-left: 6px; font-size: 0.9rem;">Customer Ticket #AZ-108</strong>
+        </div>
+        <div class="timer-badge" id="timerDisplay">00:00:00</div>
+      </div>
 
-    <script>
-        // 1. Simple 3-Hour Countdown Logic [cite: 2026-01-18]
-        let seconds = 3 * 60 * 60;
-        const timerDisplay = document.getElementById('timer');
+      <div id="spectrumContent">
+        <!-- Dynamic Spectrum Data Rendered Here -->
+      </div>
 
-        function countdown() {
-            let h = Math.floor(seconds / 3600);
-            let m = Math.floor((seconds % 3600) / 60);
-            let s = seconds % 60;
-            timerDisplay.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            if (seconds > 0) {
-                seconds--;
-            } else {
-                location.reload(); // Auto-wipe data on expire [cite: 2026-01-18]
-            }
+      <div class="btn-group">
+        <button class="btn btn-confirm" onclick="confirmKitchenTicket()">✅ Confirm Ticket Received</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print Ticket</button>
+      </div>
+    </div>
+
+    <!-- Inactive / Auto-Wiped View -->
+    <div class="wiped-banner hidden" id="wipedView">
+      <h2 style="color: #6B7280; font-size: 1.2rem; margin-bottom: 8px;">🔒 No Active Handshake</h2>
+      <p style="font-size: 0.85rem; color: #9CA3AF;">
+        The customer handshake has expired or was disconnected. All guest dietary profile details have been automatically wiped for privacy.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Script Logic -->
+  <script src="/profile.js"></script>
+  <script src="/js/profile.js"></script>
+  <script>
+    let partnerInterval = null;
+
+    function renderPartnerTicket() {
+      const ticketView = document.getElementById('ticketView');
+      const wipedView = document.getElementById('wipedView');
+      const spectrumContent = document.getElementById('spectrumContent');
+      const dot = document.getElementById('statusDot');
+
+      const remaining = userProfile.getProtectionTimeRemaining();
+
+      if (remaining <= 0) {
+        ticketView.classList.add('hidden');
+        wipedView.classList.remove('hidden');
+        if (partnerInterval) clearInterval(partnerInterval);
+        return;
+      }
+
+      ticketView.classList.remove('hidden');
+      wipedView.classList.add('hidden');
+      dot.classList.add('pulse');
+
+      const profile = userProfile.getActiveProfile();
+      const items = profile.items || {};
+
+      let html = "";
+
+      // 🔴 RED: Critical Allergies
+      if (items.red && items.red.length > 0) {
+        html += `
+          <div class="spectrum-block red">
+            <div class="block-header" style="color: var(--danger-red);">🔴 CRITICAL ALLERGIES (ANAPHYLAXIS RISK)</div>
+            <div class="tag-container">
+              ${items.red.map(i => `<span class="tag" style="color: var(--danger-red);">${i}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 🟠 AMBER: Sensitivities & Terpenes
+      if (items.amber && items.amber.length > 0) {
+        html += `
+          <div class="spectrum-block amber">
+            <div class="block-header" style="color: var(--caution-amber);">🟠 MODERATE SENSITIVITIES / EXCIPIENTS</div>
+            <div class="tag-container">
+              ${items.amber.map(i => `<span class="tag" style="color: var(--caution-amber);">${i}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 🟤 BROWN: Dislikes & Non-Allergic Distaste
+      if (items.brown && items.brown.length > 0) {
+        html += `
+          <div class="spectrum-block brown">
+            <div class="block-header" style="color: var(--dislike-brown);">🟤 GUEST DISLIKES / OMISSIONS</div>
+            <div class="tag-container">
+              ${items.brown.map(i => `<span class="tag" style="color: var(--dislike-brown);">${i}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 🟢 GREEN: Confirmed Safe Preferences
+      if (items.green && items.green.length > 0) {
+        html += `
+          <div class="spectrum-block green">
+            <div class="block-header" style="color: var(--safe-green);">🟢 APPROVED / PREFERRED ITEMS</div>
+            <div class="tag-container">
+              ${items.green.map(i => `<span class="tag" style="color: var(--safe-green);">${i}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 💙 BLUE: Sensory & ED Boundaries
+      if (items.blue && items.blue.length > 0) {
+        html += `
+          <div class="spectrum-block blue">
+            <div class="block-header" style="color: var(--boundary-blue);">💙 SENSORY & ED BOUNDARIES (NO PRESSURE PROTOCOL)</div>
+            <div class="tag-container">
+              ${items.blue.map(i => `<span class="tag" style="color: var(--boundary-blue);">${i}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      spectrumContent.innerHTML = html || `<p style="font-size: 0.85rem; color: #6B7280;">No spectrum constraints selected for this session.</p>`;
+    }
+
+    function startPartnerTimer() {
+      if (partnerInterval) clearInterval(partnerInterval);
+
+      const update = () => {
+        const remaining = userProfile.getProtectionTimeRemaining();
+        if (remaining <= 0) {
+          renderPartnerTicket();
+          return;
         }
-        setInterval(countdown, 1000);
 
-        // 2. Manual Wipe Function
-        function clearData() {
-            if(confirm("Confirm Customer Departure? All safety data will be permanently wiped.")) {
-                location.reload();
-            }
-        }
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((remaining % (1000 * 60)) / 1000);
 
-        // 3. Blue Boundary/ED Support Check
-        function checkBlueBoundaries(profileData) {
-            if (profileData && profileData.blueList && profileData.blueList.length > 0) {
-                const badge = document.getElementById('statusBadge');
-                badge.style.background = 'var(--blue)';
-                badge.innerHTML = '<span class="blue-dot pulse"></span> ED SUPPORT ACTIVE';
-            }
-        }
-    </script>
+        document.getElementById('timerDisplay').innerText = 
+          `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      };
+
+      update();
+      partnerInterval = setInterval(update, 1000);
+    }
+
+    function confirmKitchenTicket() {
+      alert("Kitchen ticket confirmed! Standard prep rules applied.");
+    }
+
+    window.onload = () => {
+      renderPartnerTicket();
+      startPartnerTimer();
+    };
+  </script>
 </body>
 </html>
