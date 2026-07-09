@@ -1,110 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partner Dashboard | allerZEN</title>
-    <style>
-        :root { --primary: #8e44ad; --dark: #2c3e50; --safe: #27ae60; --danger: #e74c3c; --blue: #007bff; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; color: var(--dark); }
-        .nav { background: white; padding: 15px 20px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
-        
-        /* Manager Stats */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; }
-        .stat-card h3 { margin: 0; color: var(--primary); font-size: 2rem; }
-        
-        /* Active Table Cards */
-        .customer-card { background: white; padding: 25px; border-radius: 15px; border-left: 10px solid var(--primary); margin-bottom: 20px; position: relative; }
-        .blue-support-mode { border-left-color: var(--blue) !important; background: #f0f7ff; }
-        
-        .allergy-tag { display: inline-block; background: #ffebee; color: var(--danger); padding: 5px 12px; border-radius: 5px; margin: 5px; font-weight: bold; border: 1px solid var(--danger); }
-        .blue-dot { width: 12px; height: 12px; background: var(--blue); border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .pulse { animation: pulse-blue 2s infinite; }
-        
-        @keyframes pulse-blue { 
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>allergyZEN | Partner Kitchen & Manager Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root {
+      --primary: #8E55A2;
+      --primary-dark: #6B3B7C;
+      --safe-green: #22C55E;
+      --caution-amber: #F97316;
+      --danger-red: #EF4444;
+      --dislike-brown: #8B4513;
+      --boundary-blue: #3B82F6;
+      --background: #F3F4F6;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --border: #E5E7EB;
+    }
 
-        .btn-print { background: var(--dark); color: white; padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--background); color: var(--text); padding-bottom: 40px; }
 
-        @media print {
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area { position: absolute; left: 0; top: 0; width: 100%; border: 2px solid black; padding: 20px; }
-        }
-    </style>
+    /* Navigation Bar */
+    .nav { background: var(--card); padding: 16px 24px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { height: 36px; }
+    .brand-title { font-size: 1.1rem; font-weight: 800; color: var(--primary-dark); }
+    .venue-title { font-size: 0.9rem; font-weight: 600; color: #4B5563; background: #EEF2FF; padding: 6px 12px; border-radius: 20px; }
+
+    .container { max-width: 950px; margin: 24px auto; padding: 0 16px; }
+
+    /* Stats Grid */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .stat-card h3 { font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .stat-card p { font-size: 0.8rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Customer Ticket Card */
+    .customer-card { background: var(--card); padding: 24px; border-radius: 20px; border: 1px solid var(--border); border-left: 10px solid var(--primary); margin-bottom: 24px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: border-left-color 0.3s ease; }
+    .customer-card.blue-support-mode { border-left-color: var(--boundary-blue) !important; background: #F0F7FF; }
+    .customer-card.expired-mode { opacity: 0.4; border-left-color: #9CA3AF !important; }
+
+    .ticket-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .ticket-title { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+    
+    .status-badge { font-weight: 800; font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+    .badge-valid { background: #DCFCE7; color: #166534; }
+    .badge-expired { background: #FEE2E2; color: #991B1B; }
+
+    /* ED Boundary Pulse Notice */
+    .ed-notice { display: none; background: #DBEAFE; border: 1px solid #BFDBFE; color: #1E40AF; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; margin-bottom: 16px; align-items: center; gap: 10px; }
+    .blue-dot { width: 12px; height: 12px; background: var(--boundary-blue); border-radius: 50%; display: inline-block; }
+    .pulse { animation: pulse-blue 2s infinite; }
+    @keyframes pulse-blue {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    /* Zen Spectrum Section Blocks */
+    .spectrum-grid { display: grid; gap: 12px; margin-top: 16px; }
+    .spectrum-row { padding: 14px 16px; border-radius: 12px; border-left: 6px solid #CBD5E1; background: #FAFAFA; }
+    .spectrum-row.red { border-left-color: var(--danger-red); background: #FEF2F2; }
+    .spectrum-row.amber { border-left-color: var(--caution-amber); background: #FFF7ED; }
+    .spectrum-row.brown { border-left-color: var(--dislike-brown); background: #FDF8F6; }
+    .spectrum-row.green { border-left-color: var(--safe-green); background: #F0FDF4; }
+    .spectrum-row.blue { border-left-color: var(--boundary-blue); background: #EFF6FF; }
+
+    .spectrum-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .red .spectrum-title { color: var(--danger-red); }
+    .amber .spectrum-title { color: var(--caution-amber); }
+    .brown .spectrum-title { color: var(--dislike-brown); }
+    .green .spectrum-title { color: var(--safe-green); }
+    .blue .spectrum-title { color: var(--boundary-blue); }
+
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+
+    /* Print Button */
+    .btn-print { background: var(--text); color: white; padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; font-size: 0.95rem; width: 100%; margin-top: 20px; transition: background 0.2s ease; }
+    .btn-print:hover { background: #374151; }
+
+    /* Wiped Placeholder */
+    .wiped-container { text-align: center; padding: 40px 20px; color: #6B7280; }
+
+    /* Print Styles */
+    @media print {
+      body * { visibility: hidden; }
+      .print-area, .print-area * { visibility: visible; }
+      .print-area { position: absolute; left: 0; top: 0; width: 100%; border: 2px solid black; padding: 20px; background: white !important; }
+      .btn-print, .nav, .stat-grid { display: none !important; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="nav">
-    <img src="logo.png" style="height: 40px;">
-    <strong>Manager Portal: The Lotus Cafe</strong>
-</div>
+  <!-- Top Bar -->
+  <header class="nav">
+    <div class="brand">
+      <img src="logo.png" alt="allergyZEN" onerror="this.src='/images/allergyzen-logo.png'">
+      <span class="brand-title">allergyZEN</span>
+    </div>
+    <span class="venue-title" id="venueDisplay">Manager Portal: The Lotus Cafe</span>
+  </header>
 
-<div class="container">
+  <div class="container">
+
+    <!-- Manager Metrics -->
     <div class="stat-grid">
-        <div class="stat-card"><h3 id="active-shields">1</h3><p>Active Shields</p></div>
-        <div class="stat-card"><h3>0</h3><p>Incidents</p></div>
-        <div class="stat-card"><h3>100%</h3><p>Safety Rating</p></div>
+      <div class="stat-card">
+        <h3 id="activeShieldsCount">0</h3>
+        <p>Active Handshake Shields</p>
+      </div>
+      <div class="stat-card">
+        <h3>0</h3>
+        <p>Cross-Contam Incidents</p>
+      </div>
+      <div class="stat-card">
+        <h3 style="color: var(--safe-green);">100%</h3>
+        <p>Safety & Trust Score</p>
+      </div>
     </div>
 
-    <div id="table-card" class="customer-card print-area">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 id="table-id">Active Scan: Table 5</h2>
-            <span id="validity-badge" style="color: var(--safe); font-weight: bold;">● QR Valid</span>
+    <!-- Active Customer Shield Ticket -->
+    <div id="tableCard" class="customer-card print-area">
+      
+      <div class="ticket-header">
+        <div>
+          <h2 class="ticket-title" id="tableId">Active Scan: Table 5</h2>
+          <span style="font-size: 0.8rem; color: #6B7280; font-weight: 600;" id="timerCountdown">Remaining Handshake: --:--:--</span>
         </div>
-        
-        <div id="ed-notice" style="display:none; margin-bottom: 15px; color: var(--blue); font-weight: bold;">
-            <div class="blue-dot pulse"></div> ED SUPPORT ACTIVE: Use Neutral Language [cite: 2026-01-18]
-        </div>
+        <span id="validityBadge" class="status-badge badge-valid">● QR Valid</span>
+      </div>
 
-        <hr>
-        <p><strong>Customer Shield Status:</strong> Active (3hr Window) [cite: 2026-01-18]</p>
-        
-        <div id="risk-display">
-            <p><strong>HIGH RISK - DO NOT SERVE:</strong></p>
-            <div id="risk-list">
-                <span class="allergy-tag">Peanuts</span>
-                <span class="allergy-tag">Shellfish</span>
-            </div>
+      <!-- ED Support Protocol Alert -->
+      <div id="edNotice" class="ed-notice">
+        <div class="blue-dot pulse"></div>
+        <span>💙 SAFE-EXPERIENCE PROTOCOL: Use Neutral Language & Avoid Pressure Questions</span>
+      </div>
+
+      <!-- Live Dynamic Spectrum Content -->
+      <div id="spectrumContainer">
+        <div class="wiped-container">
+          <p>Scanning for active guest shield sessions...</p>
         </div>
-        
-        <button class="btn-print" onclick="window.print()">Print Kitchen Safety Ticket</button>
+      </div>
+
+      <button class="btn-print" id="btnPrint" onclick="window.print()">🖨️ Print Kitchen Safety Ticket</button>
+
     </div>
-</div>
 
-<script>
-    // Manager Logic for 3-Hour Auto-Expire [cite: 2026-01-18]
-    function updateDashboard() {
-        const lastScanTime = localStorage.getItem('az_last_scan_time');
-        const now = Date.now();
-        const threeHours = 3 * 60 * 60 * 1000;
+  </div>
 
-        if (lastScanTime && (now - lastScanTime > threeHours)) {
-            // Safety window closed - Wipe the view [cite: 2026-01-18]
-            document.getElementById('table-card').style.opacity = "0.3";
-            document.getElementById('validity-badge').innerHTML = "⚠️ EXPIRED - RESCAN REQUIRED";
-            document.getElementById('validity-badge').style.color = "var(--danger)";
-            document.getElementById('active-shields').innerText = "0";
+  <!-- Scripts -->
+  <script src="Profile.js"></script>
+  <script src="profile.js"></script>
+  <script src="/js/profile.js"></script>
+  <script>
+    let dashboardTimer = null;
+
+    function refreshDashboard() {
+      const tableCard = document.getElementById('tableCard');
+      const validityBadge = document.getElementById('validityBadge');
+      const activeShieldsCount = document.getElementById('activeShieldsCount');
+      const timerCountdown = document.getElementById('timerCountdown');
+      const edNotice = document.getElementById('edNotice');
+      const spectrumContainer = document.getElementById('spectrumContainer');
+
+      const remaining = typeof userProfile !== 'undefined' ? userProfile.getProtectionTimeRemaining() : 0;
+
+      if (remaining > 0) {
+        // Active Handshake State
+        activeShieldsCount.innerText = "1";
+        validityBadge.className = "status-badge badge-valid";
+        validityBadge.innerText = "● QR Valid";
+        tableCard.classList.remove('expired-mode');
+
+        // Formatted Timer Display
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+        timerCountdown.innerText = `Remaining Handshake: ${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+        const profile = userProfile.getActiveProfile();
+        const items = profile.items || {};
+
+        // Check for Blue ED Support Boundaries
+        const hasBlue = items.blue && items.blue.length > 0;
+        if (hasBlue) {
+          tableCard.classList.add('blue-support-mode');
+          edNotice.style.display = "flex";
+        } else {
+          tableCard.classList.remove('blue-support-mode');
+          edNotice.style.display = "none";
         }
+
+        // Render Spectrum
+        let html = '<div class="spectrum-grid">';
+
+        if (items.red && items.red.length > 0) {
+          html += `
+            <div class="spectrum-row red">
+              <div class="spectrum-title">🔴 HIGH RISK - DO NOT SERVE (ANAPHYLAXIS)</div>
+              <div class="tag-cloud">
+                ${items.red.map(i => `<span class="tag" style="color: var(--danger-red);">${i}</span>`).join('')}
+              </div>
+            </div>`;
+        }
+
+        if (items.amber && items.amber.length > 0) {
+          html += `
+            <div class="spectrum-row amber">
+              <div class="spectrum-title">🟠 MODERATE SENSITIVITIES & EXCIPIENTS</div>
+              <div class="tag-cloud">
+                ${items.amber.map(i => `<span class="tag" style="color: var(--caution-amber);">${i}</span>`).join('')}
+              </div>
+            </div>`;
+        }
+
+        if (items.brown && items.brown.length > 0) {
+          html += `
+            <div class="spectrum-row brown">
+              <div class="spectrum-title">🟤 GUEST DISLIKES & OMISSIONS</div>
+              <div class="tag-cloud">
+                ${items.brown.map(i => `<span class="tag" style="color: var(--dislike-brown);">${i}</span>`).join('')}
+              </div>
+            </div>`;
+        }
+
+        if (items.green && items.green.length > 0) {
+          html += `
+            <div class="spectrum-row green">
+              <div class="spectrum-title">🟢 CONFIRMED SAFE / PREFERRED ITEMS</div>
+              <div class="tag-cloud">
+                ${items.green.map(i => `<span class="tag" style="color: var(--safe-green);">${i}</span>`).join('')}
+              </div>
+            </div>`;
+        }
+
+        if (items.blue && items.blue.length > 0) {
+          html += `
+            <div class="spectrum-row blue">
+              <div class="spectrum-title">💙 SENSORY & ED BOUNDARIES</div>
+              <div class="tag-cloud">
+                ${items.blue.map(i => `<span class="tag" style="color: var(--boundary-blue);">${i}</span>`).join('')}
+              </div>
+            </div>`;
+        }
+
+        html += '</div>';
+        spectrumContainer.innerHTML = html;
+
+      } else {
+        // Expired / Wiped Handshake State
+        activeShieldsCount.innerText = "0";
+        validityBadge.className = "status-badge badge-expired";
+        validityBadge.innerText = "⚠️ EXPIRED - RESCAN REQUIRED";
+        timerCountdown.innerText = "Remaining Handshake: 00:00:00";
+        tableCard.classList.add('expired-mode');
+        tableCard.classList.remove('blue-support-mode');
+        edNotice.style.display = "none";
+
+        spectrumContainer.innerHTML = `
+          <div class="wiped-container">
+            <h3 style="font-size: 1.1rem; margin-bottom: 6px; color: #374151;">🔒 Guest Shield Data Automatically Wiped</h3>
+            <p style="font-size: 0.85rem;">The time-bound handshake window has closed. All sensitive profile and allergy details have been cleared from this screen for privacy and liability protection.</p>
+          </div>
+        `;
+      }
     }
 
-    // Check for Blue: Boundaries (ED Support)
-    function checkEDSupport(isBlueActive) {
-        if (isBlueActive) {
-            document.getElementById('table-card').classList.add('blue-support-mode');
-            document.getElementById('ed-notice').style.display = "block";
-        }
-    }
-
-    // Run checks every minute
-    setInterval(updateDashboard, 60000);
-    window.onload = updateDashboard;
-</script>
-
+    // Start Real-Time Interval
+    window.onload = () => {
+      refreshDashboard();
+      dashboardTimer = setInterval(refreshDashboard, 1000);
+    };
+  </script>
 </body>
 </html>
