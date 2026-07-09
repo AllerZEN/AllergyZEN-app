@@ -1,143 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>allerZEN | v0 My Shield</title>
-    <style>
-        :root { --primary: #8e44ad; --blue: #007bff; --neutral: #666; --bg: #fdfbff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
-        
-        .status-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .blue-dot { width: 14px; height: 14px; background: #808080; border-radius: 50%; display: inline-block; transition: 0.5s; }
-        .pulse { animation: pulse-blue 2s infinite; background: var(--blue); }
-        @keyframes pulse-blue { 
-            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
-            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#8E55A2">
+  <title>allerZEN | My Safety Shield & Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    :root {
+      --primary: #8E55A2;
+      --primary-light: #A77BB8;
+      --safe-green: #22C55E;
+      --caution-amber: #F97316;
+      --danger-red: #EF4444;
+      --dislike-brown: #8B4513;
+      --boundary-blue: #3B82F6;
+      --background: #FAFAFA;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --border: #E5E7EB;
+    }
 
-        .card { background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #eee; }
-        .card-title { font-weight: bold; color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
-        
-        .timer-text { font-size: 1.2rem; font-weight: bold; color: #444; }
-        textarea { width: 100%; border: 1px solid #ddd; border-radius: 12px; padding: 12px; font-size: 0.9rem; resize: none; box-sizing: border-box; }
-        
-        .btn-action { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-purple { background: var(--primary); color: white; }
-        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
-        
-        /* KIP Styling [cite: 2026-01-18] */
-        .kip-text { font-size: 0.9rem; line-height: 1.6; color: #444; }
-        .kip-highlight { color: var(--primary); font-weight: 600; }
-    </style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--background); color: var(--text); padding-bottom: 90px; }
+
+    /* Header & Status Bar */
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo-container { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logo { height: 36px; }
+    .app-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+
+    .status-badge { display: flex; align-items: center; gap: 8px; background: #F3F4F6; padding: 6px 12px; border-radius: 20px; }
+    .status-text { font-size: 0.75rem; font-weight: 700; color: #4B5563; }
+
+    /* Pulsing Dot Animations */
+    .blue-dot { width: 12px; height: 12px; background-color: #9CA3AF; border-radius: 50%; display: inline-block; transition: all 0.3s ease; }
+    .blue-dot.pulse { background-color: var(--boundary-blue); animation: pulse-blue 2s infinite; }
+    @keyframes pulse-blue {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+
+    /* Cards */
+    .card { background: var(--card); border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .card-title { font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    
+    /* Timer Display */
+    .timer-container { text-align: center; padding: 10px 0; }
+    .timer-text { font-size: 2.2rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
+    .pair-info { font-size: 0.85rem; color: #6B7280; margin-top: 6px; }
+
+    /* Zen Spectrum Summary Pills */
+    .spectrum-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .pill { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 4px; }
+    .pill-red { background: var(--danger-red); }
+    .pill-amber { background: var(--caution-amber); }
+    .pill-brown { background: var(--dislike-brown); }
+    .pill-green { background: var(--safe-green); }
+    .pill-blue { background: var(--boundary-blue); }
+
+    /* KIP Knowledge Hub */
+    .kip-text { font-size: 0.88rem; line-height: 1.5; color: #374151; }
+    .kip-highlight { color: var(--primary); font-weight: 700; }
+    .kip-item { background: #F9FAFB; padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--primary); margin-bottom: 8px; }
+
+    /* Textarea & Inputs */
+    textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 0.9rem; resize: none; font-family: inherit; outline: none; transition: border-color 0.2s; }
+    textarea:focus { border-color: var(--primary); }
+
+    /* Buttons */
+    .btn-action { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-purple { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.25); }
+    .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-danger { background: #FEE2E2; color: var(--danger-red); border: 1px solid #FCA5A5; }
+
+    /* Bottom Navigation */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border: none; background: none; cursor: pointer; flex: 1; }
+    .nav-item.center { background: var(--primary); color: white; width: 54px; height: 54px; border-radius: 50%; margin-top: -24px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.4); flex: none; }
+  </style>
 </head>
 <body>
 
-    <div class="status-bar">
-        <img src="logo.png" alt="allerZEN" height="35">
-        <div style="text-align: right;">
-            <span id="statusLabel" style="font-size: 0.7rem; font-weight: bold; color: var(--neutral); display: block;">SHIELD INACTIVE</span>
-            <div id="statusDot" class="blue-dot"></div>
-        </div>
+  <!-- Header / Status Bar -->
+  <header class="header">
+    <div class="logo-container" onclick="location.href='/index.html'">
+      <img src="/logo.png" alt="allergyZEN" class="logo" onerror="this.src='/images/allergyzen-logo.png'">
+      <span class="app-title">allergyZEN</span>
     </div>
+    <div class="status-badge">
+      <div id="statusDot" class="blue-dot"></div>
+      <span id="statusLabel" class="status-text">SHIELD INACTIVE</span>
+    </div>
+  </header>
 
+  <div class="container">
+
+    <!-- Active Protection Window Card -->
     <div class="card" id="timerCard">
-        <span class="card-title">🕒 Protection Window</span>
+      <div class="card-title">
+        <span>🕒 Protection Window</span>
+        <span id="venueBadge" style="font-size: 0.75rem; color: var(--primary); text-transform: none;">Not Connected</span>
+      </div>
+      <div class="timer-container">
         <div class="timer-text" id="timerDisplay">00:00:00</div>
-        <p id="pairInfo" style="font-size: 0.85rem; color: #777; margin-top: 8px;">
-            Scan a business QR code to activate your 3-hour safety shield. [cite: 2026-01-18]
+        <p id="pairInfo" class="pair-info">
+          Scan a business QR code to activate your time-bound safety shield.
         </p>
+      </div>
+      <div id="handshakeControls" style="display: none; margin-top: 12px;">
+        <button class="btn-action btn-danger" onclick="revokeHandshake()">🛑 Revoke & Unshake (Wipe Shared Data)</button>
+      </div>
     </div>
 
+    <!-- Active Spectrum Overview Card -->
     <div class="card">
-        <span class="card-title">📚 Knowledge Hub: Power is Knowledge</span>
-        <div id="hubContent" class="kip-text">
-            <div id="kip-welcome">
-                <i>"The shield is active. You are not defined by your triggers; you are protected by your awareness." [cite: 2026-01-18]</i>
-            </div>
-            <div id="kip-details" style="margin-top: 10px;"></div>
+      <div class="card-title">
+        <span>🎨 My Active Spectrum</span>
+        <a href="profile.html" style="font-size: 0.75rem; color: var(--primary); text-decoration: none;">Edit Profile ➔</a>
+      </div>
+      <div id="spectrumSummary" class="spectrum-summary">
+        <!-- Dynamic Pills Populated Here -->
+      </div>
+    </div>
+
+    <!-- Knowledge Hub (KIP) Card -->
+    <div class="card">
+      <div class="card-title">📚 Knowledge Hub: Power is Knowledge</div>
+      <div id="hubContent" class="kip-text">
+        <div id="kip-welcome" style="margin-bottom: 10px;">
+          <i>"The shield is active. You are not defined by your triggers; you are protected by your awareness."</i>
         </div>
+        <div id="kip-details"></div>
+      </div>
     </div>
 
+    <!-- ZenNotes & Reflections Card -->
     <div class="card">
-        <span class="card-title">📝 My Notes</span>
-        <textarea id="notePad" rows="4" placeholder="How did you feel after your meal? Record textures, thoughts, or reactions..."></textarea>
-        <button class="btn-action btn-purple" onclick="saveNote()">SAVE TO PROFILE</button>
+      <div class="card-title">📝 My ZenNotes & Meal Reflections</div>
+      <textarea id="notePad" rows="4" placeholder="How did you feel after your meal? Record textures, thoughts, blood sugar readings, or reactions..."></textarea>
+      <button class="btn-action btn-purple" onclick="saveNote()">💾 Save Reflection to Profile</button>
     </div>
 
-    <div style="padding: 10px;">
-        <button class="btn-action btn-outline" onclick="location.href='profile.html'">EDIT MY SHIELD</button>
-        <p style="text-align: center; font-size: 0.75rem; color: #999; margin-top: 15px;">
-            allerZEN v0 | Power is Knowledge [cite: 2026-01-18]
-        </p>
+    <!-- Action Bar -->
+    <div style="padding: 4px 0 20px 0;">
+      <button class="btn-action btn-outline" onclick="location.href='profile.html'">⚙️ EDIT MY SHIELD PARAMETERS</button>
+      <p style="text-align: center; font-size: 0.75rem; color: #9CA3AF; margin-top: 16px;">
+        allergyZEN Wellness Assistant v0 | Power is Knowledge
+      </p>
     </div>
 
-    <script src="Profile.js"></script>
-    <script>
-        function updateDashboard() {
-            const profileData = JSON.parse(localStorage.getItem('allerzen_family_profiles'));
-            const mainUser = profileData ? profileData[0] : null;
-            
-            const dot = document.getElementById('statusDot');
-            const label = document.getElementById('statusLabel');
-            const pairInfo = document.getElementById('pairInfo');
+  </div>
 
-            // 1. Check for Blue (ED Support) List [cite: 2026-01-18]
-            if (mainUser && mainUser.blueList && mainUser.blueList.length > 0) {
-                label.innerText = "SAFE-EXPERIENCE ACTIVE";
-                pairInfo.innerText = "Your sensory and experience boundaries are being monitored.";
-            }
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="location.href='/view.html?mode=scan'"><span>🔍</span><span>Scan</span></button>
+    <button class="nav-item" onclick="location.href='/profile.html?tab=safe'"><span>🟢</span><span>Safe</span></button>
+    <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
+    <button class="nav-item" onclick="location.href='/profile.html?tab=triggers'"><span>🚫</span><span>Triggers</span></button>
+    <button class="nav-item" onclick="location.href='/profile.html'"><span>⚙️</span><span>Profile</span></button>
+  </nav>
 
-            // 2. 3-Hour Timer Logic [cite: 2026-01-18]
-            const lastScan = localStorage.getItem('az_last_scan_time'); 
-            const now = Date.now();
-            if (lastScan && (now - lastScan < (3 * 60 * 60 * 1000))) {
-                dot.classList.add('pulse');
-                label.innerText = (mainUser && mainUser.blueList && mainUser.blueList.length > 0) ? "SAFE-EXPERIENCE PULSE" : "SHIELD PULSING";
-            }
+  <!-- Script Logic -->
+  <script src="/profile.js"></script>
+  <script src="/js/profile.js"></script>
+  <script>
+    let timerInterval = null;
+
+    function initView() {
+      updateDashboard();
+      populateKIP(); //
+      loadUserNotes();
+      renderSpectrumSummary();
+      
+      // Check query string for scan trigger
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'scan') {
+        simulateScan();
+      }
+    }
+
+    function updateDashboard() {
+      const dot = document.getElementById('statusDot');
+      const label = document.getElementById('statusLabel');
+      const pairInfo = document.getElementById('pairInfo');
+      const venueBadge = document.getElementById('venueBadge');
+      const handshakeControls = document.getElementById('handshakeControls');
+
+      const profile = userProfile.getActiveProfile();
+      const timeRemaining = userProfile.getProtectionTimeRemaining();
+
+      if (timeRemaining > 0) {
+        // Active Handshake State
+        dot.classList.add('pulse');
+        const session = userProfile.session.protectionWindow;
+        venueBadge.innerText = session.businessName || "Connected Venue";
+        
+        const hasBlueBoundaries = profile.items?.blue && profile.items.blue.length > 0; //
+        label.innerText = hasBlueBoundaries ? "SAFE-EXPERIENCE PULSE" : "SHIELD PULSING"; //
+        pairInfo.innerText = "Active live handshake window with partner kitchen. Automatic data wipe active.";
+        
+        handshakeControls.style.display = "block";
+        startTimerCountdown();
+      } else {
+        // Inactive Handshake State
+        dot.classList.remove('pulse');
+        venueBadge.innerText = "Not Connected";
+        label.innerText = "SHIELD STANDBY";
+        pairInfo.innerText = "Scan a business QR code to activate your time-bound safety shield."
+        document.getElementById('timerDisplay').innerText = "00:00:00";
+        handshakeControls.style.display = "none";
+        if (timerInterval) clearInterval(timerInterval);
+      }
+    }
+
+    function startTimerCountdown() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      const updateTimer = () => {
+        const remaining = userProfile.getProtectionTimeRemaining();
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          updateDashboard();
+          alert("Your protection window has expired. Shared details have been automatically wiped for your privacy.");
+          return;
         }
 
-        function populateKIP() {
-            const profileData = JSON.parse(localStorage.getItem('allerzen_family_profiles'));
-            const mainUser = profileData ? profileData[0] : null;
-            const kipDetails = document.getElementById('kip-details');
-            
-            if (!mainUser) return;
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((remaining % (1000 * 60)) / 1000);
 
-            let tips = [];
+        document.getElementById('timerDisplay').innerText = 
+          `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      };
 
-            // Contextual tips based on user choices [cite: 2026-01-16, 2026-01-18]
-            if (mainUser.redList.length > 0) {
-                tips.push("🛡️ <span class='kip-highlight'>Pro-Tip:</span> Your high-risk alerts are now live in the Partner Portal. You don't have to explain—the tech does it for you.");
-            }
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
 
-            if (mainUser.amberList.includes('Terpenes')) {
-                tips.push("🌲 <span class='kip-highlight'>Did you know?</span> Terpenes like Linalool are in many 'natural' cleaners. Your shield flags these hidden triggers.");
-            }
+    function renderSpectrumSummary() {
+      const profile = userProfile.getActiveProfile();
+      const container = document.getElementById('spectrumSummary');
+      const items = profile.items || {};
 
-            if (mainUser.blueList.length > 0) {
-                tips.push("💙 <span class='kip-highlight'>Safe-Experience:</span> We've signaled staff to use neutral language. Focus on the texture and joy of the meal, not the pressure.");
-            }
+      let html = "";
+      if (items.red?.length) html += `<div class="pill pill-red">🔴 ${items.red.length} Critical</div>`;
+      if (items.amber?.length) html += `<div class="pill pill-amber">🟠 ${items.amber.length} Sensitivities</div>`;
+      if (items.brown?.length) html += `<div class="pill pill-brown">🟤 ${items.brown.length} Dislikes</div>`;
+      if (items.green?.length) html += `<div class="pill pill-green">🟢 ${items.green.length} Safe</div>`;
+      if (items.blue?.length) html += `<div class="pill pill-blue">💙 ${items.blue.length} ED Boundaries</div>`;
 
-            if (mainUser.greenList.length > 0) {
-                tips.push("🟢 <span class='kip-highlight'>Power Choice:</span> You've prioritized fuel that works for you. You are reclaiming control today.");
-            }
+      container.innerHTML = html || `<span style="font-size: 0.8rem; color: #9CA3AF;">No items added to your Zen Spectrum yet.</span>`;
+    }
 
-            kipDetails.innerHTML = tips.length > 0 ? tips.join('<br><br>') : "Select categories in your profile to unlock safety insights here.";
-        }
+    function populateKIP() { //
+      const profile = userProfile.getActiveProfile();
+      const kipDetails = document.getElementById('kip-details');
+      const items = profile.items || {};
+      
+      let tips = [];
 
-        function saveNote() {
-            const note = document.getElementById('notePad').value;
-            localStorage.setItem('az_user_notes', note);
-            alert("Note saved. Knowledge is power.");
-        }
+      // Contextual tips based on user choices
+      if (items.red && items.red.length > 0) {
+        tips.push(`<div class="kip-item">🛡️ <span class="kip-highlight">Pro-Tip:</span> Your high-risk alerts are live in the Partner Portal. You don't have to explain—the tech does it for you.</div>`);
+      }
 
-        window.onload = () => {
-            updateDashboard();
-            populateKIP(); // [cite: 2026-01-18]
-            document.getElementById('notePad').value = localStorage.getItem('az_user_notes') || "";
-        };
-    </script>
+      if (items.amber && (items.amber.includes('Terpenes') || items.amber.includes('Lab Chemicals'))) { //
+        tips.push(`<div class="kip-item">🌲 <span class="kip-highlight">Did you know?</span> Terpenes and lab excipients are common in 'natural' compounds. Your shield flags these hidden triggers.</div>`);
+      }
+
+      if (items.blue && items.blue.length > 0) { //
+        tips.push(`<div class="kip-item">💙 <span class="kip-highlight">Safe-Experience:</span> We've signaled staff to use neutral language. Focus on the texture and joy of the meal, not the pressure.</div>`);
+      }
+
+      if (items.green && items.green.length > 0) {
+        tips.push(`<div class="kip-item">🟢 <span class="kip-highlight">Power Choice:</span> You've prioritized fuel that works for you. You are reclaiming control today.</div>`);
+      }
+
+      // ZenHealth Medication Alerts
+      const medAlerts = userProfile.crossCheckMedications ? userProfile.crossCheckMedications() : [];
+      medAlerts.forEach(alert => {
+        tips.push(`<div class="kip-item" style="border-left-color: var(--caution-amber);">🩺 <span class="kip-highlight">Medication Alert (${alert.med}):</span> ${alert.note}</div>`);
+      });
+
+      kipDetails.innerHTML = tips.length > 0 ? tips.join('') : "<p style='font-size:0.85rem; color:#6B7280;'>Select items in your profile to unlock contextual safety insights here.</p>";
+    }
+
+    function saveNote() {
+      const note = document.getElementById('notePad').value;
+      const profile = userProfile.getActiveProfile();
+      if (!profile.zenNotes) profile.zenNotes = [];
+      
+      profile.zenNotes.push({ date: new Date().toISOString(), text: note });
+      userProfile.saveToStorage();
+      alert("Note saved to your profile. Knowledge is power!");
+    }
+
+    function loadUserNotes() {
+      const profile = userProfile.getActiveProfile();
+      if (profile.zenNotes && profile.zenNotes.length > 0) {
+        document.getElementById('notePad').value = profile.zenNotes[profile.zenNotes.length - 1].text;
+      }
+    }
+
+    function revokeHandshake() {
+      if (confirm("Are you sure you want to terminate the active handshake and wipe your shared ticket from the partner venue?")) {
+        userProfile.clearHandshake();
+        updateDashboard();
+      }
+    }
+
+    function simulateScan() {
+      userProfile.startHandshake(3 * 60 * 60 * 1000, "VENUE-01", "allergyZEN Bistro & Cafe"); //
+      updateDashboard();
+      alert("Simulated QR Scan Successful! 3-Hour Handshake Window Activated.");
+    }
+
+    window.onload = () => {
+      initView();
+    };
+  </script>
 </body>
 </html>
