@@ -1,79 +1,437 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Safety & Power Shield | allerZEN</title>
-    <link rel="stylesheet" href="style.css"> 
-    <style>
-        /* Pulse Animation for the Blue Dot Safety System */
-        .blue-dot {
-            width: 12px;
-            height: 12px;
-            background-color: #007bff;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-        .pulse {
-            animation: pulse-blue 2s infinite;
-        }
-        @keyframes pulse-blue {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
-        }
-        .shield-card { border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 8px solid; background: white; }
-        .red { border-left-color: #ff4d4d; }
-        .amber { border-left-color: #ffaa00; }
-        .blue { border-left-color: #007bff; }
-        .green { border-left-color: #28a745; }
-        .chip-group button { margin: 5px; padding: 10px; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer; transition: 0.3s; }
-        .chip-group button.active { background: #6f42c1; color: white; border-color: #6f42c1; }
-        
-        /* Pairing Note Styling */
-        .pairing-note { background: #fdfbff; border: 1px solid #8e44ad; padding: 15px; border-radius: 15px; margin: 20px 0; font-size: 0.9rem; color: #333; line-height: 1.4; text-align: left; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#8E55A2">
+  <title>Profile & Spectrum Setup | allergyZEN</title>
+  <link rel="stylesheet" href="/style.css"> 
+  <style>
+    :root {
+      --primary: #8E55A2;
+      --primary-light: #A77BB8;
+      --safe-green: #22C55E;
+      --caution-amber: #F97316;
+      --danger-red: #EF4444;
+      --dislike-brown: #8B4513;
+      --boundary-blue: #3B82F6;
+      --background: #FAFAFA;
+      --card: #FFFFFF;
+      --text: #1F2937;
+      --border: #E5E7EB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--background); color: var(--text); padding-bottom: 90px; }
+
+    /* Header */
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo-container { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .logo { height: 36px; }
+    .app-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+
+    /* Nav Tabs across Profile View */
+    .view-tabs { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+    .tab-btn { flex: 1; padding: 12px 8px; border: none; background: none; font-weight: 700; font-size: 0.8rem; color: #6B7280; cursor: pointer; text-align: center; }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    /* Shield Cards & Spectrum Styles */
+    .shield-card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 16px; border-left: 8px solid; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .shield-card.red { border-left-color: var(--danger-red); }
+    .shield-card.amber { border-left-color: var(--caution-amber); }
+    .shield-card.brown { border-left-color: var(--dislike-brown); }
+    .shield-card.green { border-left-color: var(--safe-green); }
+    .shield-card.blue { border-left-color: var(--boundary-blue); }
+
+    .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .card-desc { font-size: 0.8rem; color: #6B7280; margin-bottom: 12px; }
+
+    /* Pulse Blue Dot */
+    .blue-dot { width: 10px; height: 10px; background-color: var(--boundary-blue); border-radius: 50%; display: inline-block; animation: pulse-blue 2s infinite; }
+    @keyframes pulse-blue {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    /* Chips & Interactive Inputs */
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .chip { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: #F9FAFB; font-size: 0.85rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .chip-remove { font-weight: bold; margin-left: 4px; cursor: pointer; }
+
+    .add-input-row { display: flex; gap: 8px; margin-top: 8px; }
+    .add-input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none; }
+    .add-btn { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+
+    /* Bulk Import Banner */
+    .bulk-banner { background: linear-gradient(135deg, #7C3AED, #8E55A2); color: white; padding: 14px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .bulk-btn { background: white; color: var(--primary); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+
+    /* ZenHealth Controls */
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
+    .form-input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+
+    /* Activation & Primary Actions */
+    .activate-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3); margin-top: 10px; }
+    
+    /* Bottom Nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border: none; background: none; cursor: pointer; flex: 1; }
+    .nav-item.center { background: var(--primary); color: white; width: 54px; height: 54px; border-radius: 50%; margin-top: -24px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.4); flex: none; }
+
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 16px; }
+    .modal { background: var(--card); width: 100%; max-width: 440px; border-radius: 16px; padding: 20px; max-height: 85vh; overflow-y: auto; }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
 
-    <div class="container" style="max-width: 500px; margin: auto; padding: 15px;">
-        <header style="text-align: center; padding: 20px;">
-            <img src="logo.png" alt="allerZEN" width="80">
-            <h1>My Safety & Power Shield</h1>
-            <p>Define your risks, set your boundaries, and reclaim your favorites.</p>
-        </header>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-container" onclick="location.href='/index.html'">
+      <img src="/logo.png" alt="allergyZEN" class="logo" onerror="this.src='/images/allergyzen-logo.png'">
+      <span class="app-title">allergyZEN</span>
+    </div>
+    <button class="add-btn" onclick="openTutorialModal()">❓ Tutorial</button>
+  </header>
 
-        <div class="pairing-note">
-            <strong>Pairing Note:</strong> You can edit and update your profile anytime after you have activated your shield. You must <b>Activate My Shield</b> to pair the app with your needs and generate your live AZWAA v0 protection window.
+  <div class="container">
+    <!-- View Switcher Tabs -->
+    <div class="view-tabs">
+      <button class="tab-btn active" id="btn-tab-triggers" onclick="switchMainTab('triggers')">🔴 🟠 🟤 Triggers & Dislikes</button>
+      <button class="tab-btn" id="btn-tab-safe" onclick="switchMainTab('safe')">🟢 💙 Safe & Boundaries</button>
+      <button class="tab-btn" id="btn-tab-zenhealth" onclick="switchMainTab('zenhealth')">🩺 ZenHealth</button>
+    </div>
+
+    <!-- Bulk Import / Screenshot OCR Launcher Bar -->
+    <div class="bulk-banner">
+      <div>
+        <strong style="font-size: 0.9rem;">Have an intolerance list?</strong>
+        <p style="font-size: 0.75rem; opacity: 0.9;">Paste or upload a screenshot to import in bulk.</p>
+      </div>
+      <button class="bulk-btn" onclick="openBulkModal()">Bulk Import</button>
+    </div>
+
+    <!-- SECTION 1: TRIGGERS & DISLIKES (Tab 1) -->
+    <div id="section-triggers">
+      <!-- RED: Critical Allergies -->
+      <div class="shield-card red">
+        <div class="card-title" style="color: var(--danger-red);">🔴 Red: Critical Allergies & Triggers</div>
+        <div class="card-desc">Immediate high reactivity / Anaphylaxis risk.</div>
+        <div class="chip-group" id="red-chips"></div>
+        <div class="add-input-row">
+          <input type="text" id="input-red" class="add-input" placeholder="Add Red trigger (e.g. Peanuts, SDS)...">
+          <button class="add-btn" onclick="addSpectrumItem('red')">+ Add</button>
+        </div>
+      </div>
+
+      <!-- ORANGE / AMBER: Moderate Sensitivities -->
+      <div class="shield-card amber">
+        <div class="card-title" style="color: var(--caution-amber);">🟠 Amber / Orange: Moderate Sensitivities</div>
+        <div class="card-desc">Moderate reactivity, hidden ingredients, terpenes, excipients.</div>
+        <div class="chip-group" id="amber-chips"></div>
+        <div class="add-input-row">
+          <input type="text" id="input-amber" class="add-input" placeholder="Add Amber trigger (e.g. Lactose, Pinene)...">
+          <button class="add-btn" onclick="addSpectrumItem('amber')">+ Add</button>
+        </div>
+      </div>
+
+      <!-- BROWN: Dislikes & Non-Allergic Aversions -->
+      <div class="shield-card brown">
+        <div class="card-title" style="color: var(--dislike-brown);">🟤 Brown: Personal Dislikes</div>
+        <div class="card-desc">Aversions, non-allergic distaste, preferred omissions.</div>
+        <div class="chip-group" id="brown-chips"></div>
+        <div class="add-input-row">
+          <input type="text" id="input-brown" class="add-input" placeholder="Add Dislike (e.g. Cilantro, Olives)...">
+          <button class="add-btn" onclick="addSpectrumItem('brown')">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: SAFE & BOUNDARIES (Tab 2) -->
+    <div id="section-safe" class="hidden">
+      <!-- GREEN: Verified Safe Items -->
+      <div class="shield-card green">
+        <div class="card-title" style="color: var(--safe-green);">🟢 Green: Confirmed Safe Items</div>
+        <div class="card-desc">Safe foods, tested products, approved formulas.</div>
+        <div class="chip-group" id="green-chips"></div>
+        <div class="add-input-row">
+          <input type="text" id="input-green" class="add-input" placeholder="Add Safe Item (e.g. Oat Milk, Rice)...">
+          <button class="add-btn" onclick="addSpectrumItem('green')">+ Add</button>
+        </div>
+      </div>
+
+      <!-- BLUE: ED Boundaries & Sensory Needs -->
+      <div class="shield-card blue">
+        <div class="card-title" style="color: var(--boundary-blue);">
+          💙 <span class="blue-dot"></span> Blue: ED & Sensory Boundaries
+        </div>
+        <div class="card-desc">Eating disorder boundaries, texture rules, non-judgmental preferences.</div>
+        <div class="chip-group" id="blue-chips"></div>
+        <div class="add-input-row">
+          <input type="text" id="input-blue" class="add-input" placeholder="Add ED Boundary (e.g. Smooth Texture, No Oils)...">
+          <button class="add-btn" onclick="addSpectrumItem('blue')">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: ZENHEALTH SUITE (Tab 3) -->
+    <div id="section-zenhealth" class="hidden">
+      <div class="shield-card blue" style="border-left-color: var(--primary);">
+        <div class="card-title" style="color: var(--primary);">🩺 ZenHealth Dashboard Configuration</div>
+        <div class="card-desc">Track Diabetes, Blood Pressure, Medications, and Daily Habits seamlessly.</div>
+
+        <!-- Diabetes / Glucose -->
+        <div class="form-group">
+          <label class="form-label">Blood Sugar / Glucose Level (mmol/L or mg/dL)</label>
+          <input type="text" id="health-bs" class="form-input" placeholder="e.g. 5.6 mmol/L" onchange="saveZenHealthData()">
         </div>
 
-        <div class="shield-card red">
-            <h3>🔴 Red: Critical Allergies</h3>
-            <p>Immediate life-threat / Anaphylaxis risk.</p>
-            <div class="chip-group" id="red-group">
-                <button onclick="toggleChip(this)">Peanuts</button>
-                <button onclick="toggleChip(this)">Shellfish</button>
-            </div>
+        <!-- Blood Pressure -->
+        <div class="form-group">
+          <label class="form-label">Blood Pressure (Systolic / Diastolic)</label>
+          <input type="text" id="health-bp" class="form-input" placeholder="e.g. 120/80" onchange="saveZenHealthData()">
         </div>
 
-        <div class="shield-card amber">
-            <h3>🟠 Amber: Sensitivities</h3>
-            <p>Hidden triggers: Terpenes, Lab Chemicals, Intolerances.</p>
-            <div class="chip-group" id="amber-group">
-                <button onclick="toggleChip(this)">Lactose</button>
-                <button onclick="toggleChip(this)">Terpenes</button>
-                <button onclick="toggleChip(this)">Lab Chemicals</button>
-            </div>
+        <!-- Calorie & Carb Targets -->
+        <div class="form-group">
+          <label class="form-label">Daily Calorie / Sugar / Fat Log</label>
+          <input type="text" id="health-macros" class="form-input" placeholder="e.g. 1,800 kcal | 45g sugar" onchange="saveZenHealthData()">
         </div>
 
-        <div class="shield-card blue">
-            <h3>🔵 <span class="blue-dot pulse"></span> Blue: Boundaries (ED Support)</h3>
-            <p>Safe-experience triggers: Texture or Sensory needs.</p>
-            <div class="chip-group" id="blue-group">
-                <button onclick="toggleChip(this)">Soft Textures</button>
-                <button onclick="toggleChip(this)">No Strong Smells</button>
-            </div>
+        <!-- Active Medications Cross-Checking -->
+        <div class="form-group">
+          <label class="form-label">Active Medications (Cross-checked against Spectrum)</label>
+          <div class="chip-group" id="med-chips"></div>
+          <div class="add-input-row">
+            <input type="text" id="input-med" class="add-input" placeholder="Add Medication (e.g. Metformin, Insulin)...">
+            <button class="add-btn" onclick="addMedication()">+ Add Med</button>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="shield-card green
+    <!-- Handshake Duration Configuration & Activation -->
+    <div class="shield-card blue" style="background: #EFF6FF;">
+      <div class="card-title" style="color: var(--boundary-blue);">🤝 Handshake Protection Settings</div>
+      <div class="card-desc">Choose how long partner establishments can access your active ticket profile.</div>
+      <div class="form-group">
+        <select id="handshake-timer-select" class="form-input" style="font-weight: 700; color: var(--boundary-blue);">
+          <option value="1800000">30 Minutes</option>
+          <option value="3600000">1 Hour</option>
+          <option value="10800000" selected>3 Hours (Standard Protection Window)</option>
+          <option value="86400000">24 Hours</option>
+        </select>
+      </div>
+      <button class="activate-btn" onclick="activateShield()">🛡️ Activate My Shield & Save Profile</button>
+    </div>
+  </div>
+
+  <!-- Bulk Import Modal -->
+  <div id="modal-bulk" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 style="color: var(--primary); margin-bottom: 8px;">Bulk Import Spectrum Items</h3>
+      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Paste your list separated by commas or lines, or select an image for OCR detection.</p>
+      
+      <textarea id="bulk-text-input" style="width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px;" placeholder="Paste triggers here: Peanuts, Milk, Soy, Hydroquinone..."></textarea>
+      
+      <div style="margin-bottom: 16px;">
+        <label class="form-label">Target Spectrum Color:</label>
+        <select id="bulk-target-color" class="form-input">
+          <option value="red">🔴 Red (High Reactivity)</option>
+          <option value="amber">🟠 Amber / Orange (Moderate)</option>
+          <option value="brown">🟤 Brown (Dislike)</option>
+          <option value="green">🟢 Green (Safe)</option>
+          <option value="blue">💙 Blue (ED Boundary)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button onclick="processBulkImport()" class="activate-btn" style="flex: 1; padding: 10px;">Process Text</button>
+        <button onclick="closeBulkModal()" style="background: #F3F4F6; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding Tutorial Modal -->
+  <div id="modal-tutorial" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 style="color: var(--primary); margin-bottom: 8px;">Welcome to allergyZEN</h3>
+      <p style="font-size: 0.85rem; color: #374151; line-height: 1.4; margin-bottom: 12px;">
+        <strong>1. Map Your Spectrum:</strong> Input your triggers into 🔴 Red, 🟠 Amber, 🟤 Brown, 🟢 Green, or 💙 Blue.<br><br>
+        <strong>2. ZenHealth Suite:</strong> Log blood sugar, blood pressure, and medications to get real-time cross-referencing alerts.<br><br>
+        <strong>3. Dynamic Handshake:</strong> Choose a 30m, 1h, 3h, or 24h timer when scanning partner venues. Data auto-wipes for privacy!
+      </p>
+      <button onclick="closeTutorialModal()" class="activate-btn">Got It, Let's Begin!</button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="location.href='/view.html?mode=scan'"><span>🔍</span><span>Scan</span></button>
+    <button class="nav-item" onclick="switchMainTab('safe')"><span>🟢</span><span>Safe</span></button>
+    <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
+    <button class="nav-item" onclick="switchMainTab('triggers')"><span>🚫</span><span>Triggers</span></button>
+    <button class="nav-item" onclick="location.href='/profile.html'"><span>⚙️</span><span>Profile</span></button>
+  </nav>
+
+  <!-- Script Logic -->
+  <script src="/profile.js"></script>
+  <script src="/js/profile.js"></script>
+  <script>
+    let currentProfile = {
+      items: { red: ["Peanuts", "Shellfish"], amber: ["Lactose", "Terpenes", "Lab Chemicals"], brown: ["Cilantro"], green: ["Oat Milk"], blue: ["Soft Textures", "No Strong Smells"] },
+      zenHealth: { bloodSugar: "5.4", bloodPressure: "120/80", macros: "", medications: ["Metformin"] }
+    };
+
+    function initProfileUI() {
+      if (typeof userProfile !== 'undefined' && userProfile.getActiveProfile) {
+        const loaded = userProfile.getActiveProfile();
+        if (loaded) currentProfile = loaded;
+      }
+      renderAllChips();
+      loadZenHealthUI();
+
+      // Query Param Tab Auto-Switch
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam) switchMainTab(tabParam);
+    }
+
+    function switchMainTab(tab) {
+      document.getElementById('btn-tab-triggers').classList.toggle('active', tab === 'triggers');
+      document.getElementById('btn-tab-safe').classList.toggle('active', tab === 'safe');
+      document.getElementById('btn-tab-zenhealth').classList.toggle('active', tab === 'zenhealth');
+
+      document.getElementById('section-triggers').classList.toggle('hidden', tab !== 'triggers');
+      document.getElementById('section-safe').classList.toggle('hidden', tab !== 'safe');
+      document.getElementById('section-zenhealth').classList.toggle('hidden', tab !== 'zenhealth');
+    }
+
+    function renderAllChips() {
+      ['red', 'amber', 'brown', 'green', 'blue'].forEach(color => {
+        const container = document.getElementById(`${color}-chips`);
+        if (!container) return;
+        const list = currentProfile.items[color] || [];
+        container.innerHTML = list.map(item => `
+          <div class="chip active">
+            <span>${item}</span>
+            <span class="chip-remove" onclick="removeSpectrumItem('${color}', '${item}')">×</span>
+          </div>
+        `).join('');
+      });
+    }
+
+    function addSpectrumItem(color) {
+      const input = document.getElementById(`input-${color}`);
+      const val = input.value.trim();
+      if (!val) return;
+      if (!currentProfile.items[color]) currentProfile.items[color] = [];
+      currentProfile.items[color].push(val);
+      input.value = '';
+      renderAllChips();
+      saveToStorage();
+    }
+
+    function removeSpectrumItem(color, item) {
+      currentProfile.items[color] = currentProfile.items[color].filter(i => i !== item);
+      renderAllChips();
+      saveToStorage();
+    }
+
+    function loadZenHealthUI() {
+      const zh = currentProfile.zenHealth || {};
+      document.getElementById('health-bs').value = zh.bloodSugar || '';
+      document.getElementById('health-bp').value = zh.bloodPressure || '';
+      document.getElementById('health-macros').value = zh.macros || '';
+      
+      const medContainer = document.getElementById('med-chips');
+      const meds = zh.medications || [];
+      medContainer.innerHTML = meds.map(m => `
+        <div class="chip active" style="background: var(--primary);">
+          <span>${m}</span>
+          <span class="chip-remove" onclick="removeMedication('${m}')">×</span>
+        </div>
+      `).join('');
+    }
+
+    function addMedication() {
+      const input = document.getElementById('input-med');
+      const val = input.value.trim();
+      if (!val) return;
+      if (!currentProfile.zenHealth) currentProfile.zenHealth = {};
+      if (!currentProfile.zenHealth.medications) currentProfile.zenHealth.medications = [];
+      currentProfile.zenHealth.medications.push(val);
+      input.value = '';
+      loadZenHealthUI();
+      saveToStorage();
+    }
+
+    function removeMedication(med) {
+      currentProfile.zenHealth.medications = currentProfile.zenHealth.medications.filter(m => m !== med);
+      loadZenHealthUI();
+      saveToStorage();
+    }
+
+    function saveZenHealthData() {
+      if (!currentProfile.zenHealth) currentProfile.zenHealth = {};
+      currentProfile.zenHealth.bloodSugar = document.getElementById('health-bs').value;
+      currentProfile.zenHealth.bloodPressure = document.getElementById('health-bp').value;
+      currentProfile.zenHealth.macros = document.getElementById('health-macros').value;
+      saveToStorage();
+    }
+
+    function saveToStorage() {
+      if (typeof userProfile !== 'undefined' && userProfile.saveProfile) {
+        userProfile.saveProfile(currentProfile);
+      } else {
+        localStorage.setItem('az_user_profile', JSON.stringify(currentProfile));
+      }
+    }
+
+    function activateShield() {
+      const duration = document.getElementById('handshake-timer-select').value;
+      saveZenHealthData();
+      saveToStorage();
+      
+      if (typeof userProfile !== 'undefined' && userProfile.startHandshake) {
+        userProfile.startHandshake(parseInt(duration));
+      }
+      
+      alert("Shield activated! Your parameters and timer window are live.");
+      location.href = '/index.html';
+    }
+
+    // Modal Handlers
+    function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
+    function closeBulkModal() { document.getElementById('modal-bulk').classList.add('hidden'); }
+    function openTutorialModal() { document.getElementById('modal-tutorial').classList.remove('hidden'); }
+    function closeTutorialModal() { document.getElementById('modal-tutorial').classList.add('hidden'); }
+
+    function processBulkImport() {
+      const text = document.getElementById('bulk-text-input').value;
+      const color = document.getElementById('bulk-target-color').value;
+      if (!text.trim()) return;
+
+      const items = text.split(/[\n,]+/).map(i => i.trim()).filter(i => i.length > 0);
+      if (!currentProfile.items[color]) currentProfile.items[color] = [];
+      currentProfile.items[color].push(...items);
+      
+      document.getElementById('bulk-text-input').value = '';
+      closeBulkModal();
+      renderAllChips();
+      saveToStorage();
+      alert(`Successfully added ${items.length} items to ${color.toUpperCase()} spectrum!`);
+    }
+
+    window.onload = () => {
+      initProfileUI();
+    };
+  </script>
+</body>
+</html>
