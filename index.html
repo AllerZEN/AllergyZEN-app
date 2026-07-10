@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#8E55A2">
   <title>allergyZEN Wellness Assistant</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/style.css"> 
+  <link rel="stylesheet" href="/style.css">
   <style>
     :root {
       --primary: #8E55A2;
@@ -16,361 +15,187 @@
       --danger-red: #EF4444;
       --dislike-brown: #8B4513;
       --boundary-blue: #3B82F6;
-      --background: #FAFAFA;
-      --card: #FFFFFF;
+      --background: #F9FAFB;
       --text: #1F2937;
-      --border: #E5E7EB;
     }
-    
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--background); color: var(--text); padding-bottom: 90px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--background); color: var(--text); padding-bottom: 80px; }
+
+    .launchpad-container { max-width: 500px; margin: 0 auto; padding: 24px 16px; text-align: center; }
     
-    /* Header */
-    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .logo-container { display: flex; align-items: center; gap: 8px; }
-    .logo { height: 36px; cursor: pointer; }
-    .app-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-    .pwa-install-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: none; }
+    /* Brand Header */
+    .brand-logo { margin: 20px auto 10px; width: 70px; height: 70px; display: block; }
+    .brand-title { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
+    .brand-subtitle { font-size: 0.9rem; color: #6B7280; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; }
 
-    .main { max-width: 500px; margin: 0 auto; padding: 16px; }
+    /* Spectrum Indicator Bar */
+    .spectrum-dots { display: flex; justify-content: center; gap: 8px; margin: 12px 0 30px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* Welcome / Greeting Banner */
+    .greeting-box { text-align: left; margin-bottom: 24px; padding: 0 8px; }
+    .greeting-title { font-size: 1.8rem; font-weight: 900; color: #111827; }
+    .greeting-tagline { font-size: 0.95rem; color: #4B5563; font-style: italic; margin-top: 2px; }
+    .tracking-counter { font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-top: 8px; display: block; }
+
+    /* Main Shield Status Display Card */
+    .shield-status-card { background: white; border: 1px solid #E5E7EB; border-radius: 20px; padding: 20px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px; position: relative; }
+    .shield-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .shield-title { font-size: 1.05rem; font-weight: 800; color: #374151; }
     
-    /* Greeting Card */
-    .greeting { background: linear-gradient(135deg, var(--primary-light), var(--primary)); padding: 20px; border-radius: 16px; color: white; margin-bottom: 16px; position: relative; box-shadow: 0 4px 14px rgba(142, 85, 162, 0.25); }
-    .greeting h1 { font-size: 1.4rem; font-weight: 700; }
-    .greeting p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
-    .user-qr-trigger { position: absolute; right: 16px; top: 16px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); border-radius: 12px; padding: 8px; cursor: pointer; text-align: center; }
-    
-    /* Active Handshake Card */
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-    .timer-card { border: 2px solid var(--boundary-blue); background: #EFF6FF; }
-    .timer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .timer-display { font-size: 2.2rem; font-weight: 800; color: var(--boundary-blue); text-align: center; letter-spacing: 1px; margin: 8px 0; }
-    .unshake-btn { background: #DC2626; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%; margin-top: 8px; }
+    .status-pill { font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; }
+    .status-pill.active { background: #DCFCE7; color: #166534; }
+    .status-pill.inactive { background: #F3F4F6; color: #4B5563; }
 
-    /* Spectrum Overview (5 Colors, 2 Tabs) */
-    .tab-group { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 12px; }
-    .tab-btn { flex: 1; padding: 10px; border: none; background: none; font-weight: 700; color: #6B7280; cursor: pointer; font-size: 0.85rem; }
-    .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-    
-    .spectrum-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; }
-    .spectrum-badge { background: #F3F4F6; padding: 8px 4px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-bottom: 4px; }
-    .dot-red { background: var(--danger-red); }
-    .dot-amber { background: var(--caution-amber); }
-    .dot-green { background: var(--safe-green); }
-    .dot-brown { background: var(--dislike-brown); }
-    .dot-blue { background: var(--boundary-blue); animation: pulse 2s infinite; }
+    /* Interactive Search Launcher */
+    .search-bar-container { position: relative; width: 100%; margin-top: 10px; }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 1.1rem; }
+    .search-input-mock { width: 100%; padding: 14px 14px 14px 42px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 14px; font-size: 0.95rem; color: #4B5563; text-align: left; cursor: pointer; }
 
-    /* Quick Search & Universal Scanner */
-    .search-bar-container { position: relative; display: flex; gap: 8px; }
-    .search-input { flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; }
-    .scan-btn-inline { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .search-results { margin-top: 10px; max-height: 250px; overflow-y: auto; }
-    .result-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    /* Action Grid Launcher Links */
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    .menu-item { background: white; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; box-shadow: 0 2px 6px rgba(0,0,0,0.01); transition: transform 0.2s; }
+    .menu-item:active { transform: scale(0.98); }
+    .menu-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .menu-label { font-size: 0.85rem; font-weight: 700; color: #4B5563; }
 
-    /* ZenHealth Dashboard Snapshot */
-    .health-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-    .health-card { background: #F9FAFB; border: 1px solid var(--border); padding: 10px; border-radius: 10px; text-align: center; }
-    .health-val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-    .health-lbl { font-size: 0.7rem; color: #6B7280; font-weight: 600; text-transform: uppercase; }
-
-    /* Bottom Navigation Bar */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border: none; background: none; cursor: pointer; flex: 1; }
-    .nav-item.center { background: var(--primary); color: white; width: 54px; height: 54px; border-radius: 50%; margin-top: -24px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.4); flex: none; }
-
-    /* Modals */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 16px; }
-    .modal { background: var(--card); width: 100%; max-width: 400px; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .hidden { display: none !important; }
-
-    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+    /* Fixed Navigation Bar at Bottom */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #E5E7EB; height: 68px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.03); }
+    .nav-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #9CA3AF; font-size: 0.75rem; font-weight: 700; gap: 4px; background: none; border: none; cursor: pointer; }
+    .nav-link.active { color: var(--primary); }
+    .nav-icon { font-size: 1.3rem; }
+    .center-nav-btn { width: 52px; height: 52px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-top: -24px; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.4); text-decoration: none; }
   </style>
 </head>
 <body>
 
-  <!-- App Header -->
-  <header class="header">
-    <div class="logo-container" onclick="location.reload()">
-      <img src="/logo.png" alt="allergyZEN" class="logo" onerror="this.src='/images/allergyzen-logo.png'">
-      <span class="app-title">allergyZEN</span>
-    </div>
-    <button id="pwa-install-btn" class="pwa-install-btn" onclick="installPWA()">📲 Add to Screen</button>
-  </header>
-
-  <main class="main">
-    <!-- User Greeting & Personal QR Launcher -->
-    <div class="greeting">
-      <div>
-        <h1 id="greeting-name">Welcome Back</h1>
-        <p id="greeting-quote">Breathe easy. Your spectrum is active.</p>
-      </div>
-      <div class="user-qr-trigger" onclick="openUserQRModal()" title="Show My QR Code">
-        <span style="font-size: 1.4rem;">📱</span>
-        <div style="font-size: 0.65rem; color: white; font-weight: 700;">MY QR</div>
-      </div>
+  <div class="launchpad-container">
+    
+    <!-- App Branding -->
+    <img src="/logo.png" class="brand-logo" alt="allergyZEN" onerror="this.src='/images/allergyzen-logo.png'">
+    <h1 class="brand-title">allergyZEN</h1>
+    <div class="brand-subtitle">wellness <span style="color: var(--boundary-blue);">💙</span></div>
+    
+    <div class="spectrum-dots">
+      <span class="dot" style="background: var(--safe-green);"></span>
+      <span class="dot" style="background: var(--caution-amber);"></span>
+      <span class="dot" style="background: var(--danger-red);"></span>
+      <span class="dot" style="background: var(--dislike-brown);"></span>
     </div>
 
-    <!-- Live QR Handshake Timer Banner -->
-    <div id="timer-card" class="card timer-card hidden">
-      <div class="timer-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="dot dot-blue"></span>
-          <strong style="color:var(--boundary-blue)">Handshake Active</strong>
-        </div>
-        <span id="handshake-duration-label" style="font-size: 0.75rem; color: #6B7280; font-weight: 600;">3-Hour Window</span>
-      </div>
-      <div class="timer-display" id="timer-display">03:00:00</div>
-      <p style="text-align:center; font-size:0.8rem; color: #4B5563;" id="business-info">Connected to Venue</p>
-      <button class="unshake-btn" onclick="terminateHandshake()">🔓 Revoke Handshake & Wipe Data</button>
+    <!-- Dynamic Context Greeting -->
+    <div class="greeting-box">
+      <h2 class="greeting-title" id="welcomeGreeting">Hey there,</h2>
+      <p class="greeting-tagline">Safety and serenity, hand in hand.</p>
+      <span class="tracking-counter" id="totalSensitivitiesCount">Loading active profile profiles...</span>
     </div>
 
-    <!-- Active Zen Spectrum Breakdown -->
-    <div class="card">
-      <div class="tab-group">
-        <button class="tab-btn active" id="tab-triggers" onclick="switchSpectrumTab('triggers')">🔴 🟠 🟤 Triggers & Dislikes</button>
-        <button class="tab-btn" id="tab-safe" onclick="switchSpectrumTab('safe')">🟢 💙 Safe & ED Boundaries</button>
+    <!-- Active Shield Protection Hub -->
+    <div class="shield-status-card">
+      <div class="shield-header">
+        <h3 class="shield-title" id="shieldOwnerName">Your Shield</h3>
+        <span id="shieldPillStatus" class="status-pill inactive">● Disabled</span>
       </div>
 
-      <div class="spectrum-grid">
-        <div class="spectrum-badge" onclick="filterByColor('red')">
-          <span class="dot dot-red"></span><br>
-          <span id="red-count">0</span> RED
-        </div>
-        <div class="spectrum-badge" onclick="filterByColor('amber')">
-          <span class="dot dot-amber"></span><br>
-          <span id="amber-count">0</span> AMBER
-        </div>
-        <div class="spectrum-badge" onclick="filterByColor('brown')">
-          <span class="dot dot-brown"></span><br>
-          <span id="brown-count">0</span> BROWN
-        </div>
-        <div class="spectrum-badge" onclick="filterByColor('green')">
-          <span class="dot dot-green"></span><br>
-          <span id="green-count">0</span> SAFE
-        </div>
-        <div class="spectrum-badge" onclick="filterByColor('blue')">
-          <span class="dot dot-blue"></span><br>
-          <span id="blue-count">0</span> BLUE
-        </div>
+      <!-- Quick Quick-Search Mock to Open Profile / Interactive Search Bar -->
+      <div class="search-bar-container" onclick="window.location.href='/profile.html'">
+        <span class="search-icon">🔍</span>
+        <div class="search-input-mock" id="searchBarPlaceholder">Set up your profile to start screening items...</div>
       </div>
     </div>
 
-    <!-- Universal Quick Search & Scanner Launcher -->
-    <div class="card">
-      <h3 style="font-size: 1rem; margin-bottom: 10px;">Universal Spectrum Search</h3>
-      <div class="search-bar-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Search 1,700+ triggers, foods, cosmetics...">
-        <button class="scan-btn-inline" onclick="location.href='/view.html?mode=scan'">📷 Scan</button>
-      </div>
-      <div id="search-results" class="search-results"></div>
+    <!-- Launcher Menu System Links -->
+    <div class="menu-grid">
+      <a href="/profile.html" class="menu-item">
+        <span class="menu-icon">👤</span>
+        <span class="menu-label">Manage Profile</span>
+      </a>
+      <a href="/view.html" class="menu-item">
+        <span class="menu-icon">🛡️</span>
+        <span class="menu-label">View Live Shield</span>
+      </a>
     </div>
 
-    <!-- ZenHealth Suite Snapshot -->
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1rem;">ZenHealth Tracker</h3>
-        <button onclick="location.href='/profile.html?tab=zenhealth'" style="color: var(--primary); background: none; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Manage Log +</button>
-      </div>
-      <div class="health-grid">
-        <div class="health-card">
-          <div class="health-val" id="val-bs">5.4</div>
-          <div class="health-lbl">Blood Sugar</div>
-        </div>
-        <div class="health-card">
-          <div class="health-val" id="val-bp">120/80</div>
-          <div class="health-lbl">Blood Press.</div>
-        </div>
-        <div class="health-card">
-          <div class="health-val" id="val-meds">2 Active</div>
-          <div class="health-lbl">Meds Logged</div>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- User QR Handshake Modal -->
-  <div id="user-qr-modal" class="modal-overlay hidden">
-    <div class="modal" style="text-align: center;">
-      <h3 style="color: var(--primary); margin-bottom: 8px;">Your AZ Handshake QR</h3>
-      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 16px;">Show this to partner servers, pharmacies, or medical staff to sync your safe boundaries.</p>
-      <div id="qr-code-display" style="padding: 16px; background: white; border: 1px solid var(--border); border-radius: 12px; display: inline-block; margin-bottom: 16px;">
-        <!-- QR Code will render dynamically -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=AZ-HANDSHAKE-USER-DEMO" alt="User QR Handshake" style="width: 180px; height: 180px;">
-      </div>
-      <div style="margin-bottom: 16px;">
-        <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px;">Handshake Duration:</label>
-        <select id="handshake-duration-select" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); width: 100%;">
-          <option value="1800000">30 Minutes</option>
-          <option value="3600000">1 Hour</option>
-          <option value="10800000" selected>3 Hours (Standard)</option>
-          <option value="86400000">24 Hours</option>
-        </select>
-      </div>
-      <button onclick="closeUserQRModal()" style="background: var(--primary); color: white; border: none; width: 100%; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;">Done / Close</button>
-    </div>
   </div>
 
-  <!-- Item Detail Modal (Interactive Spectrum Info) -->
-  <div id="item-modal" class="modal-overlay hidden">
-    <div class="modal">
-      <h3 id="modal-item-title" style="color: var(--text); margin-bottom: 4px;">Item Details</h3>
-      <span id="modal-item-category" style="font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Category</span>
-      <div id="modal-item-content" style="margin: 16px 0; font-size: 0.85rem; line-height: 1.4;"></div>
-      <div id="modal-safe-alt-section" class="hidden" style="background: #ECFDF5; border: 1px solid #10B981; padding: 10px; border-radius: 10px; margin-bottom: 16px;">
-        <strong style="color: #047857; font-size: 0.8rem; display: block; margin-bottom: 4px;">Safe Alternative Identified 🖼️</strong>
-        <div id="safe-alt-content" style="font-size: 0.8rem; color: #065F46;"></div>
-      </div>
-      <button onclick="closeItemModal()" style="background: #F3F4F6; color: var(--text); border: none; width: 100%; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
-    </div>
-  </div>
-
-  <!-- Bottom Navigation -->
+  <!-- Global Footer Sticky App Navbar Navigation -->
   <nav class="bottom-nav">
-    <button class="nav-item" onclick="location.href='/view.html?mode=scan'"><span>🔍</span><span>Scan</span></button>
-    <button class="nav-item" onclick="location.href='/profile.html?tab=safe'"><span>🟢</span><span>Safe</span></button>
-    <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
-    <button class="nav-item" onclick="location.href='/profile.html?tab=triggers'"><span>🚫</span><span>Triggers</span></button>
-    <button class="nav-item" onclick="location.href='/profile.html'"><span>⚙️</span><span>Profile</span></button>
+    <a href="/profile.html" class="nav-link">
+      <span class="nav-icon">🔍</span>
+      <span>Scan</span>
+    </a>
+    <a href="/profile.html" class="nav-link">
+      <span class="nav-icon">🛡️</span>
+      <span>Safe</span>
+    </a>
+    <a href="/" class="center-nav-btn">🏠</a>
+    <a href="/profile.html" class="nav-link">
+      <span class="nav-icon">💙</span>
+      <span>Boundaries</span>
+    </a>
+    <a href="/view.html" class="nav-link">
+      <span class="nav-icon">📊</span>
+      <span>ZenHealth</span>
+    </a>
   </nav>
 
-  <!-- Profile & Engine Logic -->
+  <!-- Script Core Engines Injection -->
+  <script src="/Profile.js"></script>
   <script src="/profile.js"></script>
   <script src="/js/profile.js"></script>
   <script>
-    let allergenList = [];
-    let deferredPrompt = null;
+    function initializeLaunchpad() {
+      const welcomeGreeting = document.getElementById('welcomeGreeting');
+      const totalSensitivitiesCount = document.getElementById('totalSensitivitiesCount');
+      const shieldOwnerName = document.getElementById('shieldOwnerName');
+      const shieldPillStatus = document.getElementById('shieldPillStatus');
+      const searchBarPlaceholder = document.getElementById('searchBarPlaceholder');
 
-    // PWA Install Prompt Handler
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwa-install-btn').style.display = 'block';
-    });
+      // Safeguard profile extraction
+      const hasEngine = (typeof userProfile !== 'undefined');
+      const profile = hasEngine ? userProfile.getActiveProfile() : null;
+      const remainingTime = hasEngine ? userProfile.getProtectionTimeRemaining() : 0;
 
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            document.getElementById('pwa-install-btn').style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      }
-    }
+      if (profile && profile.name) {
+        // Render customized client variables dynamically
+        welcomeGreeting.innerText = `Hey ${profile.name},`;
+        shieldOwnerName.innerText = `${profile.name}'s Shield`;
 
-    // Load 1,700+ Database
-    async function initDatabase() {
-      try {
-        const response = await fetch('/allergens.json');
-        allergenList = await response.json();
-      } catch (e) {
-        console.warn("Local allergens.json backup loaded or waiting for server fetch.");
-      }
-    }
+        // Collate item matrix counts across the entire customized Zen Spectrum
+        const items = profile.items || {};
+        const redCount = (items.red || []).length;
+        const amberCount = (items.amber || []).length;
+        const brownCount = (items.brown || []).length;
+        const blueCount = (items.blue || []).length;
+        const totalTriggers = redCount + amberCount + brownCount + blueCount;
 
-    // Update Spectrum Counts & ZenHealth UI
-    function updateUI() {
-      if (typeof userProfile === 'undefined') return;
-      const profile = userProfile.getActiveProfile ? userProfile.getActiveProfile() : null;
-      if (!profile) return;
+        totalSensitivitiesCount.innerText = `Tracking ${totalTriggers} triggers across your Zen Spectrum.`;
 
-      if (profile.name) document.getElementById('greeting-name').textContent = `Hey ${profile.name},`;
-      
-      // Spectrum Counts
-      const items = profile.items || { red: [], amber: [], brown: [], green: [], blue: [] };
-      document.getElementById('red-count').textContent = items.red ? items.red.length : 0;
-      document.getElementById('amber-count').textContent = items.amber ? items.amber.length : 0;
-      document.getElementById('brown-count').textContent = items.brown ? items.brown.length : 0;
-      document.getElementById('green-count').textContent = items.green ? items.green.length : 0;
-      document.getElementById('blue-count').textContent = items.blue ? items.blue.length : 0;
-
-      // ZenHealth Snapshot
-      if (profile.zenHealth) {
-        document.getElementById('val-bs').textContent = profile.zenHealth.bloodSugar || '5.4';
-        document.getElementById('val-bp').textContent = profile.zenHealth.bloodPressure || '120/80';
-        document.getElementById('val-meds').textContent = (profile.zenHealth.medications ? profile.zenHealth.medications.length : 0) + ' Logged';
-      }
-    }
-
-    // Dynamic Timer & Handshake Tracking
-    function updateTimerDisplay() {
-      if (typeof userProfile === 'undefined') return;
-      const remaining = userProfile.getProtectionTimeRemaining ? userProfile.getProtectionTimeRemaining() : 0;
-      const card = document.getElementById('timer-card');
-      
-      if (remaining > 0) {
-        card.classList.remove('hidden');
-        const h = Math.floor(remaining / 3600000);
-        const m = Math.floor((remaining % 3600000) / 60000);
-        const s = Math.floor((remaining % 60000) / 1000);
-        document.getElementById('timer-display').textContent = 
-          `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        
-        const venueName = (userProfile.session && userProfile.session.businessName) ? userProfile.session.businessName : 'Partner Venue';
-        document.getElementById('business-info').textContent = `Connected to ${venueName}`;
+        if (remainingTime > 0) {
+          shieldPillStatus.className = "status-pill active";
+          shieldPillStatus.innerText = "● PROTECTED";
+          searchBarPlaceholder.innerText = "Search safe alternatives or foods...";
+          
+          // Auto redirect to active dashboard directly if shield window is live
+          // window.location.href = "/view.html"; 
+        } else {
+          shieldPillStatus.className = "status-pill inactive";
+          shieldPillStatus.innerText = "● EXPIRED";
+          searchBarPlaceholder.innerText = "Handshake window closed. Click to activate shield.";
+        }
       } else {
-        card.classList.add('hidden');
+        // Fallback default placeholder configuration
+        welcomeGreeting.innerText = "Welcome to allergyZEN,";
+        totalSensitivitiesCount.innerText = "Your personalized wellness guardian.";
+        shieldOwnerName.innerText = "Guest Shield";
+        shieldPillStatus.className = "status-pill inactive";
+        shieldPillStatus.innerText = "● Setup Needed";
+        searchBarPlaceholder.innerText = "Click here to set up your dietary boundaries...";
       }
     }
 
-    function terminateHandshake() {
-      if (confirm("Revoke handshake instantly? Your active parameters will be wiped from the venue dashboard immediately.")) {
-        if (userProfile.clearHandshake) userProfile.clearHandshake();
-        updateTimerDisplay();
-      }
-    }
-
-    // Tab Switching
-    function switchSpectrumTab(tab) {
-      document.getElementById('tab-triggers').classList.toggle('active', tab === 'triggers');
-      document.getElementById('tab-safe').classList.toggle('active', tab === 'safe');
-    }
-
-    // Search Engine Logic
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      const val = e.target.value.toLowerCase().trim();
-      const results = document.getElementById('search-results');
-      if (val.length < 2) { results.innerHTML = ''; return; }
-
-      const matches = allergenList.filter(i => i.name.toLowerCase().includes(val)).slice(0, 5);
-      
-      if (matches.length === 0) {
-        results.innerHTML = `<div style="padding:10px; color:#6B7280; font-size:0.85rem;">No exact match. Querying AI Spectrum database...</div>`;
-        return;
-      }
-
-      results.innerHTML = matches.map(m => `
-        <div class="result-item">
-          <div onclick="inspectItem('${m.name}', '${m.category}')" style="cursor:pointer;">
-            <strong>${m.name}</strong><br>
-            <small style="color:#6B7280;">${m.category}</small>
-          </div>
-          <button onclick="userProfile.addItem('${m.name}', '${m.category}', 'red'); updateUI();" style="color:var(--primary); background:none; border:1px solid var(--primary); padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:600;">+ Spectrum</button>
-        </div>
-      `).join('');
-    });
-
-    // Modal Controls
-    function openUserQRModal() { document.getElementById('user-qr-modal').classList.remove('hidden'); }
-    function closeUserQRModal() { document.getElementById('user-qr-modal').classList.add('hidden'); }
-    function closeItemModal() { document.getElementById('item-modal').classList.add('hidden'); }
-
-    function inspectItem(name, category) {
-      document.getElementById('modal-item-title').textContent = name;
-      document.getElementById('modal-item-category').textContent = category;
-      document.getElementById('modal-item-content').innerHTML = `<p><strong>Potential Triggers & Aliases:</strong> Cross-checked against 1,700+ spectrum databases.</p>`;
-      document.getElementById('item-modal').classList.remove('hidden');
-    }
-
-    // Initialize Page
-    window.onload = () => {
-      if (typeof userProfile !== 'undefined' && userProfile.init) userProfile.init();
-      updateUI();
-      initDatabase();
-      setInterval(updateTimerDisplay, 1000);
-    };
+    window.onload = initializeLaunchpad;
   </script>
 </body>
 </html>
