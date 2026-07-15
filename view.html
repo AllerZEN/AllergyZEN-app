@@ -93,7 +93,7 @@
     .scan-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     
     #qr-reader { width: 100%; max-width: 350px; background: #000; border-radius: 16px; overflow: hidden; }
-    /* Overriding default library UI styles to match allerZEN */
+    /* Overriding default library UI styles to match allergyZEN */
     #qr-reader button { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; margin: 8px; cursor: pointer; }
     #qr-reader select { padding: 6px; border-radius: 6px; border: 1px solid var(--border); margin: 8px; }
 
@@ -256,6 +256,42 @@
       alert(`Handshake Successful! Your ${selectedMinutes}-minute Safety Shield is active at ${businessName}.`);
     }
 
+    // Spectrum Ingredient Cross-Referencing Logic
+    function crossReferenceScan(scannedContent) {
+      const profile = userProfile.getActiveProfile();
+      const items = profile.items || {};
+      const normalizedContent = scannedContent.toLowerCase();
+
+      let matchedRed = [];
+      let matchedAmber = [];
+      let matchedBrown = [];
+      
+      // Helper function to check matches in spectrum arrays
+      const checkMatches = (list, targetArray) => {
+        if (!list) return;
+        list.forEach(trigger => {
+          if (normalizedContent.includes(trigger.toLowerCase())) {
+            targetArray.push(trigger);
+          }
+        });
+      };
+
+      checkMatches(items.red, matchedRed);
+      checkMatches(items.amber, matchedAmber);
+      checkMatches(items.brown, matchedBrown);
+
+      // Output formatting showing only 🔴, 🟠, 🟢 as requested
+      if (matchedRed.length > 0) {
+        alert(`🔴 CRITICAL TRIGGER DETECTED!\n\nMatches: ${matchedRed.join(', ')}\n\nAvoid contact or consumption.`);
+      } else if (matchedAmber.length > 0) {
+        alert(`🟠 SENSITIVITY DETECTED!\n\nMatches: ${matchedAmber.join(', ')}\n\nProceed with caution.`);
+      } else if (matchedBrown.length > 0) {
+        alert(`🟤 DISLIKE DETECTED!\n\nMatches: ${matchedBrown.join(', ')}`);
+      } else {
+        alert(`🟢 SAFE\n\nNo active spectrum triggers matched this scan.`);
+      }
+    }
+
     // Camera Scan Activation Functions
     function openScanner() {
       document.getElementById('scanPanel').classList.add('open');
@@ -272,13 +308,21 @@
             (decodedText) => {
               // On Scan Success
               closeScanner();
-              try {
-                // Check if the QR payload contains a valid JSON or business name
-                const data = JSON.parse(decodedText);
-                executeHandshake(data.id || "QR-SCAN", data.name || "allergyZEN Bistro");
-              } catch(e) {
-                // If standard string scanned
-                executeHandshake("QR-SCAN", decodedText || "Local Partner Venue");
+              
+              // 1. Check if it's an allergyZEN Business Handshake QR
+              if (decodedText.startsWith('{') && decodedText.includes('businessId')) {
+                try {
+                  const data = JSON.parse(decodedText);
+                  executeHandshake(data.businessId || "QR-SCAN", data.name || "allergyZEN Bistro");
+                } catch(e) {
+                  crossReferenceScan(decodedText);
+                }
+              } else if (decodedText.includes('allergyzen.app/partner')) {
+                // If scanned a business URL link
+                executeHandshake("QR-SCAN", "Partner Venue");
+              } else {
+                // 2. Otherwise, treat it as a product, ingredient list, or object scan
+                crossReferenceScan(decodedText);
               }
             },
             (errorMessage) => {
@@ -329,7 +373,7 @@
         dot.classList.remove('pulse');
         venueBadge.innerText = "Not Connected";
         label.innerText = "SHIELD STANDBY";
-        pairInfo.innerText = "Scan a business QR code to activate your time-bound safety shield."
+        pairInfo.innerText = "Scan a product or business QR code to activate safety shield."
         document.getElementById('timerDisplay').innerText = "00:00:00";
         handshakeControls.style.display = "none";
         if (timerInterval) clearInterval(timerInterval);
@@ -368,9 +412,9 @@
       let html = "";
       if (items.red?.length) html += `<div class="pill pill-red">🔴 ${items.red.length} Critical</div>`;
       if (items.amber?.length) html += `<div class="pill pill-amber">🟠 ${items.amber.length} Sensitivities</div>`;
-      if (items.brown?.length) html += `<div class="pill pill-brown">🟤 ${items.brown.length} Dislikes</div>`;
+      if (items.brown?.length) html += `<div class="pill pill-brown">🟤 ${items.brown.length} Dislikes</div>`; //
       if (items.green?.length) html += `<div class="pill pill-green">🟢 ${items.green.length} Safe</div>`;
-      if (items.blue?.length) html += `<div class="pill pill-blue">💙 ${items.blue.length} ED Boundaries</div>`;
+      if (items.blue?.length) html += `<div class="pill pill-blue">💙 ${items.blue.length} ED Boundaries</div>`; //
 
       container.innerHTML = html || `<span style="font-size: 0.8rem; color: #9CA3AF;">No items added to your Zen Spectrum yet.</span>`;
     }
@@ -382,7 +426,6 @@
       
       let tips = [];
 
-      // Contextual tips based on user choices
       if (items.red && items.red.length > 0) {
         tips.push(`<div class="kip-item">🛡️ <span class="kip-highlight">Pro-Tip:</span> Your high-risk alerts are live in the Partner Portal. You don't have to explain—the tech does it for you.</div>`);
       }
@@ -434,9 +477,19 @@
       }
     }
 
+    // Modified test scan: Simulates a simple ingredient text scan to test cross-referencing
     function simulateScan() {
       closeScanner();
-      executeHandshake("VENUE-01", "allergyZEN Bistro & Cafe");
+      
+      // Quick prompt to choose what to mock scan
+      const simulatedScanValue = prompt(
+        "Enter simulated scan text (e.g., ingredients, barcode data, or custom text):", 
+        "Contains Soy Lecithin, Wenge Wood Oils, and Gluten"
+      );
+      
+      if (simulatedScanValue !== null) {
+        crossReferenceScan(simulatedScanValue);
+      }
     }
 
     window.onload = () => {
