@@ -192,14 +192,14 @@
   <!-- Webcam Scanner slide-up Panel -->
   <div class="scan-overlay" id="scanPanel">
     <div class="scan-header">
-      <span class="scan-title">📷 scanQR | Live Handshake Scanner</span>
+      <span class="scan-title">📷 scanQR | Live Safety Scanner</span>
       <button class="btn-close-scan" onclick="closeScanner()">&times;</button>
     </div>
     <div class="scan-body">
       <div id="qr-reader"></div>
       <div style="margin-top: 20px; text-align: center; width: 100%;">
         <p style="font-size: 0.85rem; color: #6B7280; margin-bottom: 12px;">
-          Position the business QR code inside the viewfinder.
+          Position an ingredient list, product barcode, or business QR code inside the viewfinder.
         </p>
         <button class="btn-action btn-outline" style="width: auto; display: inline-flex;" onclick="simulateScan()">
           🧪 Simulate Demo scan
@@ -412,9 +412,9 @@
       let html = "";
       if (items.red?.length) html += `<div class="pill pill-red">🔴 ${items.red.length} Critical</div>`;
       if (items.amber?.length) html += `<div class="pill pill-amber">🟠 ${items.amber.length} Sensitivities</div>`;
-      if (items.brown?.length) html += `<div class="pill pill-brown">🟤 ${items.brown.length} Dislikes</div>`; //
+      if (items.brown?.length) html += `<div class="pill pill-brown">🟤 ${items.brown.length} Dislikes</div>`;
       if (items.green?.length) html += `<div class="pill pill-green">🟢 ${items.green.length} Safe</div>`;
-      if (items.blue?.length) html += `<div class="pill pill-blue">💙 ${items.blue.length} ED Boundaries</div>`; //
+      if (items.blue?.length) html += `<div class="pill pill-blue">💙 ${items.blue.length} ED Boundaries</div>`;
 
       container.innerHTML = html || `<span style="font-size: 0.8rem; color: #9CA3AF;">No items added to your Zen Spectrum yet.</span>`;
     }
