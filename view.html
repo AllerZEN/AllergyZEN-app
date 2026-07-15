@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#8E55A2">
   <title>allerZEN | My Safety Shield & Dashboard</title>
   <link rel="stylesheet" href="/style.css">
+  <!-- html5-qrcode library for local, zero-leakage, high-fidelity camera QR scanning -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" integrity="sha512-r6rDA7W6ZeQhvl8S7yRV0VUjLDVp/qlnm/6RFXjERbZs94vOPsX8LxJGn6flOC3HS1GPsz55gYUs5G15R3UXCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     :root {
       --primary: #8E55A2;
@@ -53,6 +55,11 @@
     .timer-text { font-size: 2.2rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
     .pair-info { font-size: 0.85rem; color: #6B7280; margin-top: 6px; }
 
+    /* Handshake Settings Options */
+    .handshake-options { display: flex; justify-content: space-between; gap: 6px; margin: 12px 0; }
+    .opt-btn { flex: 1; padding: 8px 4px; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--border); border-radius: 8px; background: white; color: #4B5563; cursor: pointer; transition: 0.2s; }
+    .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
     /* Zen Spectrum Summary Pills */
     .spectrum-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .pill { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 4px; }
@@ -76,6 +83,19 @@
     .btn-purple { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.25); }
     .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
     .btn-danger { background: #FEE2E2; color: var(--danger-red); border: 1px solid #FCA5A5; }
+
+    /* Webcam Scan Panel (Slide-up Overlay) */
+    .scan-overlay { position: fixed; bottom: -100%; left: 0; right: 0; height: 85%; background: var(--card); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,0.15); transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 2000; display: flex; flex-direction: column; }
+    .scan-overlay.open { bottom: 0; }
+    .scan-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .scan-title { font-weight: 700; color: var(--text); }
+    .btn-close-scan { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9CA3AF; }
+    .scan-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+    
+    #qr-reader { width: 100%; max-width: 350px; background: #000; border-radius: 16px; overflow: hidden; }
+    /* Overriding default library UI styles to match allerZEN */
+    #qr-reader button { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; margin: 8px; cursor: pointer; }
+    #qr-reader select { padding: 6px; border-radius: 6px; border: 1px solid var(--border); margin: 8px; }
 
     /* Bottom Navigation */
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
@@ -107,10 +127,24 @@
       </div>
       <div class="timer-container">
         <div class="timer-text" id="timerDisplay">00:00:00</div>
+        
+        <!-- Interactive Handshake Options -->
+        <div class="handshake-options">
+          <button class="opt-btn" onclick="selectDuration(30)" id="opt-30">30 Min</button>
+          <button class="opt-btn" onclick="selectDuration(60)" id="opt-60">1 Hour</button>
+          <button class="opt-btn active" onclick="selectDuration(180)" id="opt-180">3 Hours</button>
+          <button class="opt-btn" onclick="selectDuration(1440)" id="opt-1440">24 Hours</button>
+        </div>
+
         <p id="pairInfo" class="pair-info">
           Scan a business QR code to activate your time-bound safety shield.
         </p>
       </div>
+
+      <div style="margin-top: 8px;">
+        <button class="btn-action btn-purple" onclick="openScanner()">📷 Scan QR & Unshield Safely</button>
+      </div>
+
       <div id="handshakeControls" style="display: none; margin-top: 12px;">
         <button class="btn-action btn-danger" onclick="revokeHandshake()">🛑 Revoke & Unshake (Wipe Shared Data)</button>
       </div>
@@ -155,9 +189,28 @@
 
   </div>
 
+  <!-- Webcam Scanner slide-up Panel -->
+  <div class="scan-overlay" id="scanPanel">
+    <div class="scan-header">
+      <span class="scan-title">📷 scanQR | Live Handshake Scanner</span>
+      <button class="btn-close-scan" onclick="closeScanner()">&times;</button>
+    </div>
+    <div class="scan-body">
+      <div id="qr-reader"></div>
+      <div style="margin-top: 20px; text-align: center; width: 100%;">
+        <p style="font-size: 0.85rem; color: #6B7280; margin-bottom: 12px;">
+          Position the business QR code inside the viewfinder.
+        </p>
+        <button class="btn-action btn-outline" style="width: auto; display: inline-flex;" onclick="simulateScan()">
+          🧪 Simulate Demo scan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <button class="nav-item" onclick="location.href='/view.html?mode=scan'"><span>🔍</span><span>Scan</span></button>
+    <button class="nav-item" onclick="openScanner()"><span>🔍</span><span>Scan</span></button>
     <button class="nav-item" onclick="location.href='/profile.html?tab=safe'"><span>🟢</span><span>Safe</span></button>
     <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
     <button class="nav-item" onclick="location.href='/profile.html?tab=triggers'"><span>🚫</span><span>Triggers</span></button>
@@ -169,17 +222,83 @@
   <script src="/js/profile.js"></script>
   <script>
     let timerInterval = null;
+    let selectedMinutes = 180; // Default 3 hours
+    let html5QrScanner = null;
 
     function initView() {
       updateDashboard();
-      populateKIP(); //
+      populateKIP();
       loadUserNotes();
       renderSpectrumSummary();
       
       // Check query string for scan trigger
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('mode') === 'scan') {
-        simulateScan();
+        openScanner();
+      }
+    }
+
+    // Select custom durations (30 min, 1 hr, 3 hr, 24 hr)
+    function selectDuration(mins) {
+      selectedMinutes = mins;
+      document.querySelectorAll('.opt-btn').forEach(btn => btn.classList.remove('active'));
+      const durationBtn = document.getElementById(`opt-${mins}`);
+      if (durationBtn) {
+        durationBtn.classList.add('active');
+      }
+    }
+
+    // Handshake execution logic
+    function executeHandshake(businessId, businessName) {
+      const durationMs = selectedMinutes * 60 * 1000;
+      userProfile.startHandshake(durationMs, businessId, businessName);
+      updateDashboard();
+      alert(`Handshake Successful! Your ${selectedMinutes}-minute Safety Shield is active at ${businessName}.`);
+    }
+
+    // Camera Scan Activation Functions
+    function openScanner() {
+      document.getElementById('scanPanel').classList.add('open');
+      
+      // Initialize the scanner on opening
+      setTimeout(() => {
+        try {
+          html5QrScanner = new Html5Qrcode("qr-reader");
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+          
+          html5QrScanner.start(
+            { facingMode: "environment" }, 
+            config,
+            (decodedText) => {
+              // On Scan Success
+              closeScanner();
+              try {
+                // Check if the QR payload contains a valid JSON or business name
+                const data = JSON.parse(decodedText);
+                executeHandshake(data.id || "QR-SCAN", data.name || "allergyZEN Bistro");
+              } catch(e) {
+                // If standard string scanned
+                executeHandshake("QR-SCAN", decodedText || "Local Partner Venue");
+              }
+            },
+            (errorMessage) => {
+              // Quiet failures to avoid console flooding during focus adjustments
+            }
+          ).catch(err => {
+            console.warn("Camera start failed: ", err);
+          });
+        } catch (e) {
+          console.error("Scanner setup error: ", e);
+        }
+      }, 300);
+    }
+
+    function closeScanner() {
+      document.getElementById('scanPanel').classList.remove('open');
+      if (html5QrScanner) {
+        html5QrScanner.stop().then(() => {
+          html5QrScanner = null;
+        }).catch(err => console.warn(err));
       }
     }
 
@@ -199,8 +318,8 @@
         const session = userProfile.session.protectionWindow;
         venueBadge.innerText = session.businessName || "Connected Venue";
         
-        const hasBlueBoundaries = profile.items?.blue && profile.items.blue.length > 0; //
-        label.innerText = hasBlueBoundaries ? "SAFE-EXPERIENCE PULSE" : "SHIELD PULSING"; //
+        const hasBlueBoundaries = profile.items?.blue && profile.items.blue.length > 0;
+        label.innerText = hasBlueBoundaries ? "SAFE-EXPERIENCE PULSE" : "SHIELD PULSING";
         pairInfo.innerText = "Active live handshake window with partner kitchen. Automatic data wipe active.";
         
         handshakeControls.style.display = "block";
@@ -256,7 +375,7 @@
       container.innerHTML = html || `<span style="font-size: 0.8rem; color: #9CA3AF;">No items added to your Zen Spectrum yet.</span>`;
     }
 
-    function populateKIP() { //
+    function populateKIP() {
       const profile = userProfile.getActiveProfile();
       const kipDetails = document.getElementById('kip-details');
       const items = profile.items || {};
@@ -268,11 +387,11 @@
         tips.push(`<div class="kip-item">🛡️ <span class="kip-highlight">Pro-Tip:</span> Your high-risk alerts are live in the Partner Portal. You don't have to explain—the tech does it for you.</div>`);
       }
 
-      if (items.amber && (items.amber.includes('Terpenes') || items.amber.includes('Lab Chemicals'))) { //
+      if (items.amber && (items.amber.includes('Terpenes') || items.amber.includes('Lab Chemicals'))) {
         tips.push(`<div class="kip-item">🌲 <span class="kip-highlight">Did you know?</span> Terpenes and lab excipients are common in 'natural' compounds. Your shield flags these hidden triggers.</div>`);
       }
 
-      if (items.blue && items.blue.length > 0) { //
+      if (items.blue && items.blue.length > 0) {
         tips.push(`<div class="kip-item">💙 <span class="kip-highlight">Safe-Experience:</span> We've signaled staff to use neutral language. Focus on the texture and joy of the meal, not the pressure.</div>`);
       }
 
@@ -282,9 +401,11 @@
 
       // ZenHealth Medication Alerts
       const medAlerts = userProfile.crossCheckMedications ? userProfile.crossCheckMedications() : [];
-      medAlerts.forEach(alert => {
-        tips.push(`<div class="kip-item" style="border-left-color: var(--caution-amber);">🩺 <span class="kip-highlight">Medication Alert (${alert.med}):</span> ${alert.note}</div>`);
-      });
+      if (medAlerts && medAlerts.length > 0) {
+        medAlerts.forEach(alert => {
+          tips.push(`<div class="kip-item" style="border-left-color: var(--caution-amber);">🩺 <span class="kip-highlight">Medication Alert (${alert.med}):</span> ${alert.note}</div>`);
+        });
+      }
 
       kipDetails.innerHTML = tips.length > 0 ? tips.join('') : "<p style='font-size:0.85rem; color:#6B7280;'>Select items in your profile to unlock contextual safety insights here.</p>";
     }
@@ -314,9 +435,8 @@
     }
 
     function simulateScan() {
-      userProfile.startHandshake(3 * 60 * 60 * 1000, "VENUE-01", "allergyZEN Bistro & Cafe"); //
-      updateDashboard();
-      alert("Simulated QR Scan Successful! 3-Hour Handshake Window Activated.");
+      closeScanner();
+      executeHandshake("VENUE-01", "allergyZEN Bistro & Cafe");
     }
 
     window.onload = () => {
