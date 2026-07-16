@@ -205,3 +205,65 @@ function navigateToSafeTab() {
 
 // Automatically load profiles from memory space instantly when file mounts
 userProfile.loadFromStorage();
+// ==========================================
+// AUTOMATED BADGE RENDERING LINK
+// ==========================================
+
+/**
+ * Automatically targets the allergyZEN UI containers and renders 
+ * interactive badges linked directly to the Knowledge Base.
+ */
+function renderAllergyZenBadges() {
+  const activeProfile = window.userProfile.getActiveProfile();
+  if (!activeProfile || !activeProfile.items) return;
+
+  // Map your Zen Spectrum categories to your HTML container IDs
+  const spectrumMap = {
+    red: { containerId: 'red-triggers-container', color: '#EF4444' },
+    amber: { containerId: 'amber-triggers-container', color: '#F97316' },
+    brown: { containerId: 'brown-triggers-container', color: '#78350F' },
+    green: { containerId: 'green-triggers-container', color: '#22C55E' },
+    blue: { containerId: 'blue-triggers-container', color: '#3B82F6' }
+  };
+
+  Object.keys(spectrumMap).forEach(key => {
+    const container = document.getElementById(spectrumMap[key].containerId);
+    if (!container) return; // Skips if container isn't found on the current page
+
+    const items = activeProfile.items[key] || [];
+    
+    // Clear static elements and inject fully interactive badges
+    container.innerHTML = items.map(item => `
+      <span class="badge" 
+            style="display: inline-flex; align-items: center; gap: 6px; margin: 4px; padding: 6px 12px; border-radius: 20px; background: #F3F4F6; border: 1px solid #E5E7EB; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer; transition: all 0.2s;" 
+            onclick="handleTriggerClick('${item.replace(/'/g, "\\'")}')"
+            onmouseover="this.style.backgroundColor='#E5E7EB'"
+            onmouseout="this.style.backgroundColor='#F3F4F6'">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${spectrumMap[key].color}; display: inline-block;"></span>
+        ${item}
+        <button class="delete-btn" 
+                style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 1rem; padding: 0 2px; line-height: 1;"
+                onclick="event.stopPropagation(); removeUserProfileItem('${key}', '${item.replace(/'/g, "\\'")}')">&times;</button>
+      </span>
+    `).join('');
+  });
+}
+
+/**
+ * Global item removal handler supporting state preservation
+ */
+function removeUserProfileItem(category, item) {
+  const activeProfile = window.userProfile.getActiveProfile();
+  if (activeProfile && activeProfile.items[category]) {
+    activeProfile.items[category] = activeProfile.items[category].filter(i => i !== item);
+    window.userProfile.saveToStorage();
+    renderAllergyZenBadges(); // Refresh view instantly
+  }
+}
+
+// Run rendering immediately when document finishes parsing layout structures
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderAllergyZenBadges);
+} else {
+  renderAllergyZenBadges();
+}
