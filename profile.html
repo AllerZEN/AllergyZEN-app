@@ -280,12 +280,11 @@
     <button class="nav-item" onclick="location.href='/profile.html'"><span>⚙️</span><span>Profile</span></button>
   </nav>
 
-  <!-- Script Logic -->
+  <!-- Script Logic Links -->
   <script src="/profile.js"></script>
-  <script src="/js/profile.js"></script>
   <script>
     let currentProfile = {
-      items: { red: ["Peanuts", "Shellfish"], amber: ["Lactose", "Terpenes", "Lab Chemicals"], brown: ["Cilantro"], green: ["Oat Milk"], blue: ["Soft Textures", "No Strong Smells"] },
+      items: { red: ["Peanuts", "Shellfish", "Croscarmellose Sodium"], amber: ["Lactose", "Terpenes", "SDS"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk", "Almond Milk"], blue: ["Texture Restrictions", "Neutral Language Request"] },
       zenHealth: { bloodSugar: "5.4", bloodPressure: "120/80", macros: "", medications: ["Metformin"] }
     };
 
@@ -293,11 +292,17 @@
       if (typeof userProfile !== 'undefined' && userProfile.getActiveProfile) {
         const loaded = userProfile.getActiveProfile();
         if (loaded) currentProfile = loaded;
+      } else {
+        const cached = localStorage.getItem('az_user_profile');
+        if (cached) currentProfile = JSON.parse(cached);
       }
+      
+      if (!currentProfile.items) currentProfile.items = { red: [], amber: [], brown: [], green: [], blue: [] };
+      if (!currentProfile.zenHealth) currentProfile.zenHealth = { bloodSugar: "", bloodPressure: "", macros: "", medications: [] };
+
       renderAllChips();
       loadZenHealthUI();
 
-      // Query Param Tab Auto-Switch
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
       if (tabParam) switchMainTab(tabParam);
@@ -319,9 +324,9 @@
         if (!container) return;
         const list = currentProfile.items[color] || [];
         container.innerHTML = list.map(item => `
-          <div class="chip active">
+          <div class="chip active" style="cursor: pointer;" onclick="if(typeof handleTriggerClick === 'function') handleTriggerClick('${item.replace(/'/g, "\\'")}')">
             <span>${item}</span>
-            <span class="chip-remove" onclick="removeSpectrumItem('${color}', '${item}')">×</span>
+            <span class="chip-remove" onclick="event.stopPropagation(); removeSpectrumItem('${color}', '${item.replace(/'/g, "\\'")}')">×</span>
           </div>
         `).join('');
       });
@@ -336,12 +341,14 @@
       input.value = '';
       renderAllChips();
       saveToStorage();
+      if (typeof renderAllergyZenBadges === 'function') renderAllergyZenBadges();
     }
 
     function removeSpectrumItem(color, item) {
       currentProfile.items[color] = currentProfile.items[color].filter(i => i !== item);
       renderAllChips();
       saveToStorage();
+      if (typeof renderAllergyZenBadges === 'function') renderAllergyZenBadges();
     }
 
     function loadZenHealthUI() {
@@ -387,8 +394,9 @@
     }
 
     function saveToStorage() {
-      if (typeof userProfile !== 'undefined' && userProfile.saveProfile) {
-        userProfile.saveProfile(currentProfile);
+      if (typeof userProfile !== 'undefined' && userProfile.saveToStorage) {
+        userProfile.profiles[userProfile.activeProfileIndex] = currentProfile;
+        userProfile.saveToStorage();
       } else {
         localStorage.setItem('az_user_profile', JSON.stringify(currentProfile));
       }
@@ -400,14 +408,13 @@
       saveToStorage();
       
       if (typeof userProfile !== 'undefined' && userProfile.startHandshake) {
-        userProfile.startHandshake(parseInt(duration));
+        userProfile.startHandshake(parseInt(duration), "local-venue", "Partner Establishment");
       }
       
       alert("Shield activated! Your parameters and timer window are live.");
       location.href = '/index.html';
     }
 
-    // Modal Handlers
     function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
     function closeBulkModal() { document.getElementById('modal-bulk').classList.add('hidden'); }
     function openTutorialModal() { document.getElementById('modal-tutorial').classList.remove('hidden'); }
@@ -426,6 +433,7 @@
       closeBulkModal();
       renderAllChips();
       saveToStorage();
+      if (typeof renderAllergyZenBadges === 'function') renderAllergyZenBadges();
       alert(`Successfully added ${items.length} items to ${color.toUpperCase()} spectrum!`);
     }
 
