@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#8E55A2">
   <title>Profile & Spectrum Setup | allergyZEN</title>
   <link rel="stylesheet" href="/style.css"> 
-  <!-- Tesseract OCR Engine for Reading Labels -->
+  <!-- Tesseract OCR Engine -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
@@ -64,6 +64,8 @@
     .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .chip { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: #F9FAFB; font-size: 0.85rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
     .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .chip.selectable { background: #F3E8FF; color: var(--royal-purple); border-color: #D8B4FE; }
+    .chip.selectable.selected { background: var(--royal-purple); color: white; }
     .chip-remove { font-weight: bold; margin-left: 4px; cursor: pointer; }
 
     .add-input-row { display: flex; gap: 8px; margin-top: 8px; }
@@ -206,19 +208,28 @@
       </div>
     </div>
 
-    <!-- SECTION 4: ZENMEALS -->
+    <!-- SECTION 4: ZENMEALS POWERED AI GENERATOR -->
     <div id="section-zenmeals" class="hidden">
       <div class="shield-card purple">
-        <div class="card-title" style="color: var(--royal-purple);">🥗 ZenMeals Generator</div>
-        <div class="card-desc">Generates recipes customized to your Zen Spectrum.</div>
-        
+        <div class="card-title" style="color: var(--royal-purple);">🥗 ZenMeals Kitchen AI Generator</div>
+        <div class="card-desc">Looking at what's in your kitchen or planning ahead? Select available items below:</div>
+
+        <!-- Interactive Kitchen Inventory Ticks -->
+        <label class="form-label" style="margin-top: 8px;">Select Available Kitchen Staples:</label>
+        <div class="chip-group" id="pantry-chips-container"></div>
+
+        <div class="form-group" style="margin-top: 8px;">
+          <label class="form-label">Additional Kitchen Ingredients (comma separated):</label>
+          <input type="text" id="custom-pantry-input" class="form-input" placeholder="e.g. Rice, Eggs, Spinach, Chicken, Tomato">
+        </div>
+
         <div style="margin-bottom: 12px; font-size: 0.8rem; background: #F3E8FF; padding: 10px; border-radius: 8px; color: var(--royal-purple);">
           <strong>Spectrum Key:</strong><br>
           <span class="ingredient-tag tag-safe">🟢 Confirmed Safe</span>
           <span class="ingredient-tag tag-unallocated">🟣 Deep Royal Purple = Unallocated / Neutral</span>
         </div>
 
-        <button class="activate-btn" style="background: var(--royal-purple); margin-bottom: 16px;" onclick="generateZenMeals()">✨ Generate Safe Meals Now</button>
+        <button class="activate-btn" style="background: var(--royal-purple); margin-bottom: 16px;" onclick="generateZenMealsAI()">✨ Generate Custom Safe Recipes</button>
 
         <div id="meal-results-container"></div>
       </div>
@@ -240,16 +251,31 @@
     </div>
   </div>
 
-  <!-- Dynamic Detail Modal -->
+  <!-- Dynamic Detail & Add to Spectrum Modal -->
   <div id="modal-trigger-info" class="modal-overlay hidden">
     <div class="modal">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 id="modal-info-title" style="color: var(--primary);">Item Details</h3>
+        <h3 id="modal-info-title" style="color: var(--primary);">Product / Item Scan Details</h3>
         <button onclick="closeInfoModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
       </div>
       <div id="modal-info-badge" style="margin-bottom: 10px;"></div>
       <p id="modal-info-body" style="font-size: 0.85rem; color: #374151; line-height: 1.5; margin-bottom: 16px; white-space: pre-line;"></p>
       
+      <!-- Quick Add to Spectrum Section -->
+      <div id="modal-add-spectrum-box" style="background: #F9FAFB; border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+        <strong style="font-size: 0.8rem; color: var(--primary);">➕ Add Scanned Item to Spectrum:</strong>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <select id="scan-add-color-select" class="form-input" style="padding:6px; font-size:0.8rem;">
+            <option value="red">🔴 Red (Critical)</option>
+            <option value="amber">🟠 Amber (Moderate)</option>
+            <option value="brown">🟤 Brown (Dislike)</option>
+            <option value="green">🟢 Green (Safe)</option>
+            <option value="blue">💙 Blue (Boundary)</option>
+          </select>
+          <button onclick="addScannedItemToSpectrum()" class="add-btn">Save</button>
+        </div>
+      </div>
+
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <button onclick="goToSafeAlternatives()" class="add-btn" style="background: var(--safe-green);">🟢 See Safe Alternatives in SAFE Tab</button>
         <button onclick="closeInfoModal()" style="background: #F3F4F6; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
@@ -261,7 +287,7 @@
   <div id="modal-scanner" class="modal-overlay hidden">
     <div class="modal" style="text-align: center;">
       <h3 style="color: var(--primary); margin-bottom: 8px;">📷 Live Safety Scanner</h3>
-      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Position ingredient text or label inside the frame</p>
+      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Position ingredient text or back label inside the frame</p>
       
       <!-- HD Viewfinder Frame -->
       <div style="position: relative; width: 100%; height: 260px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 12px;">
@@ -307,13 +333,34 @@
       zenHealth: { mode: "all", bloodSugar: "5.4", bloodPressure: "120/80" }
     };
 
+    let pantryStaples = ["Rice", "Oat Milk", "Quinoa", "Tofu", "Zucchini", "Carrots", "Spinach", "Chicken", "Eggs", "Potatoes", "Olive Oil"];
+    let selectedPantry = new Set(["Oat Milk", "Quinoa"]);
+    let lastScannedItemName = "";
+
     function initProfileUI() {
       const cached = localStorage.getItem('az_user_profile');
       if (cached) currentProfile = JSON.parse(cached);
       renderAllChips();
+      renderPantryChips();
       
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('mode') === 'scan') openScannerModal();
+    }
+
+    function renderPantryChips() {
+      const container = document.getElementById('pantry-chips-container');
+      if (!container) return;
+      container.innerHTML = pantryStaples.map(item => `
+        <div class="chip selectable ${selectedPantry.has(item) ? 'selected' : ''}" onclick="togglePantryItem('${item}')">
+          <span>${selectedPantry.has(item) ? '✓ ' : '+ '}${item}</span>
+        </div>
+      `).join('');
+    }
+
+    function togglePantryItem(item) {
+      if (selectedPantry.has(item)) selectedPantry.delete(item);
+      else selectedPantry.add(item);
+      renderPantryChips();
     }
 
     function switchMainTab(tab) {
@@ -361,6 +408,17 @@
       saveToStorage();
     }
 
+    function addScannedItemToSpectrum() {
+      const color = document.getElementById('scan-add-color-select').value;
+      if (!lastScannedItemName) return;
+      if (!currentProfile.items[color]) currentProfile.items[color] = [];
+      currentProfile.items[color].push(lastScannedItemName);
+      renderAllChips();
+      saveToStorage();
+      alert(`Added "${lastScannedItemName}" to ${color.toUpperCase()} spectrum!`);
+      closeInfoModal();
+    }
+
     function removeSpectrumItem(color, item) {
       currentProfile.items[color] = currentProfile.items[color].filter(i => i !== item);
       renderAllChips();
@@ -382,36 +440,48 @@
       document.getElementById('bulk-text-input').value = '';
     }
 
-    function generateZenMeals() {
+    function generateZenMealsAI() {
       const container = document.getElementById('meal-results-container');
+      const customInput = document.getElementById('custom-pantry-input').value;
+      const customItems = customInput ? customInput.split(',').map(i => i.trim()).filter(i => i) : [];
+      
+      const availableKitchen = [...Array.from(selectedPantry), ...customItems];
+
       const reds = (currentProfile.items.red || []).map(i => i.toLowerCase());
       const ambers = (currentProfile.items.amber || []).map(i => i.toLowerCase());
       const browns = (currentProfile.items.brown || []).map(i => i.toLowerCase());
       const greens = (currentProfile.items.green || []).map(i => i.toLowerCase());
 
-      const masterRecipes = [
-        { title: "Balanced Harvest Bowl", ingredients: ["Oat Milk", "Quinoa", "Sunflower Seed Butter", "Blueberries"] },
-        { title: "Safe Medley Stir-Fry", ingredients: ["Rice Noodles", "Tofu", "Zucchini", "Carrots"] },
-        { title: "Nourish Smoothie", ingredients: ["Oat Milk", "Banana", "Sunflower Seed Butter", "Spinach"] }
+      const recipeDatabase = [
+        { title: "Warm Harvest Bowl", ingredients: ["Quinoa", "Oat Milk", "Spinach", "Zucchini", "Olive Oil"] },
+        { title: "Pan-Seared Protein Stir-Fry", ingredients: ["Chicken", "Rice", "Carrots", "Zucchini", "Olive Oil"] },
+        { title: "Tofu Garden Medley", ingredients: ["Tofu", "Spinach", "Carrots", "Potatoes"] },
+        { title: "Comfort Egg & Potato Hash", ingredients: ["Eggs", "Potatoes", "Spinach", "Olive Oil"] },
+        { title: "Nourishing Green Smoothie", ingredients: ["Oat Milk", "Spinach", "Sunflower Seed Butter"] }
       ];
 
-      let html = "";
-      masterRecipes.forEach(recipe => {
-        let coversTrigger = recipe.ingredients.some(ing => 
+      let html = `<p style="font-size:0.8rem; color:#6B7280; margin-bottom:8px;">Generated using ingredients: <strong>${availableKitchen.join(', ')}</strong></p>`;
+      let count = 0;
+
+      recipeDatabase.forEach(recipe => {
+        let hasConflict = recipe.ingredients.some(ing => 
           reds.includes(ing.toLowerCase()) || ambers.includes(ing.toLowerCase()) || browns.includes(ing.toLowerCase())
         );
 
-        if (!coversTrigger) {
-          html += `<div style="background: #FFF; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;">
-            <strong style="color: var(--royal-purple); font-size: 0.95rem;">${recipe.title}</strong>
+        if (!hasConflict) {
+          count++;
+          html += `<div style="background: #FFF; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+            <strong style="color: var(--royal-purple); font-size: 0.95rem;">🍲 ${recipe.title}</strong>
             <div style="margin-top: 8px;">`;
 
           recipe.ingredients.forEach(ing => {
             const lower = ing.toLowerCase();
             if (greens.includes(lower)) {
-              html += `<span class="ingredient-tag tag-safe">🟢 ${ing}</span>`;
+              html += `<span class="ingredient-tag tag-safe">🟢 ${ing} (Safe Staple)</span>`;
+            } else if (availableKitchen.map(k => k.toLowerCase()).includes(lower)) {
+              html += `<span class="ingredient-tag tag-unallocated">🟣 ${ing} (In Pantry)</span>`;
             } else {
-              html += `<span class="ingredient-tag tag-unallocated">🟣 ${ing}</span>`;
+              html += `<span class="ingredient-tag tag-unallocated" style="opacity:0.6;">🟣 ${ing}</span>`;
             }
           });
 
@@ -419,7 +489,7 @@
         }
       });
 
-      if (!html) html = "<p style='font-size:0.85rem; color:#6B7280;'>No safe recipes matched your current strict constraints.</p>";
+      if (count === 0) html += "<p style='font-size:0.85rem; color:#6B7280;'>No safe recipes matched your current strict constraints. Try adding more pantry items!</p>";
       container.innerHTML = html;
     }
 
