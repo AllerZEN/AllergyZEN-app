@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#8E55A2">
   <title>Profile & Spectrum Setup | allergyZEN</title>
   <link rel="stylesheet" href="/style.css"> 
+  <!-- Tesseract OCR Engine for Reading Labels -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --primary: #8E55A2;
@@ -15,7 +17,7 @@
       --danger-red: #EF4444;
       --dislike-brown: #8B4513;
       --boundary-blue: #3B82F6;
-      --royal-purple: #4C1D95; /* Deep Royal Purple for non-spectrum items */
+      --royal-purple: #4C1D95;
       --background: #FAFAFA;
       --card: #FFFFFF;
       --text: #1F2937;
@@ -84,7 +86,7 @@
     .activate-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3); margin-top: 10px; }
 
     /* Bottom Nav */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-space-around; z-index: 1000; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border: none; background: none; cursor: pointer; flex: 1; }
     .nav-item.center { background: var(--primary); color: white; width: 54px; height: 54px; border-radius: 50%; margin-top: -24px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.4); flex: none; }
 
@@ -101,7 +103,7 @@
       <img src="/logo.png" alt="allergyZEN" class="logo" onerror="this.src='/images/allergyzen-logo.png'">
       <span class="app-title">allergyZEN</span>
     </div>
-    <button class="add-btn" onclick="openTutorialModal()">❓ Tutorial</button>
+    <button class="add-btn" onclick="alert('Tutorial: Add your triggers into Red, Amber, Brown, or Blue categories. The Live Scanner will read ingredient labels and check for hidden aliases!')">❓ Tutorial</button>
   </header>
 
   <div class="container">
@@ -129,7 +131,7 @@
         <div class="card-desc">Immediate high reactivity / Anaphylaxis risk.</div>
         <div class="chip-group" id="red-chips"></div>
         <div class="add-input-row">
-          <input type="text" id="input-red" class="add-input" placeholder="Add Red trigger (e.g. Peanuts, SDS)...">
+          <input type="text" id="input-red" class="add-input" placeholder="Add Red trigger (e.g. Aqua, Peanuts, SDS)...">
           <button class="add-btn" onclick="addSpectrumItem('red')">+ Add</button>
         </div>
       </div>
@@ -149,7 +151,7 @@
         <div class="card-desc">Aversions, non-allergic distaste, preferred omissions.</div>
         <div class="chip-group" id="brown-chips"></div>
         <div class="add-input-row">
-          <input type="text" id="input-brown" class="add-input" placeholder="Add Dislike (e.g. Cilantro, Olives)...">
+          <input type="text" id="input-brown" class="add-input" placeholder="Add Dislike (e.g. Cilantro, Mushrooms)...">
           <button class="add-btn" onclick="addSpectrumItem('brown')">+ Add</button>
         </div>
       </div>
@@ -174,7 +176,7 @@
         <div class="card-desc">Eating disorder boundaries, texture rules, non-judgmental preferences.</div>
         <div class="chip-group" id="blue-chips"></div>
         <div class="add-input-row">
-          <input type="text" id="input-blue" class="add-input" placeholder="Add ED Boundary (e.g. Smooth Texture, No Oils)...">
+          <input type="text" id="input-blue" class="add-input" placeholder="Add ED Boundary (e.g. Smooth Texture, Gel)...">
           <button class="add-btn" onclick="addSpectrumItem('blue')">+ Add</button>
         </div>
       </div>
@@ -204,7 +206,7 @@
       </div>
     </div>
 
-    <!-- SECTION 4: ZENMEALS (SAFE MEAL PLAN GENERATOR) -->
+    <!-- SECTION 4: ZENMEALS -->
     <div id="section-zenmeals" class="hidden">
       <div class="shield-card purple">
         <div class="card-title" style="color: var(--royal-purple);">🥗 ZenMeals Generator</div>
@@ -222,7 +224,7 @@
       </div>
     </div>
 
-    <!-- Handshake Duration Configuration & Activation -->
+    <!-- Handshake Duration Configuration -->
     <div class="shield-card blue" style="background: #EFF6FF;">
       <div class="card-title" style="color: var(--boundary-blue);">🤝 Handshake Protection Settings</div>
       <div class="card-desc">Choose how long partner establishments can access your active ticket profile.</div>
@@ -238,7 +240,7 @@
     </div>
   </div>
 
-  <!-- Dynamic Detail & Alternatives Sheet Modal -->
+  <!-- Dynamic Detail Modal -->
   <div id="modal-trigger-info" class="modal-overlay hidden">
     <div class="modal">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -246,7 +248,7 @@
         <button onclick="closeInfoModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
       </div>
       <div id="modal-info-badge" style="margin-bottom: 10px;"></div>
-      <p id="modal-info-body" style="font-size: 0.85rem; color: #374151; line-height: 1.5; margin-bottom: 16px;"></p>
+      <p id="modal-info-body" style="font-size: 0.85rem; color: #374151; line-height: 1.5; margin-bottom: 16px; white-space: pre-line;"></p>
       
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <button onclick="goToSafeAlternatives()" class="add-btn" style="background: var(--safe-green);">🟢 See Safe Alternatives in SAFE Tab</button>
@@ -255,18 +257,19 @@
     </div>
   </div>
 
-  <!-- LIVE CAMERA SCANNER MODAL -->
+  <!-- LIVE HD CAMERA SCANNER MODAL -->
   <div id="modal-scanner" class="modal-overlay hidden">
     <div class="modal" style="text-align: center;">
       <h3 style="color: var(--primary); margin-bottom: 8px;">📷 Live Safety Scanner</h3>
-      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Position any product, ingredient list, or object in the frame</p>
+      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Position ingredient text or label inside the frame</p>
       
-      <div style="position: relative; width: 100%; height: 220px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 12px;">
-        <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
-        <div id="scan-feedback" style="position: absolute; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 6px; border-radius: 6px; font-size: 0.8rem; display: none;"></div>
+      <!-- HD Viewfinder Frame -->
+      <div style="position: relative; width: 100%; height: 260px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 12px;">
+        <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast;"></video>
+        <div id="scan-feedback" style="position: absolute; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.85); color: white; padding: 8px; border-radius: 6px; font-size: 0.8rem; display: none; z-index: 10;"></div>
       </div>
 
-      <button onclick="captureAndScan()" class="activate-btn" style="margin-bottom: 8px; background: var(--safe-green);">📸 Scan Object / Item</button>
+      <button onclick="captureAndScan()" class="activate-btn" style="margin-bottom: 8px; background: var(--safe-green);">📸 Scan Label / Ingredients</button>
       <button onclick="closeScannerModal()" style="background: #F3F4F6; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%;">Close</button>
     </div>
   </div>
@@ -275,7 +278,7 @@
   <div id="modal-bulk" class="modal-overlay hidden">
     <div class="modal">
       <h3 style="color: var(--primary); margin-bottom: 8px;">Bulk Import Spectrum Items</h3>
-      <textarea id="bulk-text-input" style="width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px;" placeholder="Paste triggers here..."></textarea>
+      <textarea id="bulk-text-input" style="width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px;" placeholder="Paste items separated by commas..."></textarea>
       <select id="bulk-target-color" class="form-input" style="margin-bottom: 12px;">
         <option value="red">🔴 Red (High Reactivity)</option>
         <option value="amber">🟠 Amber / Orange (Moderate)</option>
@@ -284,6 +287,7 @@
         <option value="blue">💙 Blue (ED Boundary)</option>
       </select>
       <button onclick="processBulkImport()" class="activate-btn">Process Text</button>
+      <button onclick="document.getElementById('modal-bulk').classList.add('hidden')" style="background: #F3F4F6; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px;">Cancel</button>
     </div>
   </div>
 
@@ -299,7 +303,7 @@
   <script src="/profile.js"></script>
   <script>
     let currentProfile = {
-      items: { red: ["Peanuts", "Shellfish", "Croscarmellose Sodium"], amber: ["Lactose", "Pinene", "SDS"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk"], blue: ["Smooth Textures"] },
+      items: { red: ["Aqua", "Peanuts", "Croscarmellose Sodium"], amber: ["Lactose", "Pinene", "SDS"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk"], blue: ["Smooth Textures"] },
       zenHealth: { mode: "all", bloodSugar: "5.4", bloodPressure: "120/80" }
     };
 
@@ -363,6 +367,21 @@
       saveToStorage();
     }
 
+    function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
+    
+    function processBulkImport() {
+      const text = document.getElementById('bulk-text-input').value;
+      const color = document.getElementById('bulk-target-color').value;
+      if (!text) return;
+      const parsed = text.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      if (!currentProfile.items[color]) currentProfile.items[color] = [];
+      currentProfile.items[color] = [...new Set([...currentProfile.items[color], ...parsed])];
+      renderAllChips();
+      saveToStorage();
+      document.getElementById('modal-bulk').classList.add('hidden');
+      document.getElementById('bulk-text-input').value = '';
+    }
+
     function generateZenMeals() {
       const container = document.getElementById('meal-results-container');
       const reds = (currentProfile.items.red || []).map(i => i.toLowerCase());
@@ -371,18 +390,15 @@
       const greens = (currentProfile.items.green || []).map(i => i.toLowerCase());
 
       const masterRecipes = [
-        { title: "Balanced Harvest Bowl", ingredients: ["Oat Milk", "Quinoa", "Sunflower Seed Butter", "Blueberries", "Chia Seeds"] },
-        { title: "Safe Medley Stir-Fry", ingredients: ["Rice Noodles", "Tofu", "Zucchini", "Carrots", "Tamari"] },
+        { title: "Balanced Harvest Bowl", ingredients: ["Oat Milk", "Quinoa", "Sunflower Seed Butter", "Blueberries"] },
+        { title: "Safe Medley Stir-Fry", ingredients: ["Rice Noodles", "Tofu", "Zucchini", "Carrots"] },
         { title: "Nourish Smoothie", ingredients: ["Oat Milk", "Banana", "Sunflower Seed Butter", "Spinach"] }
       ];
 
       let html = "";
-
       masterRecipes.forEach(recipe => {
         let coversTrigger = recipe.ingredients.some(ing => 
-          reds.includes(ing.toLowerCase()) || 
-          ambers.includes(ing.toLowerCase()) || 
-          browns.includes(ing.toLowerCase())
+          reds.includes(ing.toLowerCase()) || ambers.includes(ing.toLowerCase()) || browns.includes(ing.toLowerCase())
         );
 
         if (!coversTrigger) {
@@ -395,7 +411,7 @@
             if (greens.includes(lower)) {
               html += `<span class="ingredient-tag tag-safe">🟢 ${ing}</span>`;
             } else {
-              html += `<span class="ingredient-tag tag-unallocated" title="Not on your spectrum - assumed neutral">🟣 ${ing}</span>`;
+              html += `<span class="ingredient-tag tag-unallocated">🟣 ${ing}</span>`;
             }
           });
 
@@ -408,8 +424,6 @@
     }
 
     function closeInfoModal() { document.getElementById('modal-trigger-info').classList.add('hidden'); }
-    function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
-
     function saveToStorage() { localStorage.setItem('az_user_profile', JSON.stringify(currentProfile)); }
     function activateShield() { saveToStorage(); alert("Shield Activated!"); location.href = '/view.html'; }
 
