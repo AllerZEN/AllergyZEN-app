@@ -15,6 +15,7 @@
       --danger-red: #EF4444;
       --dislike-brown: #8B4513;
       --boundary-blue: #3B82F6;
+      --royal-purple: #4C1D95; /* Deep Royal Purple for non-spectrum items */
       --background: #FAFAFA;
       --card: #FFFFFF;
       --text: #1F2937;
@@ -32,9 +33,9 @@
 
     .container { max-width: 500px; margin: 0 auto; padding: 16px; }
 
-    /* Nav Tabs across Profile View */
-    .view-tabs { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
-    .tab-btn { flex: 1; padding: 12px 8px; border: none; background: none; font-weight: 700; font-size: 0.8rem; color: #6B7280; cursor: pointer; text-align: center; }
+    /* Nav Tabs */
+    .view-tabs { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow-x: auto; }
+    .tab-btn { flex: 1; padding: 10px 6px; border: none; background: none; font-weight: 700; font-size: 0.75rem; color: #6B7280; cursor: pointer; text-align: center; white-space: nowrap; }
     .tab-btn.active { background: var(--primary); color: white; }
 
     /* Shield Cards & Spectrum Styles */
@@ -44,6 +45,7 @@
     .shield-card.brown { border-left-color: var(--dislike-brown); }
     .shield-card.green { border-left-color: var(--safe-green); }
     .shield-card.blue { border-left-color: var(--boundary-blue); }
+    .shield-card.purple { border-left-color: var(--royal-purple); }
 
     .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
     .card-desc { font-size: 0.8rem; color: #6B7280; margin-bottom: 12px; }
@@ -70,26 +72,22 @@
     .bulk-banner { background: linear-gradient(135deg, #7C3AED, #8E55A2); color: white; padding: 14px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
     .bulk-btn { background: white; color: var(--primary); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
 
-    /* ZenHealth Controls */
+    /* Meal Plan Deep Royal Purple Styling */
+    .ingredient-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin: 2px; }
+    .tag-safe { background: #DCFCE7; color: #15803D; }
+    .tag-unallocated { background: #F3E8FF; color: var(--royal-purple); border: 1px solid var(--royal-purple); }
+
+    /* Controls & Modals */
     .form-group { margin-bottom: 12px; }
     .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
-
-    /* Habit Badge Lists */
-    .habit-box { background: #F3F4F6; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
-    .habit-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
-    .habit-tag.good { background: #DCFCE7; color: #15803D; }
-    .habit-tag.bad { background: #FEE2E2; color: #B91C1C; }
-
-    /* Activation & Primary Actions */
     .activate-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3); margin-top: 10px; }
-    
+
     /* Bottom Nav */
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border: none; background: none; cursor: pointer; flex: 1; }
     .nav-item.center { background: var(--primary); color: white; width: 54px; height: 54px; border-radius: 50%; margin-top: -24px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.4); flex: none; }
 
-    /* Modals */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 16px; }
     .modal { background: var(--card); width: 100%; max-width: 440px; border-radius: 16px; padding: 20px; max-height: 85vh; overflow-y: auto; }
     .hidden { display: none !important; }
@@ -109,12 +107,13 @@
   <div class="container">
     <!-- View Switcher Tabs -->
     <div class="view-tabs">
-      <button class="tab-btn active" id="btn-tab-triggers" onclick="switchMainTab('triggers')">🔴 🟠 🟤 Triggers & Dislikes</button>
-      <button class="tab-btn" id="btn-tab-safe" onclick="switchMainTab('safe')">🟢 💙 Safe & Boundaries</button>
+      <button class="tab-btn active" id="btn-tab-triggers" onclick="switchMainTab('triggers')">🔴 🟠 🟤 Triggers</button>
+      <button class="tab-btn" id="btn-tab-safe" onclick="switchMainTab('safe')">🟢 💙 Safe</button>
       <button class="tab-btn" id="btn-tab-zenhealth" onclick="switchMainTab('zenhealth')">🩺 ZenHealth</button>
+      <button class="tab-btn" id="btn-tab-zenmeals" onclick="switchMainTab('zenmeals')">🥗 ZenMeals</button>
     </div>
 
-    <!-- Bulk Import / Screenshot OCR Launcher Bar -->
+    <!-- Bulk Import Banner -->
     <div class="bulk-banner">
       <div>
         <strong style="font-size: 0.9rem;">Have an intolerance list?</strong>
@@ -123,9 +122,8 @@
       <button class="bulk-btn" onclick="openBulkModal()">Bulk Import</button>
     </div>
 
-    <!-- SECTION 1: TRIGGERS & DISLIKES (Tab 1) -->
+    <!-- SECTION 1: TRIGGERS & DISLIKES -->
     <div id="section-triggers">
-      <!-- RED: Critical Allergies -->
       <div class="shield-card red">
         <div class="card-title" style="color: var(--danger-red);">🔴 Red: Critical Allergies & Triggers</div>
         <div class="card-desc">Immediate high reactivity / Anaphylaxis risk.</div>
@@ -136,7 +134,6 @@
         </div>
       </div>
 
-      <!-- ORANGE / AMBER: Moderate Sensitivities -->
       <div class="shield-card amber">
         <div class="card-title" style="color: var(--caution-amber);">🟠 Amber / Orange: Moderate Sensitivities</div>
         <div class="card-desc">Moderate reactivity, hidden ingredients, terpenes, excipients.</div>
@@ -147,7 +144,6 @@
         </div>
       </div>
 
-      <!-- BROWN: Dislikes & Non-Allergic Aversions -->
       <div class="shield-card brown">
         <div class="card-title" style="color: var(--dislike-brown);">🟤 Brown: Personal Dislikes</div>
         <div class="card-desc">Aversions, non-allergic distaste, preferred omissions.</div>
@@ -159,20 +155,18 @@
       </div>
     </div>
 
-    <!-- SECTION 2: SAFE & BOUNDARIES (Tab 2) -->
+    <!-- SECTION 2: SAFE & BOUNDARIES -->
     <div id="section-safe" class="hidden">
-      <!-- GREEN: Verified Safe Items -->
       <div class="shield-card green">
-        <div class="card-title" style="color: var(--safe-green);">🟢 Green: Confirmed Safe Items</div>
-        <div class="card-desc">Safe foods, tested products, approved formulas.</div>
+        <div class="card-title" style="color: var(--safe-green);">🟢 Green: Safe Alternatives & Verified Items</div>
+        <div class="card-desc">Safe substitutes and confirmed tolerable choices.</div>
         <div class="chip-group" id="green-chips"></div>
         <div class="add-input-row">
-          <input type="text" id="input-green" class="add-input" placeholder="Add Safe Item (e.g. Oat Milk, Rice)...">
+          <input type="text" id="input-green" class="add-input" placeholder="Add Safe Alternative (e.g. Oat Milk, Rice)...">
           <button class="add-btn" onclick="addSpectrumItem('green')">+ Add</button>
         </div>
       </div>
 
-      <!-- BLUE: ED Boundaries & Sensory Needs -->
       <div class="shield-card blue">
         <div class="card-title" style="color: var(--boundary-blue);">
           💙 <span class="blue-dot"></span> Blue: ED & Sensory Boundaries
@@ -186,84 +180,45 @@
       </div>
     </div>
 
-    <!-- SECTION 3: ZENHEALTH SUITE (Tab 3 - DYNAMIC & CUSTOMIZABLE) -->
+    <!-- SECTION 3: ZENHEALTH SUITE -->
     <div id="section-zenhealth" class="hidden">
       <div class="shield-card blue" style="border-left-color: var(--primary);">
-        <div class="card-title" style="color: var(--primary);">
-          <span>🩺 ZenHealth Suite</span>
-          <button class="add-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="toggleCustomizer()">⚙️ Customize</button>
-        </div>
-        <div class="card-desc">Track what matters to you. Choose modules below or customize your view.</div>
-
-        <!-- Mode Dropdown Selection -->
+        <div class="card-title" style="color: var(--primary);">🩺 ZenHealth Suite</div>
         <div class="form-group">
           <label class="form-label">Primary Tracking Focus:</label>
           <select id="zenhealth-mode-select" class="form-input" onchange="changeZenHealthMode(this.value)">
             <option value="all">Comprehensive View (All Modules)</option>
-            <option value="habits">Habit Tracker Only (Good & Bad Habits)</option>
+            <option value="habits">Habit Tracker Only</option>
             <option value="diabetes">Diabetes & Glucose Focus</option>
             <option value="bp">Blood Pressure & Cardiovascular</option>
-            <option value="custom">Custom Focus</option>
           </select>
         </div>
-
-        <!-- MODULE A: Glucose & Blood Sugar -->
         <div id="module-glucose" class="form-group">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <label class="form-label">Blood Sugar / Glucose Level (mmol/L or mg/dL)</label>
-            <button class="add-btn" style="padding: 2px 6px; font-size: 0.7rem;" onclick="setHealthAlert('Glucose')">🔔 Set Alert</button>
-          </div>
+          <label class="form-label">Blood Sugar / Glucose Level</label>
           <input type="text" id="health-bs" class="form-input" placeholder="e.g. 5.4 mmol/L" onchange="saveZenHealthData()">
         </div>
-
-        <!-- MODULE B: Blood Pressure -->
         <div id="module-bp" class="form-group">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <label class="form-label">Blood Pressure (Systolic / Diastolic)</label>
-            <button class="add-btn" style="padding: 2px 6px; font-size: 0.7rem;" onclick="setHealthAlert('Blood Pressure')">🔔 Set Alert</button>
-          </div>
+          <label class="form-label">Blood Pressure</label>
           <input type="text" id="health-bp" class="form-input" placeholder="e.g. 120/80" onchange="saveZenHealthData()">
         </div>
+      </div>
+    </div>
 
-        <!-- MODULE C: Calories & Macros -->
-        <div id="module-macros" class="form-group">
-          <label class="form-label">Daily Calorie / Sugar / Fat Log</label>
-          <input type="text" id="health-macros" class="form-input" placeholder="e.g. 1,800 kcal | 45g sugar" onchange="saveZenHealthData()">
+    <!-- SECTION 4: ZENMEALS (SAFE MEAL PLAN GENERATOR) -->
+    <div id="section-zenmeals" class="hidden">
+      <div class="shield-card purple">
+        <div class="card-title" style="color: var(--royal-purple);">🥗 ZenMeals Generator</div>
+        <div class="card-desc">Generates recipes customized to your Zen Spectrum.</div>
+        
+        <div style="margin-bottom: 12px; font-size: 0.8rem; background: #F3E8FF; padding: 10px; border-radius: 8px; color: var(--royal-purple);">
+          <strong>Spectrum Key:</strong><br>
+          <span class="ingredient-tag tag-safe">🟢 Confirmed Safe</span>
+          <span class="ingredient-tag tag-unallocated">🟣 Deep Royal Purple = Unallocated / Neutral</span>
         </div>
 
-        <!-- MODULE D: Good & Bad Habits Tracker -->
-        <div id="module-habits" class="form-group" style="margin-top: 16px;">
-          <label class="form-label">Habits Log (Good & Bad)</label>
-          
-          <div class="habit-box">
-            <strong style="font-size:0.8rem; color:#15803D;">👍 Positive Habits to Maintain:</strong>
-            <div id="good-habit-chips" style="margin-top: 6px;"></div>
-            <div class="add-input-row">
-              <input type="text" id="input-good-habit" class="add-input" placeholder="Add good habit (e.g. 2L Water)...">
-              <button class="add-btn" style="background:#22C55E;" onclick="addHabit('good')">+ Good</button>
-            </div>
-          </div>
+        <button class="activate-btn" style="background: var(--royal-purple); margin-bottom: 16px;" onclick="generateZenMeals()">✨ Generate Safe Meals Now</button>
 
-          <div class="habit-box">
-            <strong style="font-size:0.8rem; color:#B91C1C;">👎 Habits to Reduce / Avoid:</strong>
-            <div id="bad-habit-chips" style="margin-top: 6px;"></div>
-            <div class="add-input-row">
-              <input type="text" id="input-bad-habit" class="add-input" placeholder="Add habit to avoid (e.g. Late snacks)...">
-              <button class="add-btn" style="background:#EF4444;" onclick="addHabit('bad')">+ Avoid</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODULE E: Active Medications Cross-Checking -->
-        <div id="module-meds" class="form-group">
-          <label class="form-label">Active Medications (Cross-checked against Spectrum)</label>
-          <div class="chip-group" id="med-chips"></div>
-          <div class="add-input-row">
-            <input type="text" id="input-med" class="add-input" placeholder="Add Medication (e.g. Metformin, Insulin)...">
-            <button class="add-btn" onclick="addMedication()">+ Add Med</button>
-          </div>
-        </div>
-
+        <div id="meal-results-container"></div>
       </div>
     </div>
 
@@ -283,7 +238,7 @@
     </div>
   </div>
 
-  <!-- Dynamic Granular Info Sheet Modal (Replaces browser alert!) -->
+  <!-- Dynamic Detail & Alternatives Sheet Modal -->
   <div id="modal-trigger-info" class="modal-overlay hidden">
     <div class="modal">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -293,10 +248,25 @@
       <div id="modal-info-badge" style="margin-bottom: 10px;"></div>
       <p id="modal-info-body" style="font-size: 0.85rem; color: #374151; line-height: 1.5; margin-bottom: 16px;"></p>
       
-      <div style="display: flex; gap: 8px;">
-        <button onclick="setCustomItemAlert()" class="add-btn" style="flex: 1; background: var(--caution-amber);">🔔 Set Alert Threshold</button>
-        <button onclick="closeInfoModal()" style="background: #F3F4F6; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button onclick="goToSafeAlternatives()" class="add-btn" style="background: var(--safe-green);">🟢 See Safe Alternatives in SAFE Tab</button>
+        <button onclick="closeInfoModal()" style="background: #F3F4F6; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Scanner Overlay Fix Modal -->
+  <div id="modal-scanner" class="modal-overlay hidden">
+    <div class="modal" style="text-align: center;">
+      <h3 style="color: var(--primary); margin-bottom: 8px;">📷 Live Safety Scanner</h3>
+      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 16px;">Point camera at barcode or ingredient list</p>
+      
+      <div style="width: 100%; height: 180px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 16px;">
+        <span id="scan-status-text">Viewfinder Active...</span>
+      </div>
+
+      <button onclick="runSimulatedScan()" class="activate-btn" style="margin-bottom: 8px;">🧪 Run Simulated Scan</button>
+      <button onclick="closeScannerModal()" style="background: #F3F4F6; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%;">Close</button>
     </div>
   </div>
 
@@ -304,98 +274,52 @@
   <div id="modal-bulk" class="modal-overlay hidden">
     <div class="modal">
       <h3 style="color: var(--primary); margin-bottom: 8px;">Bulk Import Spectrum Items</h3>
-      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Paste your list separated by commas or lines, or select an image for OCR detection.</p>
-      
-      <textarea id="bulk-text-input" style="width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px;" placeholder="Paste triggers here: Peanuts, Milk, Soy, Hydroquinone..."></textarea>
-      
-      <div style="margin-bottom: 16px;">
-        <label class="form-label">Target Spectrum Color:</label>
-        <select id="bulk-target-color" class="form-input">
-          <option value="red">🔴 Red (High Reactivity)</option>
-          <option value="amber">🟠 Amber / Orange (Moderate)</option>
-          <option value="brown">🟤 Brown (Dislike)</option>
-          <option value="green">🟢 Green (Safe)</option>
-          <option value="blue">💙 Blue (ED Boundary)</option>
-        </select>
-      </div>
-
-      <div style="display: flex; gap: 8px;">
-        <button onclick="processBulkImport()" class="activate-btn" style="flex: 1; padding: 10px;">Process Text</button>
-        <button onclick="closeBulkModal()" style="background: #F3F4F6; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer;">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Onboarding Tutorial Modal -->
-  <div id="modal-tutorial" class="modal-overlay hidden">
-    <div class="modal">
-      <h3 style="color: var(--primary); margin-bottom: 8px;">Welcome to allergyZEN</h3>
-      <p style="font-size: 0.85rem; color: #374151; line-height: 1.4; margin-bottom: 12px;">
-        <strong>1. Map Your Spectrum:</strong> Input your triggers into 🔴 Red, 🟠 Amber, 🟤 Brown, 🟢 Green, or 💙 Blue.<br><br>
-        <strong>2. ZenHealth Suite:</strong> Customize what you track—blood sugar, BP, medications, or good/bad habits.<br><br>
-        <strong>3. Dynamic Handshake:</strong> Choose a 30m, 1h, 3h, or 24h timer when scanning partner venues. Data auto-wipes for privacy!
-      </p>
-      <button onclick="closeTutorialModal()" class="activate-btn">Got It, Let's Begin!</button>
+      <textarea id="bulk-text-input" style="width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px;" placeholder="Paste triggers here..."></textarea>
+      <select id="bulk-target-color" class="form-input" style="margin-bottom: 12px;">
+        <option value="red">🔴 Red (High Reactivity)</option>
+        <option value="amber">🟠 Amber / Orange (Moderate)</option>
+        <option value="brown">🟤 Brown (Dislike)</option>
+        <option value="green">🟢 Green (Safe)</option>
+        <option value="blue">💙 Blue (ED Boundary)</option>
+      </select>
+      <button onclick="processBulkImport()" class="activate-btn">Process Text</button>
     </div>
   </div>
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <button class="nav-item" onclick="location.href='/view.html?mode=scan'"><span>🔍</span><span>Scan</span></button>
+    <button class="nav-item" onclick="openScannerModal()"><span>🔍</span><span>Scan</span></button>
     <button class="nav-item" onclick="location.href='/view.html'"><span>🛡️</span><span>Shield</span></button>
     <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
     <button class="nav-item" onclick="switchMainTab('triggers')"><span>🚫</span><span>Triggers</span></button>
-    <button class="nav-item" onclick="location.href='/profile.html'"><span>⚙️</span><span>Profile</span></button>
+    <button class="nav-item" onclick="switchMainTab('zenmeals')"><span>🥗</span><span>Meals</span></button>
   </nav>
 
-  <!-- Script Logic Links -->
   <script src="/profile.js"></script>
   <script>
     let currentProfile = {
-      items: { red: ["Peanuts", "Shellfish", "Croscarmellose Sodium"], amber: ["Lactose", "Terpenes", "SDS"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk", "Almond Milk"], blue: ["Texture Restrictions", "Neutral Language Request"] },
-      zenHealth: { 
-        mode: "all",
-        bloodSugar: "5.4", 
-        bloodPressure: "120/80", 
-        macros: "1800 kcal", 
-        medications: ["Metformin"],
-        goodHabits: ["Drink 2L Water", "10m Mindfulness"],
-        badHabits: ["Late Night Snacks", "High Sodium Meals"]
-      }
+      items: { red: ["Peanuts", "Shellfish"], amber: ["Lactose", "Pinene"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk"], blue: ["Texture Restrictions"] },
+      zenHealth: { mode: "all", bloodSugar: "5.4", bloodPressure: "120/80" }
     };
 
-    let activeTriggerSelectedItem = null;
+    let activeSelectedTrigger = "";
 
     function initProfileUI() {
-      if (typeof userProfile !== 'undefined' && userProfile.getActiveProfile) {
-        const loaded = userProfile.getActiveProfile();
-        if (loaded) currentProfile = loaded;
-      } else {
-        const cached = localStorage.getItem('az_user_profile');
-        if (cached) currentProfile = JSON.parse(cached);
-      }
-      
-      if (!currentProfile.items) currentProfile.items = { red: [], amber: [], brown: [], green: [], blue: [] };
-      if (!currentProfile.zenHealth) {
-        currentProfile.zenHealth = { mode: "all", bloodSugar: "", bloodPressure: "", macros: "", medications: [], goodHabits: [], badHabits: [] };
-      }
-
+      const cached = localStorage.getItem('az_user_profile');
+      if (cached) currentProfile = JSON.parse(cached);
       renderAllChips();
-      loadZenHealthUI();
-
+      
       const urlParams = new URLSearchParams(window.location.search);
-      const tabParam = urlParams.get('tab');
-      if (tabParam) switchMainTab(tabParam);
+      if (urlParams.get('mode') === 'scan') openScannerModal();
     }
 
     function switchMainTab(tab) {
-      document.getElementById('btn-tab-triggers').classList.toggle('active', tab === 'triggers');
-      document.getElementById('btn-tab-safe').classList.toggle('active', tab === 'safe');
-      document.getElementById('btn-tab-zenhealth').classList.toggle('active', tab === 'zenhealth');
-
-      document.getElementById('section-triggers').classList.toggle('hidden', tab !== 'triggers');
-      document.getElementById('section-safe').classList.toggle('hidden', tab !== 'safe');
-      document.getElementById('section-zenhealth').classList.toggle('hidden', tab !== 'zenhealth');
+      ['triggers', 'safe', 'zenhealth', 'zenmeals'].forEach(t => {
+        const btn = document.getElementById(`btn-tab-${t}`);
+        const sec = document.getElementById(`section-${t}`);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (sec) sec.classList.toggle('hidden', t !== tab);
+      });
     }
 
     function renderAllChips() {
@@ -404,12 +328,24 @@
         if (!container) return;
         const list = currentProfile.items[color] || [];
         container.innerHTML = list.map(item => `
-          <div class="chip active" style="cursor: pointer;" onclick="if(typeof handleTriggerClick === 'function') handleTriggerClick('${item.replace(/'/g, "\\'")}')">
+          <div class="chip active" onclick="triggerItemClicked('${item.replace(/'/g, "\\'")}', '${color}')">
             <span>${item}</span>
             <span class="chip-remove" onclick="event.stopPropagation(); removeSpectrumItem('${color}', '${item.replace(/'/g, "\\'")}')">×</span>
           </div>
         `).join('');
       });
+    }
+
+    function triggerItemClicked(itemName, color) {
+      activeSelectedTrigger = itemName;
+      if (typeof handleTriggerClick === 'function') {
+        handleTriggerClick(itemName, color);
+      }
+    }
+
+    function goToSafeAlternatives() {
+      closeInfoModal();
+      switchMainTab('safe');
     }
 
     function addSpectrumItem(color) {
@@ -429,195 +365,70 @@
       saveToStorage();
     }
 
-    /* ZenHealth Module Switching & Customization */
-    function changeZenHealthMode(mode) {
-      currentProfile.zenHealth.mode = mode;
-      
-      const modGlucose = document.getElementById('module-glucose');
-      const modBP = document.getElementById('module-bp');
-      const modMacros = document.getElementById('module-macros');
-      const modHabits = document.getElementById('module-habits');
-      const modMeds = document.getElementById('module-meds');
+    /* ZenMeals Logic with Deep Royal Purple for Unallocated Items */
+    function generateZenMeals() {
+      const container = document.getElementById('meal-results-container');
+      const reds = (currentProfile.items.red || []).map(i => i.toLowerCase());
+      const ambers = (currentProfile.items.amber || []).map(i => i.toLowerCase());
+      const browns = (currentProfile.items.brown || []).map(i => i.toLowerCase());
+      const greens = (currentProfile.items.green || []).map(i => i.toLowerCase());
 
-      if (mode === 'habits') {
-        modGlucose.classList.add('hidden');
-        modBP.classList.add('hidden');
-        modMacros.classList.add('hidden');
-        modHabits.classList.remove('hidden');
-        modMeds.classList.add('hidden');
-      } else if (mode === 'diabetes') {
-        modGlucose.classList.remove('hidden');
-        modBP.classList.add('hidden');
-        modMacros.classList.remove('hidden');
-        modHabits.classList.add('hidden');
-        modMeds.classList.remove('hidden');
-      } else if (mode === 'bp') {
-        modGlucose.classList.add('hidden');
-        modBP.classList.remove('hidden');
-        modMacros.classList.add('hidden');
-        modHabits.classList.add('hidden');
-        modMeds.classList.remove('hidden');
-      } else { // 'all' or 'custom'
-        modGlucose.classList.remove('hidden');
-        modBP.classList.remove('hidden');
-        modMacros.classList.remove('hidden');
-        modHabits.classList.remove('hidden');
-        modMeds.classList.remove('hidden');
-      }
-      saveZenHealthData();
+      const masterRecipes = [
+        { title: "Balanced Harvest Bowl", ingredients: ["Oat Milk", "Quinoa", "Sunflower Seed Butter", "Blueberries", "Chia Seeds"] },
+        { title: "Safe Medley Stir-Fry", ingredients: ["Rice Noodles", "Tofu", "Zucchini", "Carrots", "Tamari"] },
+        { title: "Nourish Smoothie", ingredients: ["Oat Milk", "Banana", "Sunflower Seed Butter", "Spinach"] }
+      ];
+
+      let html = "";
+
+      masterRecipes.forEach(recipe => {
+        let coversTrigger = recipe.ingredients.some(ing => 
+          reds.includes(ing.toLowerCase()) || 
+          ambers.includes(ing.toLowerCase()) || 
+          browns.includes(ing.toLowerCase())
+        );
+
+        if (!coversTrigger) {
+          html += `<div style="background: #FFF; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;">
+            <strong style="color: var(--royal-purple); font-size: 0.95rem;">${recipe.title}</strong>
+            <div style="margin-top: 8px;">`;
+
+          recipe.ingredients.forEach(ing => {
+            const lower = ing.toLowerCase();
+            if (greens.includes(lower)) {
+              html += `<span class="ingredient-tag tag-safe">🟢 ${ing}</span>`;
+            } else {
+              html += `<span class="ingredient-tag tag-unallocated" title="Not on your spectrum - assumed neutral">🟣 ${ing}</span>`;
+            }
+          });
+
+          html += `</div></div>`;
+        }
+      });
+
+      if (!html) html = "<p style='font-size:0.85rem; color:#6B7280;'>No safe recipes matched your current strict constraints.</p>";
+      container.innerHTML = html;
     }
 
-    function loadZenHealthUI() {
-      const zh = currentProfile.zenHealth || {};
-      document.getElementById('zenhealth-mode-select').value = zh.mode || 'all';
-      changeZenHealthMode(zh.mode || 'all');
-
-      document.getElementById('health-bs').value = zh.bloodSugar || '';
-      document.getElementById('health-bp').value = zh.bloodPressure || '';
-      document.getElementById('health-macros').value = zh.macros || '';
-      
-      // Meds
-      const medContainer = document.getElementById('med-chips');
-      const meds = zh.medications || [];
-      medContainer.innerHTML = meds.map(m => `
-        <div class="chip active" style="background: var(--primary);">
-          <span>${m}</span>
-          <span class="chip-remove" onclick="removeMedication('${m}')">×</span>
-        </div>
-      `).join('');
-
-      // Good / Bad Habits
-      const goodContainer = document.getElementById('good-habit-chips');
-      const goods = zh.goodHabits || [];
-      goodContainer.innerHTML = goods.map(h => `
-        <span class="habit-tag good">${h} <span style="cursor:pointer;" onclick="removeHabit('good', '${h}')">×</span></span>
-      `).join('');
-
-      const badContainer = document.getElementById('bad-habit-chips');
-      const bads = zh.badHabits || [];
-      badContainer.innerHTML = bads.map(h => `
-        <span class="habit-tag bad">${h} <span style="cursor:pointer;" onclick="removeHabit('bad', '${h}')">×</span></span>
-      `).join('');
-    }
-
-    function addHabit(type) {
-      const input = document.getElementById(`input-${type}-habit`);
-      const val = input.value.trim();
-      if (!val) return;
-      if (type === 'good') {
-        if (!currentProfile.zenHealth.goodHabits) currentProfile.zenHealth.goodHabits = [];
-        currentProfile.zenHealth.goodHabits.push(val);
-      } else {
-        if (!currentProfile.zenHealth.badHabits) currentProfile.zenHealth.badHabits = [];
-        currentProfile.zenHealth.badHabits.push(val);
-      }
-      input.value = '';
-      loadZenHealthUI();
-      saveToStorage();
-    }
-
-    function removeHabit(type, item) {
-      if (type === 'good') {
-        currentProfile.zenHealth.goodHabits = currentProfile.zenHealth.goodHabits.filter(h => h !== item);
-      } else {
-        currentProfile.zenHealth.badHabits = currentProfile.zenHealth.badHabits.filter(h => h !== item);
-      }
-      loadZenHealthUI();
-      saveToStorage();
-    }
-
-    function addMedication() {
-      const input = document.getElementById('input-med');
-      const val = input.value.trim();
-      if (!val) return;
-      if (!currentProfile.zenHealth) currentProfile.zenHealth = {};
-      if (!currentProfile.zenHealth.medications) currentProfile.zenHealth.medications = [];
-      currentProfile.zenHealth.medications.push(val);
-      input.value = '';
-      loadZenHealthUI();
-      saveToStorage();
-    }
-
-    function removeMedication(med) {
-      currentProfile.zenHealth.medications = currentProfile.zenHealth.medications.filter(m => m !== med);
-      loadZenHealthUI();
-      saveToStorage();
-    }
-
-    function saveZenHealthData() {
-      if (!currentProfile.zenHealth) currentProfile.zenHealth = {};
-      currentProfile.zenHealth.bloodSugar = document.getElementById('health-bs').value;
-      currentProfile.zenHealth.bloodPressure = document.getElementById('health-bp').value;
-      currentProfile.zenHealth.macros = document.getElementById('health-macros').value;
-      saveToStorage();
-    }
-
-    function setHealthAlert(paramName) {
-      const val = prompt(`Set target alert limit for ${paramName}:`, "e.g. Max 7.0 mmol/L");
-      if (val) {
-        alert(`🔔 Alert limit saved for ${paramName}: ${val}`);
-      }
-    }
-
-    function toggleCustomizer() {
-      alert("⚙️ Customizer Mode: Select or hide modules using the 'Primary Tracking Focus' dropdown!");
-    }
-
-    function saveToStorage() {
-      if (typeof userProfile !== 'undefined' && userProfile.saveToStorage) {
-        userProfile.profiles[userProfile.activeProfileIndex] = currentProfile;
-        userProfile.saveToStorage();
-      } else {
-        localStorage.setItem('az_user_profile', JSON.stringify(currentProfile));
-      }
-    }
-
-    function activateShield() {
-      const duration = document.getElementById('handshake-timer-select').value;
-      saveZenHealthData();
-      saveToStorage();
-      
-      if (typeof userProfile !== 'undefined' && userProfile.startHandshake) {
-        userProfile.startHandshake(parseInt(duration), "local-venue", "Partner Establishment");
-      }
-      
-      alert("Shield activated! Your parameters and timer window are live.");
-      location.href = '/view.html';
-    }
-
-    function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
-    function closeBulkModal() { document.getElementById('modal-bulk').classList.add('hidden'); }
-    function openTutorialModal() { document.getElementById('modal-tutorial').classList.remove('hidden'); }
-    function closeTutorialModal() { document.getElementById('modal-tutorial').classList.add('hidden'); }
+    /* Scanner Modal Handling */
+    function openScannerModal() { document.getElementById('modal-scanner').classList.remove('hidden'); }
+    function closeScannerModal() { document.getElementById('modal-scanner').classList.add('hidden'); }
     function closeInfoModal() { document.getElementById('modal-trigger-info').classList.add('hidden'); }
+    function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
 
-    function setCustomItemAlert() {
-      if (activeTriggerSelectedItem) {
-        const threshold = prompt(`Set custom alert threshold or note for ${activeTriggerSelectedItem}:`, "e.g. Notify if > 0.5mg present");
-        if (threshold) alert(`Alert created for ${activeTriggerSelectedItem}: ${threshold}`);
-      }
-      closeInfoModal();
+    function runSimulatedScan() {
+      const status = document.getElementById('scan-status-text');
+      status.innerText = "Scanning Barcode...";
+      setTimeout(() => {
+        status.innerText = "🟢 PASS: 0 Triggers Detected!";
+        setTimeout(() => closeScannerModal(), 1200);
+      }, 1000);
     }
 
-    function processBulkImport() {
-      const text = document.getElementById('bulk-text-input').value;
-      const color = document.getElementById('bulk-target-color').value;
-      if (!text.trim()) return;
+    function saveToStorage() { localStorage.setItem('az_user_profile', JSON.stringify(currentProfile)); }
+    function activateShield() { saveToStorage(); alert("Shield Activated!"); location.href = '/view.html'; }
 
-      const items = text.split(/[\n,]+/).map(i => i.trim()).filter(i => i.length > 0);
-      if (!currentProfile.items[color]) currentProfile.items[color] = [];
-      currentProfile.items[color].push(...items);
-      
-      document.getElementById('bulk-text-input').value = '';
-      closeBulkModal();
-      renderAllChips();
-      saveToStorage();
-      alert(`Successfully added ${items.length} items to ${color.toUpperCase()} spectrum!`);
-    }
-
-    window.onload = () => {
-      initProfileUI();
-    };
+    window.onload = initProfileUI;
   </script>
 </body>
 </html>
