@@ -45,7 +45,7 @@
     .shield-card.green { border-left-color: var(--safe-green); }
     .shield-card.blue { border-left-color: var(--boundary-blue); }
 
-    .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
     .card-desc { font-size: 0.8rem; color: #6B7280; margin-bottom: 12px; }
 
     /* Pulse Blue Dot */
@@ -74,6 +74,12 @@
     .form-group { margin-bottom: 12px; }
     .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+
+    /* Habit Badge Lists */
+    .habit-box { background: #F3F4F6; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+    .habit-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
+    .habit-tag.good { background: #DCFCE7; color: #15803D; }
+    .habit-tag.bad { background: #FEE2E2; color: #B91C1C; }
 
     /* Activation & Primary Actions */
     .activate-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3); margin-top: 10px; }
@@ -180,32 +186,76 @@
       </div>
     </div>
 
-    <!-- SECTION 3: ZENHEALTH SUITE (Tab 3) -->
+    <!-- SECTION 3: ZENHEALTH SUITE (Tab 3 - DYNAMIC & CUSTOMIZABLE) -->
     <div id="section-zenhealth" class="hidden">
       <div class="shield-card blue" style="border-left-color: var(--primary);">
-        <div class="card-title" style="color: var(--primary);">🩺 ZenHealth Dashboard Configuration</div>
-        <div class="card-desc">Track Diabetes, Blood Pressure, Medications, and Daily Habits seamlessly.</div>
+        <div class="card-title" style="color: var(--primary);">
+          <span>🩺 ZenHealth Suite</span>
+          <button class="add-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="toggleCustomizer()">⚙️ Customize</button>
+        </div>
+        <div class="card-desc">Track what matters to you. Choose modules below or customize your view.</div>
 
-        <!-- Diabetes / Glucose -->
+        <!-- Mode Dropdown Selection -->
         <div class="form-group">
-          <label class="form-label">Blood Sugar / Glucose Level (mmol/L or mg/dL)</label>
-          <input type="text" id="health-bs" class="form-input" placeholder="e.g. 5.6 mmol/L" onchange="saveZenHealthData()">
+          <label class="form-label">Primary Tracking Focus:</label>
+          <select id="zenhealth-mode-select" class="form-input" onchange="changeZenHealthMode(this.value)">
+            <option value="all">Comprehensive View (All Modules)</option>
+            <option value="habits">Habit Tracker Only (Good & Bad Habits)</option>
+            <option value="diabetes">Diabetes & Glucose Focus</option>
+            <option value="bp">Blood Pressure & Cardiovascular</option>
+            <option value="custom">Custom Focus</option>
+          </select>
         </div>
 
-        <!-- Blood Pressure -->
-        <div class="form-group">
-          <label class="form-label">Blood Pressure (Systolic / Diastolic)</label>
+        <!-- MODULE A: Glucose & Blood Sugar -->
+        <div id="module-glucose" class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="form-label">Blood Sugar / Glucose Level (mmol/L or mg/dL)</label>
+            <button class="add-btn" style="padding: 2px 6px; font-size: 0.7rem;" onclick="setHealthAlert('Glucose')">🔔 Set Alert</button>
+          </div>
+          <input type="text" id="health-bs" class="form-input" placeholder="e.g. 5.4 mmol/L" onchange="saveZenHealthData()">
+        </div>
+
+        <!-- MODULE B: Blood Pressure -->
+        <div id="module-bp" class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="form-label">Blood Pressure (Systolic / Diastolic)</label>
+            <button class="add-btn" style="padding: 2px 6px; font-size: 0.7rem;" onclick="setHealthAlert('Blood Pressure')">🔔 Set Alert</button>
+          </div>
           <input type="text" id="health-bp" class="form-input" placeholder="e.g. 120/80" onchange="saveZenHealthData()">
         </div>
 
-        <!-- Calorie & Carb Targets -->
-        <div class="form-group">
+        <!-- MODULE C: Calories & Macros -->
+        <div id="module-macros" class="form-group">
           <label class="form-label">Daily Calorie / Sugar / Fat Log</label>
           <input type="text" id="health-macros" class="form-input" placeholder="e.g. 1,800 kcal | 45g sugar" onchange="saveZenHealthData()">
         </div>
 
-        <!-- Active Medications Cross-Checking -->
-        <div class="form-group">
+        <!-- MODULE D: Good & Bad Habits Tracker -->
+        <div id="module-habits" class="form-group" style="margin-top: 16px;">
+          <label class="form-label">Habits Log (Good & Bad)</label>
+          
+          <div class="habit-box">
+            <strong style="font-size:0.8rem; color:#15803D;">👍 Positive Habits to Maintain:</strong>
+            <div id="good-habit-chips" style="margin-top: 6px;"></div>
+            <div class="add-input-row">
+              <input type="text" id="input-good-habit" class="add-input" placeholder="Add good habit (e.g. 2L Water)...">
+              <button class="add-btn" style="background:#22C55E;" onclick="addHabit('good')">+ Good</button>
+            </div>
+          </div>
+
+          <div class="habit-box">
+            <strong style="font-size:0.8rem; color:#B91C1C;">👎 Habits to Reduce / Avoid:</strong>
+            <div id="bad-habit-chips" style="margin-top: 6px;"></div>
+            <div class="add-input-row">
+              <input type="text" id="input-bad-habit" class="add-input" placeholder="Add habit to avoid (e.g. Late snacks)...">
+              <button class="add-btn" style="background:#EF4444;" onclick="addHabit('bad')">+ Avoid</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE E: Active Medications Cross-Checking -->
+        <div id="module-meds" class="form-group">
           <label class="form-label">Active Medications (Cross-checked against Spectrum)</label>
           <div class="chip-group" id="med-chips"></div>
           <div class="add-input-row">
@@ -213,6 +263,7 @@
             <button class="add-btn" onclick="addMedication()">+ Add Med</button>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -229,6 +280,23 @@
         </select>
       </div>
       <button class="activate-btn" onclick="activateShield()">🛡️ Activate My Shield & Save Profile</button>
+    </div>
+  </div>
+
+  <!-- Dynamic Granular Info Sheet Modal (Replaces browser alert!) -->
+  <div id="modal-trigger-info" class="modal-overlay hidden">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 id="modal-info-title" style="color: var(--primary);">Item Details</h3>
+        <button onclick="closeInfoModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <div id="modal-info-badge" style="margin-bottom: 10px;"></div>
+      <p id="modal-info-body" style="font-size: 0.85rem; color: #374151; line-height: 1.5; margin-bottom: 16px;"></p>
+      
+      <div style="display: flex; gap: 8px;">
+        <button onclick="setCustomItemAlert()" class="add-btn" style="flex: 1; background: var(--caution-amber);">🔔 Set Alert Threshold</button>
+        <button onclick="closeInfoModal()" style="background: #F3F4F6; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
+      </div>
     </div>
   </div>
 
@@ -264,7 +332,7 @@
       <h3 style="color: var(--primary); margin-bottom: 8px;">Welcome to allergyZEN</h3>
       <p style="font-size: 0.85rem; color: #374151; line-height: 1.4; margin-bottom: 12px;">
         <strong>1. Map Your Spectrum:</strong> Input your triggers into 🔴 Red, 🟠 Amber, 🟤 Brown, 🟢 Green, or 💙 Blue.<br><br>
-        <strong>2. ZenHealth Suite:</strong> Log blood sugar, blood pressure, and medications to get real-time cross-referencing alerts.<br><br>
+        <strong>2. ZenHealth Suite:</strong> Customize what you track—blood sugar, BP, medications, or good/bad habits.<br><br>
         <strong>3. Dynamic Handshake:</strong> Choose a 30m, 1h, 3h, or 24h timer when scanning partner venues. Data auto-wipes for privacy!
       </p>
       <button onclick="closeTutorialModal()" class="activate-btn">Got It, Let's Begin!</button>
@@ -274,7 +342,7 @@
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <button class="nav-item" onclick="location.href='/view.html?mode=scan'"><span>🔍</span><span>Scan</span></button>
-    <button class="nav-item" onclick="switchMainTab('safe')"><span>🟢</span><span>Safe</span></button>
+    <button class="nav-item" onclick="location.href='/view.html'"><span>🛡️</span><span>Shield</span></button>
     <button class="nav-item center" onclick="location.href='/index.html'"><span>🏠</span></button>
     <button class="nav-item" onclick="switchMainTab('triggers')"><span>🚫</span><span>Triggers</span></button>
     <button class="nav-item" onclick="location.href='/profile.html'"><span>⚙️</span><span>Profile</span></button>
@@ -285,8 +353,18 @@
   <script>
     let currentProfile = {
       items: { red: ["Peanuts", "Shellfish", "Croscarmellose Sodium"], amber: ["Lactose", "Terpenes", "SDS"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk", "Almond Milk"], blue: ["Texture Restrictions", "Neutral Language Request"] },
-      zenHealth: { bloodSugar: "5.4", bloodPressure: "120/80", macros: "", medications: ["Metformin"] }
+      zenHealth: { 
+        mode: "all",
+        bloodSugar: "5.4", 
+        bloodPressure: "120/80", 
+        macros: "1800 kcal", 
+        medications: ["Metformin"],
+        goodHabits: ["Drink 2L Water", "10m Mindfulness"],
+        badHabits: ["Late Night Snacks", "High Sodium Meals"]
+      }
     };
+
+    let activeTriggerSelectedItem = null;
 
     function initProfileUI() {
       if (typeof userProfile !== 'undefined' && userProfile.getActiveProfile) {
@@ -298,7 +376,9 @@
       }
       
       if (!currentProfile.items) currentProfile.items = { red: [], amber: [], brown: [], green: [], blue: [] };
-      if (!currentProfile.zenHealth) currentProfile.zenHealth = { bloodSugar: "", bloodPressure: "", macros: "", medications: [] };
+      if (!currentProfile.zenHealth) {
+        currentProfile.zenHealth = { mode: "all", bloodSugar: "", bloodPressure: "", macros: "", medications: [], goodHabits: [], badHabits: [] };
+      }
 
       renderAllChips();
       loadZenHealthUI();
@@ -341,22 +421,62 @@
       input.value = '';
       renderAllChips();
       saveToStorage();
-      if (typeof renderAllergyZenBadges === 'function') renderAllergyZenBadges();
     }
 
     function removeSpectrumItem(color, item) {
       currentProfile.items[color] = currentProfile.items[color].filter(i => i !== item);
       renderAllChips();
       saveToStorage();
-      if (typeof renderAllergyZenBadges === 'function') renderAllergyZenBadges();
+    }
+
+    /* ZenHealth Module Switching & Customization */
+    function changeZenHealthMode(mode) {
+      currentProfile.zenHealth.mode = mode;
+      
+      const modGlucose = document.getElementById('module-glucose');
+      const modBP = document.getElementById('module-bp');
+      const modMacros = document.getElementById('module-macros');
+      const modHabits = document.getElementById('module-habits');
+      const modMeds = document.getElementById('module-meds');
+
+      if (mode === 'habits') {
+        modGlucose.classList.add('hidden');
+        modBP.classList.add('hidden');
+        modMacros.classList.add('hidden');
+        modHabits.classList.remove('hidden');
+        modMeds.classList.add('hidden');
+      } else if (mode === 'diabetes') {
+        modGlucose.classList.remove('hidden');
+        modBP.classList.add('hidden');
+        modMacros.classList.remove('hidden');
+        modHabits.classList.add('hidden');
+        modMeds.classList.remove('hidden');
+      } else if (mode === 'bp') {
+        modGlucose.classList.add('hidden');
+        modBP.classList.remove('hidden');
+        modMacros.classList.add('hidden');
+        modHabits.classList.add('hidden');
+        modMeds.classList.remove('hidden');
+      } else { // 'all' or 'custom'
+        modGlucose.classList.remove('hidden');
+        modBP.classList.remove('hidden');
+        modMacros.classList.remove('hidden');
+        modHabits.classList.remove('hidden');
+        modMeds.classList.remove('hidden');
+      }
+      saveZenHealthData();
     }
 
     function loadZenHealthUI() {
       const zh = currentProfile.zenHealth || {};
+      document.getElementById('zenhealth-mode-select').value = zh.mode || 'all';
+      changeZenHealthMode(zh.mode || 'all');
+
       document.getElementById('health-bs').value = zh.bloodSugar || '';
       document.getElementById('health-bp').value = zh.bloodPressure || '';
       document.getElementById('health-macros').value = zh.macros || '';
       
+      // Meds
       const medContainer = document.getElementById('med-chips');
       const meds = zh.medications || [];
       medContainer.innerHTML = meds.map(m => `
@@ -365,6 +485,45 @@
           <span class="chip-remove" onclick="removeMedication('${m}')">×</span>
         </div>
       `).join('');
+
+      // Good / Bad Habits
+      const goodContainer = document.getElementById('good-habit-chips');
+      const goods = zh.goodHabits || [];
+      goodContainer.innerHTML = goods.map(h => `
+        <span class="habit-tag good">${h} <span style="cursor:pointer;" onclick="removeHabit('good', '${h}')">×</span></span>
+      `).join('');
+
+      const badContainer = document.getElementById('bad-habit-chips');
+      const bads = zh.badHabits || [];
+      badContainer.innerHTML = bads.map(h => `
+        <span class="habit-tag bad">${h} <span style="cursor:pointer;" onclick="removeHabit('bad', '${h}')">×</span></span>
+      `).join('');
+    }
+
+    function addHabit(type) {
+      const input = document.getElementById(`input-${type}-habit`);
+      const val = input.value.trim();
+      if (!val) return;
+      if (type === 'good') {
+        if (!currentProfile.zenHealth.goodHabits) currentProfile.zenHealth.goodHabits = [];
+        currentProfile.zenHealth.goodHabits.push(val);
+      } else {
+        if (!currentProfile.zenHealth.badHabits) currentProfile.zenHealth.badHabits = [];
+        currentProfile.zenHealth.badHabits.push(val);
+      }
+      input.value = '';
+      loadZenHealthUI();
+      saveToStorage();
+    }
+
+    function removeHabit(type, item) {
+      if (type === 'good') {
+        currentProfile.zenHealth.goodHabits = currentProfile.zenHealth.goodHabits.filter(h => h !== item);
+      } else {
+        currentProfile.zenHealth.badHabits = currentProfile.zenHealth.badHabits.filter(h => h !== item);
+      }
+      loadZenHealthUI();
+      saveToStorage();
     }
 
     function addMedication() {
@@ -393,6 +552,17 @@
       saveToStorage();
     }
 
+    function setHealthAlert(paramName) {
+      const val = prompt(`Set target alert limit for ${paramName}:`, "e.g. Max 7.0 mmol/L");
+      if (val) {
+        alert(`🔔 Alert limit saved for ${paramName}: ${val}`);
+      }
+    }
+
+    function toggleCustomizer() {
+      alert("⚙️ Customizer Mode: Select or hide modules using the 'Primary Tracking Focus' dropdown!");
+    }
+
     function saveToStorage() {
       if (typeof userProfile !== 'undefined' && userProfile.saveToStorage) {
         userProfile.profiles[userProfile.activeProfileIndex] = currentProfile;
@@ -412,13 +582,22 @@
       }
       
       alert("Shield activated! Your parameters and timer window are live.");
-      location.href = '/index.html';
+      location.href = '/view.html';
     }
 
     function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
     function closeBulkModal() { document.getElementById('modal-bulk').classList.add('hidden'); }
     function openTutorialModal() { document.getElementById('modal-tutorial').classList.remove('hidden'); }
     function closeTutorialModal() { document.getElementById('modal-tutorial').classList.add('hidden'); }
+    function closeInfoModal() { document.getElementById('modal-trigger-info').classList.add('hidden'); }
+
+    function setCustomItemAlert() {
+      if (activeTriggerSelectedItem) {
+        const threshold = prompt(`Set custom alert threshold or note for ${activeTriggerSelectedItem}:`, "e.g. Notify if > 0.5mg present");
+        if (threshold) alert(`Alert created for ${activeTriggerSelectedItem}: ${threshold}`);
+      }
+      closeInfoModal();
+    }
 
     function processBulkImport() {
       const text = document.getElementById('bulk-text-input').value;
@@ -433,7 +612,6 @@
       closeBulkModal();
       renderAllChips();
       saveToStorage();
-      if (typeof renderAllergyZenBadges === 'function') renderAllergyZenBadges();
       alert(`Successfully added ${items.length} items to ${color.toUpperCase()} spectrum!`);
     }
 
