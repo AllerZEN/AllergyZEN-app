@@ -73,7 +73,7 @@
     .bulk-btn { background: white; color: var(--primary); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
 
     /* Meal Plan Deep Royal Purple Styling */
-    .ingredient-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin: 2px; }
+    .ingredient-tag { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin: 2px; }
     .tag-safe { background: #DCFCE7; color: #15803D; }
     .tag-unallocated { background: #F3E8FF; color: var(--royal-purple); border: 1px solid var(--royal-purple); }
 
@@ -84,7 +84,7 @@
     .activate-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(142, 85, 162, 0.3); margin-top: 10px; }
 
     /* Bottom Nav */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-around; z-index: 1000; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 8px 0; display: flex; justify-space-around; z-index: 1000; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: #6B7280; text-decoration: none; border: none; background: none; cursor: pointer; flex: 1; }
     .nav-item.center { background: var(--primary); color: white; width: 54px; height: 54px; border-radius: 50%; margin-top: -24px; justify-content: center; box-shadow: 0 4px 12px rgba(142,85,162,0.4); flex: none; }
 
@@ -186,7 +186,7 @@
         <div class="card-title" style="color: var(--primary);">🩺 ZenHealth Suite</div>
         <div class="form-group">
           <label class="form-label">Primary Tracking Focus:</label>
-          <select id="zenhealth-mode-select" class="form-input" onchange="changeZenHealthMode(this.value)">
+          <select id="zenhealth-mode-select" class="form-input">
             <option value="all">Comprehensive View (All Modules)</option>
             <option value="habits">Habit Tracker Only</option>
             <option value="diabetes">Diabetes & Glucose Focus</option>
@@ -195,11 +195,11 @@
         </div>
         <div id="module-glucose" class="form-group">
           <label class="form-label">Blood Sugar / Glucose Level</label>
-          <input type="text" id="health-bs" class="form-input" placeholder="e.g. 5.4 mmol/L" onchange="saveZenHealthData()">
+          <input type="text" id="health-bs" class="form-input" placeholder="e.g. 5.4 mmol/L">
         </div>
         <div id="module-bp" class="form-group">
           <label class="form-label">Blood Pressure</label>
-          <input type="text" id="health-bp" class="form-input" placeholder="e.g. 120/80" onchange="saveZenHealthData()">
+          <input type="text" id="health-bp" class="form-input" placeholder="e.g. 120/80">
         </div>
       </div>
     </div>
@@ -255,17 +255,18 @@
     </div>
   </div>
 
-  <!-- Scanner Overlay Fix Modal -->
+  <!-- LIVE CAMERA SCANNER MODAL -->
   <div id="modal-scanner" class="modal-overlay hidden">
     <div class="modal" style="text-align: center;">
       <h3 style="color: var(--primary); margin-bottom: 8px;">📷 Live Safety Scanner</h3>
-      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 16px;">Point camera at barcode or ingredient list</p>
+      <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 12px;">Position any product, ingredient list, or object in the frame</p>
       
-      <div style="width: 100%; height: 180px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 16px;">
-        <span id="scan-status-text">Viewfinder Active...</span>
+      <div style="position: relative; width: 100%; height: 220px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 12px;">
+        <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+        <div id="scan-feedback" style="position: absolute; bottom: 10px; left: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 6px; border-radius: 6px; font-size: 0.8rem; display: none;"></div>
       </div>
 
-      <button onclick="runSimulatedScan()" class="activate-btn" style="margin-bottom: 8px;">🧪 Run Simulated Scan</button>
+      <button onclick="captureAndScan()" class="activate-btn" style="margin-bottom: 8px; background: var(--safe-green);">📸 Scan Object / Item</button>
       <button onclick="closeScannerModal()" style="background: #F3F4F6; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%;">Close</button>
     </div>
   </div>
@@ -298,11 +299,9 @@
   <script src="/profile.js"></script>
   <script>
     let currentProfile = {
-      items: { red: ["Peanuts", "Shellfish"], amber: ["Lactose", "Pinene"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk"], blue: ["Texture Restrictions"] },
+      items: { red: ["Peanuts", "Shellfish", "Croscarmellose Sodium"], amber: ["Lactose", "Pinene", "SDS"], brown: ["Cilantro", "Mushrooms"], green: ["Sunflower Seed Butter", "Oat Milk"], blue: ["Smooth Textures"] },
       zenHealth: { mode: "all", bloodSugar: "5.4", bloodPressure: "120/80" }
     };
-
-    let activeSelectedTrigger = "";
 
     function initProfileUI() {
       const cached = localStorage.getItem('az_user_profile');
@@ -337,7 +336,6 @@
     }
 
     function triggerItemClicked(itemName, color) {
-      activeSelectedTrigger = itemName;
       if (typeof handleTriggerClick === 'function') {
         handleTriggerClick(itemName, color);
       }
@@ -365,7 +363,6 @@
       saveToStorage();
     }
 
-    /* ZenMeals Logic with Deep Royal Purple for Unallocated Items */
     function generateZenMeals() {
       const container = document.getElementById('meal-results-container');
       const reds = (currentProfile.items.red || []).map(i => i.toLowerCase());
@@ -410,20 +407,8 @@
       container.innerHTML = html;
     }
 
-    /* Scanner Modal Handling */
-    function openScannerModal() { document.getElementById('modal-scanner').classList.remove('hidden'); }
-    function closeScannerModal() { document.getElementById('modal-scanner').classList.add('hidden'); }
     function closeInfoModal() { document.getElementById('modal-trigger-info').classList.add('hidden'); }
     function openBulkModal() { document.getElementById('modal-bulk').classList.remove('hidden'); }
-
-    function runSimulatedScan() {
-      const status = document.getElementById('scan-status-text');
-      status.innerText = "Scanning Barcode...";
-      setTimeout(() => {
-        status.innerText = "🟢 PASS: 0 Triggers Detected!";
-        setTimeout(() => closeScannerModal(), 1200);
-      }, 1000);
-    }
 
     function saveToStorage() { localStorage.setItem('az_user_profile', JSON.stringify(currentProfile)); }
     function activateShield() { saveToStorage(); alert("Shield Activated!"); location.href = '/view.html'; }
