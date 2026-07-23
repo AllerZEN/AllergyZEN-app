@@ -2,7 +2,6 @@
  * profile.js - allergyZEN Core Profile & Spectrum Management
  */
 
-// Global User Profile Manager Object
 const userProfile = {
   activeProfileIndex: 0,
   profiles: [
@@ -16,16 +15,18 @@ const userProfile = {
         blue: ["Texture Restrictions", "Neutral Language Request"]
       },
       zenHealth: {
+        mode: "all",
         bloodSugar: "5.4",
         bloodPressure: "120/80",
         macros: "1800 kcal",
-        medications: ["Metformin"]
+        medications: ["Metformin"],
+        goodHabits: ["Drink 2L Water", "10m Mindfulness"],
+        badHabits: ["Late Night Snacks", "High Sodium Meals"]
       },
       activeHandshake: null
     }
   ],
 
-  // Load from local storage on init
   init: function() {
     const saved = localStorage.getItem('az_user_profile');
     if (saved) {
@@ -50,7 +51,6 @@ const userProfile = {
     localStorage.setItem('az_user_profile', JSON.stringify(this.getActiveProfile()));
   },
 
-  // Handshake Activation Logic with Dynamic Timer Windows
   startHandshake: function(durationMs, venueId = "venue-general", venueName = "Partner Venue") {
     const active = this.getActiveProfile();
     const now = Date.now();
@@ -71,97 +71,76 @@ const userProfile = {
   }
 };
 
-// Initialize profile state immediately
 userProfile.init();
 
 /**
- * Dynamic Lookup for Granular Spectrum Details (Batch Highlights & Specific Triggers)
+ * Rich Interactive Lookup Sheet Trigger
  */
 function handleTriggerClick(itemName) {
   if (!itemName) return;
   
   const cleanName = itemName.toLowerCase().trim();
   let title = itemName;
-  let description = "Spectrum verification active. Safe boundaries or custom trigger loaded.";
+  let description = "Spectrum verification active. This item is safely tracked within your active boundaries.";
+  let badgeColor = "🔴 Red Spectrum Alert";
 
-  // Granular Batch Highlights & Detailed Spectrum Dictionary
   const allergyDb = {
-    // Medicinal Excipients & Lab Chemicals
-    "croscarmellose sodium": "Medicinal Excipient: Tablet binder/disintegrant. Common hidden trigger in pharmaceuticals.",
-    "sds": "The Lab Set: Sodium Dodecyl Sulfate. Strong surfactant & protein denaturant used in lab settings.",
-    "edta": "The Lab Set: Heavy metal chelator and preservative; potential skin and respiratory irritant.",
-    "dmso": "The Lab Set: Solvent that rapidly penetrates skin and carries secondary compounds across biological barriers.",
-    
-    // Photographic & Industrial
-    "hydroquinone": "Photographic Chemical: High-risk skin sensitizer and topical agent.",
-    "metol": "Photographic Chemical: Frequently causes contact dermatitis in development environments.",
-    
-    // Exotic Woods & Modern Materials
-    "wenge": "Exotic Wood Dust: Tropical hardwood containing aggressive sensitizing natural oils.",
-    "padauk": "Exotic Wood Dust: Sensitizing timber dust linked to respiratory irritation.",
-    "mushroom leather": "Modern Material: Mycelium textile. May retain fungal spores or treatment chemical residues.",
-    "pla": "Modern Material: Polylactic Acid bioplastic; processing additives can trigger localized contact sensitivity.",
-    
-    // Terpenes & Fermented Basics
-    "pinene": "Terpene Profile: Conifer/pine-scented resin compound found in sage and specific flora.",
-    "myrcene": "Terpene Profile: Earthy, musky terpene abundant in hops, lemongrass, and thyme.",
-    "natto": "Fermented Basic: Triggered specifically by Bacillus subtilis var. natto bacteria.",
-    "kimchi": "Fermented Basic: Contains active lactic acid bacteria and wild fermentation fungi variations.",
-    
-    // Luxury Fibers
-    "vicuna": "Luxury Fiber: Ultra-fine wild animal hair with a distinct protein profile from sheep's wool.",
-    "qiviut": "Luxury Fiber: Inner muskox wool, distinct from traditional wool allergens."
+    "croscarmellose sodium": {
+      desc: "Medicinal Excipient: Tablet binder and disintegrant. Highly reactive hidden trigger in standard pharmaceuticals.",
+      tag: "🔴 Excipient Risk"
+    },
+    "shellfish": {
+      desc: "High Risk Allergen: Anaphylaxis danger. Involves tropomyosin proteins found in crustaceans and mollusks.",
+      tag: "🔴 Anaphylaxis Critical"
+    },
+    "peanuts": {
+      desc: "High Risk Allergen: Severe reactivity trigger (Ara h 1-8 proteins). Requires strict cross-contamination protocols.",
+      tag: "🔴 Anaphylaxis Critical"
+    },
+    "sds": {
+      desc: "The Lab Set: Sodium Dodecyl Sulfate. Strong surfactant & protein denaturant widely used in scientific laboratories.",
+      tag: "🟠 Moderate Reaction"
+    },
+    "edta": {
+      desc: "The Lab Set: Heavy metal chelator and preservative; can cause dermal and localized sensitivities.",
+      tag: "🟠 Lab Trigger"
+    },
+    "pinene": {
+      desc: "Terpene Profile: Conifer/pine-scented resin compound found in sage, pine, and specific botanical extracts.",
+      tag: "🟠 Terpene Sensitivity"
+    },
+    "wenge": {
+      desc: "Exotic Wood Dust: Tropical hardwood containing aggressive sensitizing natural oils.",
+      tag: "🟠 Sensitizing Oil"
+    }
   };
 
   if (allergyDb[cleanName]) {
-    description = allergyDb[cleanName];
+    description = allergyDb[cleanName].desc;
+    badgeColor = allergyDb[cleanName].tag;
   }
 
-  showSpectrumInfoModal(title, description);
+  if (typeof activeTriggerSelectedItem !== 'undefined') {
+    activeTriggerSelectedItem = itemName;
+  }
+
+  showSpectrumInfoModal(title, description, badgeColor);
 }
 
-/**
- * Visual Display Helper for Trigger Information
- */
-function showSpectrumInfoModal(title, text) {
-  // Checks if custom modal container exists in DOM, otherwise displays clean alert
+function showSpectrumInfoModal(title, text, badgeText = "") {
   const titleEl = document.getElementById('modal-info-title');
   const bodyEl = document.getElementById('modal-info-body');
+  const badgeEl = document.getElementById('modal-info-badge');
   const modalEl = document.getElementById('modal-trigger-info');
 
   if (titleEl && bodyEl && modalEl) {
     titleEl.innerText = title;
     bodyEl.innerText = text;
+    if (badgeEl) {
+      badgeEl.innerHTML = badgeText ? `<span style="background:#FEE2E2; color:#B91C1C; padding:4px 8px; border-radius:12px; font-weight:700; font-size:0.75rem;">${badgeText}</span>` : '';
+    }
     modalEl.classList.remove('hidden');
   } else {
     alert(`💡 ${title}\n\n${text}`);
   }
-}
-
-/**
- * Render Badges helper (if rendered outside profile page context)
- */
-function renderAllergyZenBadges() {
-  const profile = userProfile.getActiveProfile();
-  if (!profile || !profile.items) return;
-
-  const colorMap = {
-    red: '🔴',
-    amber: '🟠',
-    brown: '🟤',
-    green: '🟢',
-    blue: '💙'
-  };
-
-  Object.keys(colorMap).forEach(color => {
-    const container = document.getElementById(`badge-group-${color}`);
-    if (container) {
-      const items = profile.items[color] || [];
-      container.innerHTML = items.map(item => `
-        <span class="zen-badge badge-${color}" onclick="handleTriggerClick('${item.replace(/'/g, "\\'")}')">
-          ${colorMap[color]} ${item}
-        </span>
-      `).join('');
-    }
-  });
 }
